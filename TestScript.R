@@ -4,7 +4,7 @@
 # dir.create("data")
 # dir.create("data_processed")
 # Reading in the test datasets
-test <- read.csv("data/RAW_test_data.csv")
+test <- read.csv("data_test/RAW_test_data.csv")
 
 dim(test)
 names(test)
