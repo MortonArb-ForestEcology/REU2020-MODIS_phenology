@@ -37,3 +37,5 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+data_processed/TEST_RAW_CLEANED.csv
+.DS_Store
