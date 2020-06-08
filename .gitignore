@@ -39,3 +39,6 @@ vignettes/*.pdf
 .Renviron
 data_processed/TEST_RAW_CLEANED.csv
 .DS_Store
+
+# Data folders
+data_raw/
