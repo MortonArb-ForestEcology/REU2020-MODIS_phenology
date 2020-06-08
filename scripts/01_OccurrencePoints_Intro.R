@@ -54,7 +54,8 @@ ggplot(data=spp.test) +
 # Suggestions: Summarize some of the categorical data by making more bar plots or try a histogram or even adding color to the map! 
 # Try some stuff and commit it to github!
 
-
+hist(spp.test$year, xlab= "Years", ylab="Frequency", col = "red", main= "Frequency of different years of Quercus georgiana")
+?hist
 
 
 # ----------------------------
