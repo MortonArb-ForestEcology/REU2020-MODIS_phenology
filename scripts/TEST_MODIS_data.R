@@ -1,10 +1,20 @@
 # Trying out using modis tools to get the data we need
 # We want the MCD12Q2 product.  
 #  Details here: https://lpdaac.usgs.gov/products/mcd12q2v006/
+# Find MODISTools package info & user guide here: https://cran.r-project.org/web/packages/MODISTools/index.html
+
+# --------------------------
+# Tasks for Andrew To try
+# --------------------------
+# 1. Graph data for the Arb
+# 2. Try getting data for your home
+# --------------------------
 
 # install.packages("MODISTools")
 library(ggplot2)
 
+# Coordinates for The Morton Arboretum
+site.code="MortonArb"
 lat.in=41.812739
 lon.in=-88.072749
 
@@ -25,18 +35,22 @@ dat.date <- MODISTools::mt_dates("MCD12Q2", lat=lat.in, lon=lon.in)
 dat.date # Data from 2001 to 2017
 
 # Trying out getting MODIS Phenology data.  Lets start with onset: Greenup.Num_Modes_01
-dat.test <- MODISTools::mt_subset(product="MCD12Q2", band=c("Greenup.Num_Modes_01", "MidGreenup.Num_Modes_01"), lat=lat.in, lon=lon.in, site_name = "MortonArb")
+dat.test <- MODISTools::mt_subset(product="MCD12Q2", band=c("Greenup.Num_Modes_01", "MidGreenup.Num_Modes_01"), lat=lat.in, lon=lon.in, site_name = site.code)
+head(dat.test)
+dim(dat.test)
+
 dat.test$value[dat.test$value==32767] <- NA # 32767 is the missing data code
 
 # Doing just a tiny bit of formattings
 dat.test$calendar_date <- as.Date(dat.test$calendar_date)
 dat.test$band <- as.factor(dat.test$band)
-dat.test$band.name <- as.factor(sapply(dat.test$band, FUN=function(x){stringr::str_split(x, "[.]")[[1]][1]}))
+dat.test$band.name <- as.factor(sapply(dat.test$band, FUN=function(x){stringr::str_split(x, "[.]")[[1]][1]})) # make band name easier to read and get rid of extra crap
 summary(dat.test)
 
 # Convert days since Jan 1 1970 to a calendar date
 dat.test$value.date <- as.Date("1970-01-01") + dat.test$value
 summary(dat.test)
+head(dat.test)
 
 # Extract useful parts of that date
 dat.test$greenup.year <- lubridate::year(dat.test$value.date)
