@@ -3,8 +3,8 @@
 #----------------
 #install.packages("MODISTools")
 library(MODISTools)
-#install.packages("tidyverse")
-library(tidyverse)
+#install.packages("ggplot2")
+library(ggplot2)
 
 #coordinates found from Google Earth of Andrew's Ivy Branch Farm
 site.id = 'IvyBranchFarm'
@@ -43,6 +43,7 @@ dat.tst$value_date = as.Date('1970-01-01') + dat.tst$value
 
 summary(dat.tst)
 head(dat.tst)
+
 dat.tst
 
 dat.tst$greenup.year = lubridate::year(dat.tst$value_date)
@@ -57,7 +58,7 @@ days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 ggplot(data=dat.tst, mapping = aes(x= greenup.year, y= greenup.yday, color= band.name)) +
   geom_point() +
   geom_line() +
-  scale_x_continuous('Year') +
+  scale_x_continuous('Year', breaks= seq(from= '2005', to= '2015', by= 2 )) +
   scale_y_continuous('Day', breaks = days.mrk$mrk.yday, labels = days.mrk$Label)
 
 
