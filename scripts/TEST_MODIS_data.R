@@ -74,3 +74,4 @@ ggplot(data=dat.test, aes(x=greenup.year, y=greenup.yday, color=band.name)) +
 # Storing the raw MODIS output 
 if(!dir.exists("../data_raw/MODIS")) dir.create("../data_raw/MODIS")
 write.csv(dat.test, "../data_raw/MODIS/TEST_Greenup_TheMortonArboretum.csv", row.names=F)
+
