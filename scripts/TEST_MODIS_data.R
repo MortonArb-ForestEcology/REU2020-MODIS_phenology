@@ -33,37 +33,36 @@ dat.tst
 
 dat.tst$value[dat.tst$value == 32767] = NA #value representative of NA in MODIS, this filters that out
 
-#some formatting that will aestically change the band names and alter the display of the dates
-dat.tst$calendar_date = as.Date(calendar_date)
+#some formatting that will change the band names and alter the display of the dates
+dat.tst$calendar_date = as.Date(dat.tst$calendar_date)
 dat.tst$band = as.factor(dat.tst$band)
-dat.tst$band.name = as.factor(sapply(dat.tst$band, FUN =function(x){stringr::str_split(x, '[.]'), [1][1]})) #I somewhat understand it, but the explainations for using sapply confuse me.
+dat.tst$band.name = as.factor(sapply(dat.tst$band, FUN =function(x){stringr::str_split(x, '[.]') [[1]][1]}))
 
 #convert the days since 2001-01-01 value to a calendar date
-dat.tst$value_date = as.Date('1970-01-01') + dat.tst$value #not sure exactly how this one works
+dat.tst$value_date = as.Date('1970-01-01') + dat.tst$value
 
 summary(dat.tst)
 head(dat.tst)
-dat.tst #at this point when ran, the bottom values =0 Not sure why
+dat.tst
 
-dat.tst$greenup.year = lubridate::year(dat.tst$value.date) #is the .date telling it how to format the value? whats the difference from that and _date
-dat.tst$greenup.yday = lubridate::yday(dat.tst$value.date)
+dat.tst$greenup.year = lubridate::year(dat.tst$value_date)
+dat.tst$greenup.yday = lubridate::yday(dat.tst$value_date)
 
 #translate yday to calendar dates
-days.mrk = data.frame(Label= c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'Jun 1', 'Jul 1'), #Is this just to specify our speculated timeframe? What happens if it is wrong?
-                      Date= c('2019-01-01', '2019-02-01,' '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01'))
+days.mrk = data.frame(Label= c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'Jun 1', 'Jul 1'),
+                      Date= c('2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01'))
 days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
-days.mrk$mrk.yday <- days.mrk$mrk.yday #why "1 = 1"?
 
 #simple plot that should show the data for this farm greening up between 2005 and 2015.
-ggplot(data=dat.tst) +
+ggplot(data=dat.tst, mapping = aes(x= greenup.year, y= greenup.yday, color= band.name)) +
   geom_point() +
-  geom_contour() +
+  geom_line() +
   scale_x_continuous('Year') +
-  scale_y_continuous('Day',breaks = days.mrk$mrk.ydays, labels = days.mrk$Label) #why does the days.mrk still need included? why not labels = Label
+  scale_y_continuous('Day', breaks = days.mrk$mrk.yday, labels = days.mrk$Label)
 
 
 # Storing the raw MODIS output 
 if(!dir.exists("../data_raw/MODIS")) dir.create("../data_raw/MODIS")
-write.csv(dat.test, file.path("../data_raw/MODIS/", paste0("TEST_Greenup_", site.id, ".csv")), row.names=F)
+write.csv(dat.tst, file.path("../data_raw/MODIS/", paste0("TEST_Greenup_", site.id, ".csv")), row.names=F)
                       
 
