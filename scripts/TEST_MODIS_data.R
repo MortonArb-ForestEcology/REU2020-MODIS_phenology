@@ -64,6 +64,6 @@ ggplot(data=dat.tst) +
 
 # Storing the raw MODIS output 
 if(!dir.exists("../data_raw/MODIS")) dir.create("../data_raw/MODIS")
-write.csv(dat.test, "../data_raw/MODIS/TEST_Greenup_TheMortonArboretum.csv", row.names=F)
+write.csv(dat.test, file.path("../data_raw/MODIS/", paste0("TEST_Greenup_", site.id, ".csv")), row.names=F)
                       
 
