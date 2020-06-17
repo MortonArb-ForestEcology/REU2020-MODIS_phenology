@@ -142,8 +142,8 @@ library(dplyr)
 #Creating a dataframe to hold weather summary statistics
 #This step is needed because we can not fill an empty data frame. This gives us an object for us to fill over the loop
 #This fills a data frame with a row for latitude and longitude for every year in our range
-df.loc <- data.frame(latitude=rep(lat.list[[1]]$latitude, ((yend-ystart)+1)) ,
-                     longitude=rep(lat.list[[1]]$longitude, ((yend-ystart)+1)))
+df.loc <- data.frame(latitude=rep(lat.list[[1]]$latitude, 365* ((yend-ystart)+1)) ,
+                     longitude=rep(lat.list[[1]]$longitude, 365 * ((yend-ystart)+1)))
 
 #Making sure we only go through relevant years we are calculating gdd5 for
 dat.npn <- dat.npn[dat.npn$Year >= ystart, ]
@@ -182,17 +182,27 @@ for(i in seq_along(lat.list)){
       df.yr[j,"GDD5.cum"] <- gdd.cum
     }
     df.tmp[df.tmp$year==YR, "GDD5.cum"] <- df.yr$GDD5.cum
+    
   }
-  dat.npn$GDD5.cum <- NA
-  for(DAT in paste(dat.npn$Date)){
-    if(length(df.tmp[df.tmp$Date==as.Date(DAT), "GDD5.cum"]) > 0){
-      dat.npn[dat.npn$Date==as.Date(DAT),"GDD5.cum"] <- df.tmp[df.tmp$Date==as.Date(DAT), "GDD5.cum"]
-    }
-    YR <- lubridate::year(DAT)
-  }
-  
+  df.loc$"latitude" <- lat.list[[i]]$latitude
+  df.loc$"longitude" <- lat.list[[i]]$longitude
+  df.loc$"year" <- df.tmp$year
+  df.loc$"TMAX" <- df.tmp$tmax..deg.c.
+  df.loc$"TMIN" <- df.tmp$tmin..deg.c.
+  df.loc$"TMEAN" <- df.tmp$TMEAN
+  df.loc$"PRCP" <- df.tmp$prcp..mm.day.
+  df.loc$"SNOW" <- df.tmp$srad..W.m.2.
+  df.loc$"YDAY" <- df.tmp$yday
+  df.loc$"Date" <- df.tmp$Date
+  df.loc$"GDD5" <- df.tmp$GDD5
+  df.loc$"GDD5.cum" <- df.tmp$GDD5.cum
 }
 
+#This is the loop where we take our weather data and add it to our observation data frame
 
-
-
+for(DAT in paste(dat.npn$Date)){
+  if(length(df.loc[df.loc$Date==as.Date(DAT), "GDD5.cum"]) > 0){
+    dat.npn[dat.npn$Date==as.Date(DAT),"GDD5.cum"] <- df.loc[df.loc$Date==as.Date(DAT), "GDD5.cum"]
+  }
+}
+View(dat.npn)
