@@ -27,6 +27,7 @@ summary(met.new)
 range(met.old$TMAX, na.rm=T)
 range(met.new$TMAX, na.rm=T)
 
+
 # Combine the old and the new datasets into a new data frame.  We don't want all columns, so just take the ones we care about
 met.all <- rbind(met.old[,c("STATION", "DATE", "PRCP", "SNOW", "SNWD", "TMAX", "TMIN")],
                  met.new[,c("STATION", "DATE", "PRCP", "SNOW", "SNWD", "TMAX", "TMIN")])
@@ -40,7 +41,7 @@ met.all$DAY <- lubridate::day(met.all$DATE)
 met.all$YDAY <- lubridate::yday(met.all$DATE)
 
 #Setting our chosen years
-met.all <- met.all[met.all$YEAR>1895 & met.all$YEAR<2020,]
+met.all <- met.all[met.all$YEAR>1995 & met.all$YEAR<2020,]
 
 #Adding TMEAN
 met.all$TMEAN <- (met.all$TMAX + met.all$TMIN)/2
@@ -57,15 +58,12 @@ summary(met.all)
 # Calculate the cumulative growing degree days for each day/year
 for(YR in unique(met.all$YEAR)){
   dat.tmp <- met.all[met.all$YEAR==YR, ]
-  if(min(dat.tmp$DATE)>as.Date(paste0(YR, "-01-01"))) next #To make sure a value is set to zero at start of year
   gdd5.cum=0 
   d5.miss = 0
   for(i in 1:nrow(dat.tmp)){
-    if(is.na(dat.tmp$GDD5[i]) & d5.miss<=3){ 
-      d5.miss <- d5.miss+1 # Let us miss up to 3 consecutive days
+    if(is.na(dat.tmp$GDD5[i])){ 
       gdd5.cum <- gdd5.cum+0
     } else {
-      d5.miss = 0 # reset to 0
       gdd5.cum <- gdd5.cum+dat.tmp$GDD5[i] 
     }
     dat.tmp[i,"GDD5.cum"] <- gdd5.cum
@@ -73,6 +71,18 @@ for(YR in unique(met.all$YEAR)){
   met.all[met.all$YEAR==YR, "GDD5.cum"] <- dat.tmp$GDD5.cum
 }
 summary(met.all)
+
+#This is the loop where we take our weather data and add it to our observation data frame
+#So here we need to add in our MODIS data and change this code to fit the values in that data frame
+
+dat.npn$GDD5.cum <- NA
+
+for(DAT in paste(dat.npn$Date)){
+  if(length(met.all[met.all$Date==as.Date(DAT), "GDD5.cum"]) > 0){
+    dat.npn[dat.npn$Date==as.Date(DAT),"GDD5.cum"] <- met.all[met.all$Date==as.Date(DAT), "GDD5.cum"]
+  }
+}
+View(dat.npn)
 
 
 #-------------------------------------------------------------------------------------#
@@ -198,11 +208,3 @@ for(i in seq_along(lat.list)){
   df.loc$"GDD5.cum" <- df.tmp$GDD5.cum
 }
 
-#This is the loop where we take our weather data and add it to our observation data frame
-
-for(DAT in paste(dat.npn$Date)){
-  if(length(df.loc[df.loc$Date==as.Date(DAT), "GDD5.cum"]) > 0){
-    dat.npn[dat.npn$Date==as.Date(DAT),"GDD5.cum"] <- df.loc[df.loc$Date==as.Date(DAT), "GDD5.cum"]
-  }
-}
-View(dat.npn)
