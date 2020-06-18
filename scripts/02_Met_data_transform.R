@@ -207,4 +207,14 @@ for(i in seq_along(lat.list)){
   df.loc$"GDD5" <- df.tmp$GDD5
   df.loc$"GDD5.cum" <- df.tmp$GDD5.cum
 }
+dat.tst$GDD5.cum <- NA 
+dat.npn$GDD5.cum <- NA
+
+
+for(DAT in paste(dat.tst$value_date)){
+  if(length(met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]) > 0){
+    dat.tst[dat.tst$value_date==as.Date(DAT),"GDD5.cum"] <- met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]
+  }
+}
+View(dat.tst)
 
