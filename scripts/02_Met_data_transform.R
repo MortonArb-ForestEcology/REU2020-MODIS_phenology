@@ -1,11 +1,7 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
-
-
-
-
 path.g <- "G:/My Drive"
 #path.g <- "/Volumes/GoogleDrive/My Drive"
-#path.g <- "Your/filepath/here"
+
 #-------------------------------------------------#
 #This section is for downloaded the met data, pulling out data of interest, and calculating growing degree days
 #-------------------------------------------------#
@@ -74,6 +70,7 @@ summary(met.all)
 
 #This is the loop where we take our weather data and add it to our observation data frame
 #So here we need to add in our MODIS data and change this code to fit the values in that data frame
+
 
 dat.npn$GDD5.cum <- NA
 
@@ -207,9 +204,10 @@ for(i in seq_along(lat.list)){
   df.loc$"GDD5" <- df.tmp$GDD5
   df.loc$"GDD5.cum" <- df.tmp$GDD5.cum
 }
-dat.tst$GDD5.cum <- NA 
-dat.npn$GDD5.cum <- NA
 
+dat.tst <- read.csv(file.path("../data_raw/MODIS/", paste0("TEST_Greenup_", site.id, ".csv")))
+
+dat.tst$GDD5.cum <- NA 
 
 for(DAT in paste(dat.tst$value_date)){
   if(length(met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]) > 0){
@@ -217,4 +215,6 @@ for(DAT in paste(dat.tst$value_date)){
   }
 }
 View(dat.tst)
+
+write.csv(dat.tst, file.path("../data_raw/MODIS/", paste0("Clean_Greenup_", site.id, ".csv")), row.names=F)
 

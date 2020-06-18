@@ -16,7 +16,7 @@ library(ggplot2)
 
 
 # Read in output of previous script
-dat.comb <- dat.tst
+dat.comb <- read.csv(file.path("../data_raw/MODIS/", paste0("Clean_Greenup_", site.id, ".csv")))
 #---------------------------------------------------------------------#
 #If only running the Bayesian model than you can stop here. These may become fully seperate scripts down the line
 #---------------------------------------------------------------------#

@@ -8,8 +8,11 @@ library(ggplot2)
 
 #coordinates found from Google Earth of Andrew's Ivy Branch Farm
 site.id = 'IvyBranchFarm'
-lat.in= 39.788276
-lon.in= -94.010451
+#lat.in= 39.788276
+#lon.in= -94.010451
+
+lat.in<- 41.8164
+lon.in<- -88.0549
 
 #set the data that we want specifically from MODISTools to prods
 prods= MODISTools::mt_products()
