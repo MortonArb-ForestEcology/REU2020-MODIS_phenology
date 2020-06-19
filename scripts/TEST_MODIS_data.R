@@ -55,6 +55,7 @@ days.mrk <- data.frame(Label= c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'Jun
 days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 
 #simple plot that should show the data for this farm greening up between 2005 and 2015.
+png(width= 750, filename= paste0('Test_Plot_', site.id, '.png'))
 ggplot(data= dat.tst, mapping= aes(x= greenup.year, y= greenup.yday)) +
   ggtitle('Ivy Branch Greenup to Maturity Trends From 2005 - 2015') +
   geom_line(mapping= aes(color= BAND)) +
@@ -62,9 +63,8 @@ ggplot(data= dat.tst, mapping= aes(x= greenup.year, y= greenup.yday)) +
   geom_text(label= dat.tst$greenup.yday, color= 'black', size = 5) +
   scale_x_continuous('YEAR', breaks= seq(from= '2005', to= '2015', by= 1 )) +
   scale_y_continuous('DATE (YDay)', breaks= days.mrk$mrk.yday, labels= days.mrk$Label)
+dev.off()
 
 # Storing the raw MODIS output 
 if(!dir.exists("../data_raw/MODIS")) dir.create("../data_raw/MODIS")
 write.csv(dat.tst, file.path("../data_raw/MODIS/", paste0("TEST_Greenup_", site.id, ".csv")), row.names=F)
-png(file='Test_Plot_', site.id, '.png')
-plot(dat.tst)
