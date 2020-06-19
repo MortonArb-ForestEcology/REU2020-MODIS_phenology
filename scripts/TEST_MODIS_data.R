@@ -57,7 +57,7 @@ days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 #simple plot that should show the data for this farm greening up between 2005 and 2015.
 png(width= 750, filename= paste0('Test_Plot_', site.id, '.png'))
 ggplot(data= dat.tst, mapping= aes(x= greenup.year, y= greenup.yday)) +
-  ggtitle('Ivy Branch Greenup to Maturity Trends From 2005 - 2015') +
+  ggtitle('Ivy Branch Farm Greening Trends From 2005 - 2015') +
   geom_line(mapping= aes(color= BAND)) +
   geom_point(color= 'orange', size= .5) + 
   geom_text(label= dat.tst$greenup.yday, color= 'black', size = 5) +
