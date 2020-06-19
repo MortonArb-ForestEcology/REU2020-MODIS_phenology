@@ -1,8 +1,6 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
 
 
-
-
 path.g <- "G:/My Drive"
 #path.g <- "/Volumes/GoogleDrive/My Drive"
 #path.g <- "Your/filepath/here"
@@ -11,8 +9,9 @@ path.g <- "G:/My Drive"
 #-------------------------------------------------#
 
 #Setting a shared file path for where the data are
-path.met <- file.path(path.g, "Arboretum Met Data/GHCN-Daily")
-
+#path.met <- file.path(path.g, "Arboretum Met Data/GHCN-Daily")
+#Here is the clunky way before the G:drive fix
+path.met<- 'G:/.shortcut-targets-by-id/1mWNwI3qfNJ4JMjvpD8hJxnyHMLV6EfSk/Arboretum Met Data/GHCN-Daily'
 # Read in the older dataset. This is because the GHCND at the arboretum changed in 2007 and we need to pull from both
 met.old <- read.csv(file.path(path.met, "MortonArb_GHCND-USC00119221_1895-2007.csv"))
 met.old$DATE <- as.Date(met.old$DATE) # Convert this column to a special datatype that's recognized as a date
@@ -66,24 +65,23 @@ for(YR in unique(met.all$YEAR)){
     } else {
       gdd5.cum <- gdd5.cum+dat.tmp$GDD5[i] 
     }
-    dat.tmp[i,"GDD5.cum"] <- gdd5.cum
+      dat.tmp[i,"GDD5.cum"] <- gdd5.cum
   }
   met.all[met.all$YEAR==YR, "GDD5.cum"] <- dat.tmp$GDD5.cum
 }
-summary(met.all)
+summary(dat.tst)
 
 #This is the loop where we take our weather data and add it to our observation data frame
-#So here we need to add in our MODIS data and change this code to fit the values in that data frame
-
-dat.npn$GDD5.cum <- NA
-
-for(DAT in paste(dat.npn$Date)){
-  if(length(met.all[met.all$Date==as.Date(DAT), "GDD5.cum"]) > 0){
-    dat.npn[dat.npn$Date==as.Date(DAT),"GDD5.cum"] <- met.all[met.all$Date==as.Date(DAT), "GDD5.cum"]
+#So here we need to add in our MODIS data (dat.tst) and change this code to fit the values in that data frame
+dat.tst$GDD5.cum <- NA
+for(DAT in paste(dat.tst$value_date)){
+  if(length(met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]) > 0){
+    dat.tst[dat.tst$value_date==as.Date(DAT),"GDD5.cum"] <- met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]
   }
 }
-View(dat.npn)
 
+View(dat.tst)
+ #generate new save path for this like Test_GDD...
 
 #-------------------------------------------------------------------------------------#
 #This works for a single point at the arboretum using data we already have downloaded.
@@ -105,7 +103,7 @@ yend <- 2019
 pointsfile <- "MODIS_points.csv"
 
 #Subsetting to only include lat and long (and for now the first rows to make testing easier)
-#q.lat <- dat.npn[,(c=1:2)]
+#q.lat <- dat.tst[,(c=1:2)]
 lat.in=41.812739
 lon.in=-88.072749
 q.lat <- data.frame("site" = "Daymet", "lat" = lat.in, "long" = lon.in)
@@ -156,7 +154,7 @@ df.loc <- data.frame(latitude=rep(lat.list[[1]]$latitude, 365* ((yend-ystart)+1)
                      longitude=rep(lat.list[[1]]$longitude, 365 * ((yend-ystart)+1)))
 
 #Making sure we only go through relevant years we are calculating gdd5 for
-dat.npn <- dat.npn[dat.npn$Year >= ystart, ]
+dat.tst <- dat.tst[dat.tst$Year >= ystart, ]
 
 #Looping to pull out the GDD5.cum of the bud burst date fore every tree and location
 count <- 1
