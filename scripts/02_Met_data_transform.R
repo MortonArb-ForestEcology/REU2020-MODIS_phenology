@@ -1,6 +1,6 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
 
-dat.tst <- read.csv(file.path('../Research Data REU 2020/REU2020-MODIS_phenology/data_raw/MODIS', paste0(dat.tst, 'TEST_Greenup_', site.id, '.csv'))
+dat.tst <- read.csv(file.path('../Research Data REU 2020/REU2020-MODIS_phenology/data_raw/MODIS', paste0(dat.tst, 'TEST_Greenup_', site.id, '.csv')))
 summary(dat.tst)
 
 path.g <- "G:/My Drive"
@@ -86,7 +86,6 @@ View(dat.tst)
 
 
 write.csv(dat.tst, file.path('../data_raw/MODIS', paste0('TEST_GDD_', site.id, '.csv')), row.names <- F) #generate new save path for this like Test_GDD...
-
           
 #-------------------------------------------------------------------------------------#
 #This works for a single point at the arboretum using data we already have downloaded.
@@ -97,6 +96,7 @@ write.csv(dat.tst, file.path('../data_raw/MODIS', paste0('TEST_GDD_', site.id, '
 
 
 #Setting the points to download the daymet data from
+#path.doc <- 'C:/Users/aerna/OneDrive/Documents/Research Data REU 2020' or '../Documents/Research Data REU 2020'
 path.doc <- "C:/Users/lucie/Documents/NPN_data/"
 
 #ystart <- min(dat.MODIS$Year)
@@ -109,8 +109,8 @@ pointsfile <- "MODIS_points.csv"
 
 #Subsetting to only include lat and long (and for now the first rows to make testing easier)
 #q.lat <- dat.tst[,(c=1:2)]
-lat.in=41.812739
-lon.in=-88.072749
+lat.in=39.788276
+lon.in=-94.010451 #could this not be omitted because at this point the Test_MODIS objects should be loaded/ran in this script?
 q.lat <- data.frame("site" = "Daymet", "lat" = lat.in, "long" = lon.in)
 
 #creating a proxy "site" column because the batch function needs it
@@ -156,15 +156,15 @@ library(dplyr)
 #This step is needed because we can not fill an empty data frame. This gives us an object for us to fill over the loop
 #This fills a data frame with a row for latitude and longitude for every year in our range
 df.loc <- data.frame(latitude=rep(lat.list[[1]]$latitude, 365* ((yend-ystart)+1)) ,
-                     longitude=rep(lat.list[[1]]$longitude, 365 * ((yend-ystart)+1)))
+                     longitude=rep(lat.list[[1]]$longitude, 365* ((yend-ystart)+1)))
 
 #Making sure we only go through relevant years we are calculating gdd5 for
-dat.tst <- dat.tst[dat.tst$Year >= ystart, ]
+dat.tst <- dat.tst[dat.tst$Year >= ystart, ] #will this still work if the dat.tst is constrained to 2005-2015? dat.tst can be easily opened up though
 
 #Looping to pull out the GDD5.cum of the bud burst date fore every tree and location
 count <- 1
 i <- 1
-YR <- ystart
+YR <- ystart #will ystart be an input point for us when trying to visual data?
 for(i in seq_along(lat.list)){
   #df.tmp is all weather data for a location
   df.tmp <- lat.list[[i]]$data
@@ -196,7 +196,7 @@ for(i in seq_along(lat.list)){
     }
     df.tmp[df.tmp$year==YR, "GDD5.cum"] <- df.yr$GDD5.cum
     
-  }
+  } #what is the purpose of this bracket and the one on line 212? 
   df.loc$"latitude" <- lat.list[[i]]$latitude
   df.loc$"longitude" <- lat.list[[i]]$longitude
   df.loc$"year" <- df.tmp$year
@@ -210,4 +210,6 @@ for(i in seq_along(lat.list)){
   df.loc$"GDD5" <- df.tmp$GDD5
   df.loc$"GDD5.cum" <- df.tmp$GDD5.cum
 }
+
+#need save path?
 
