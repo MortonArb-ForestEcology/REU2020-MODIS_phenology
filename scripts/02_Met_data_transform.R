@@ -73,6 +73,8 @@ names(list.met) <-  modis.pts$site
 summary(list.met)
 summary(list.met[[1]])
 
+rm(lat.list) # Removing lat.list to save memory
+
 #-----------------------------------------------------------------------#
 #This is where we start preparing for the loop for GDD5 calculation.
 # We'll take the daymet data, calculate GDD5 and make it a flattened object
