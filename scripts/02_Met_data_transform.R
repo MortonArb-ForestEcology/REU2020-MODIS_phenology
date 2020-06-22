@@ -1,7 +1,13 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
+#Setting the points to download the daymet data from
+path.daymet <- "../data_raw/DAYMET"
+if(!dir.exists(path.daymet)) dir.create(path.daymet)
 
+
+# Note: We will probably want this to go by species, rather than site, but for now this works
 site.id = 'IvyBranchFarm'
 
+# This will probably get changed to a list of sites that we have NPN data for for each species
 dat.tst <- read.csv(file.path('../data_raw/MODIS', paste0("TEST_Greenup_", site.id, ".csv")))
 summary(dat.tst)
 
@@ -13,14 +19,11 @@ summary(dat.tst)
 #install.packages("daymetr")
 
 
-#Setting the points to download the daymet data from
-path.daymet <- "../data_raw/DAYMET"
-if(!dir.exists(path.daymet)) dir.create(path.daymet)
-
 summary(dat.tst)
 
 
 # Creating a point list and time range that matches your MODIS dataset
+# Note: This will probably change down the road
 modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.tst, 
                        FUN=min)
 names(modis.pts)[4] <- "yr.start"
@@ -42,16 +45,14 @@ lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.daymet
 
 # This gives us a list with one layer per site (I think)
 length(lat.list)
-class(lat.list[[1]])
+names(lat.list) <- modis.pts$site # Giving the different layers of the list the site names they correspond to
+# class(lat.list[[1]])
 summary(lat.list[[1]])
 summary(lat.list[[1]][["data"]]) # Lets us look at the data for the first site
 
 
 #Lets look at the structure of what we are given
 summary(lat.list)
-
-#So summary might look weird so lets try str()
-str(lat.list)
 
 #As you might notice we have a "List of 1" containing a nested "List of 7"
 #Within that "List of 7" there is a data frame called data that has the data we want
@@ -61,73 +62,67 @@ str(lat.list)
 lat.list[[1]]$latitude
 
 #If you are reaching further into the data
-lat.list[[1]]$data$yday
+# lat.list[[1]]$data$yday
 
+# Creating a new simplified list that won't make Christy cranky
+list.met <- list()
+for(i in seq_along(lat.list)){
+  list.met[[i]] <- data.frame(site=modis.pts$site[i], latitude=modis.pts$latitude[i], longitude=modis.pts$longitude[i], lat.list[[i]]$data)
+}
+names(list.met) <-  modis.pts$site
+summary(list.met)
+summary(list.met[[1]])
 
 #-----------------------------------------------------------------------#
 #This is where we start preparing for the loop for GDD5 calculation.
+# We'll take the daymet data, calculate GDD5 and make it a flattened object
 #-----------------------------------------------------------------------#
 #This package is needed for the %>% pipe used in the loop to summarise data
-library(dplyr)
-
-#Creating a dataframe to hold weather summary statistics
-#This step is needed because we can not fill an empty data frame. This gives us an object for us to fill over the loop
-#This fills a data frame with a row for latitude and longitude for every year in our range
-df.loc <- data.frame(latitude=rep(lat.list[[1]]$latitude, 365* ((yend-ystart)+1)) ,
-                     longitude=rep(lat.list[[1]]$longitude, 365* ((yend-ystart)+1)))
+# library(dplyr)
 
 #Making sure we only go through relevant years we are calculating gdd5 for
-dat.tst <- dat.tst[dat.tst$Year >= ystart, ] #will this still work if the dat.tst is constrained to 2005-2015? dat.tst can be easily opened up though
 
-#Looping to pull out the GDD5.cum of the bud burst date fore every tree and location
-count <- 1
-i <- 1
-YR <- ystart #will ystart be an input point for us when trying to visual data?
-for(i in seq_along(lat.list)){
-  #df.tmp is all weather data for a location
-  df.tmp <- lat.list[[i]]$data
-  df.tmp$TMEAN <- (df.tmp$tmax..deg.c. + df.tmp$tmin..deg.c.)/2
-  df.tmp$GDD5 <- ifelse(df.tmp$TMEAN>5, df.tmp$TMEAN-5, 0)
-  df.tmp$GDD5.cum <- NA
+calc.gdd5 <- function(df.met){
+  df.met$Date <- as.Date(paste(df.met$year, df.met$yday, sep="-"), format="%Y-%j")
+  df.met$TMEAN <- (df.met$tmax..deg.c. + df.met$tmin..deg.c.)/2
+  df.met$GDD5 <- ifelse(df.met$TMEAN>5, df.met$TMEAN-5, 0)
+  df.met$GDD5.cum <- NA
   
-  #Loop that goes through every year for each point
-  for(YR in min(df.tmp$year):max(df.tmp$year)){
+  
+  for(YR in min(df.met$year):max(df.met$year)){
     #df.yr is all weather data for a year at a location
-    df.yr <- df.tmp[df.tmp$year==YR,]
+    df.yr <- df.met[df.met$year==YR,]
     
-    #Creating dates to correspond with the yday
-    start <- paste(as.character(df.tmp$year), "-01-01", sep="")
-    df.tmp$Date <- as.Date((df.yr$yday-1), origin = start)
-    
-    #This should look like the same loop we used earlier
-    gdd.cum=0
-    d.miss = 0
-    for(j in 1:nrow(df.yr)){
-      if(is.na(df.yr$GDD5[j]) & d.miss<=3){
-        d.miss <- d.miss+1 # Let us miss up to 3 consecutive days
-        gdd.cum <- gdd.cum+0
-      } else {
-        d.miss = 0 # reset to 0
-        gdd.cum <- gdd.cum+df.yr$GDD5[j] 
-      }
-      df.yr[j,"GDD5.cum"] <- gdd.cum
+    # Only calculate GDD5 if we have jan 1; this is Daymet, so it should be fine
+    if(min(df.yr$yday)==1){
+      # If we have Jan 1, calculate cumulative growing degree-days
+      df.yr$GDD5.cum <- cumsum(df.yr$GDD5)
+    } else {
+      # if we're missing Jan 1: still create the column, but don't fill it
+      df.yr$GDD5.cum <- NA 
     }
-    df.tmp[df.tmp$year==YR, "GDD5.cum"] <- df.yr$GDD5.cum
     
-  } #what is the purpose of this bracket and the one on line 212? 
-  df.loc$"latitude" <- lat.list[[i]]$latitude
-  df.loc$"longitude" <- lat.list[[i]]$longitude
-  df.loc$"year" <- df.tmp$year
-  df.loc$"TMAX" <- df.tmp$tmax..deg.c.
-  df.loc$"TMIN" <- df.tmp$tmin..deg.c.
-  df.loc$"TMEAN" <- df.tmp$TMEAN
-  df.loc$"PRCP" <- df.tmp$prcp..mm.day.
-  df.loc$"SNOW" <- df.tmp$srad..W.m.2.
-  df.loc$"YDAY" <- df.tmp$yday
-  df.loc$"Date" <- df.tmp$Date
-  df.loc$"GDD5" <- df.tmp$GDD5
-  df.loc$"GDD5.cum" <- df.tmp$GDD5.cum
-}
+    # Note: we could have done this differently,but :shrug: this is easier to diagnose
+    df.met[df.met$year==YR, "GDD5.cum"] <- df.yr$GDD5.cum
+  } # end year loop
+  
+  return(df.met)
+} # End funciton
+
+
+# Apply our df.met funciton to all layers of our list;
+# Note: we are overwriting the list, so be careful
+list.met <- lapply(list.met, calc.gdd5)
+summary(list.met2[[1]])
+
+# Unlist the met to save it to a dataframe that will be easier to share
+df.met <- dplyr::bind_rows(list.met)
+head(df.met)
+
+# Quick graph to make sure things look okay
+ggplot(data=df.met) +
+  geom_line(aes(x=yday, y=GDD5.cum, group=year))
 
 #need save path?
+write.csv(df.met, file.path(path.daymet, paste0("TEST_DAYMET_", site.id, ".csv")), row.names=FALSE)
 
