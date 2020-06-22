@@ -42,3 +42,4 @@ data_processed/TEST_RAW_CLEANED.csv
 
 # Data folders
 data_raw/
+*.png

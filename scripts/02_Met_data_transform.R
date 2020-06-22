@@ -1,92 +1,10 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
 
-dat.tst <- read.csv(file.path('../Research Data REU 2020/REU2020-MODIS_phenology/data_raw/MODIS', paste0(dat.tst, 'TEST_Greenup_', site.id, '.csv')))
+site.id = 'IvyBranchFarm'
+
+dat.tst <- read.csv(file.path('../data_raw/MODIS', paste0("TEST_Greenup_", site.id, ".csv")))
 summary(dat.tst)
 
-path.g <- "G:/My Drive"
-#path.g <- "/Volumes/GoogleDrive/My Drive"
-#path.g <- "Your/filepath/here"
-#-------------------------------------------------#
-#This section is for downloaded the met data, pulling out data of interest, and calculating growing degree days
-#-------------------------------------------------#
-
-#Setting a shared file path for where the data are
-#path.met <- file.path(path.g, "Arboretum Met Data/GHCN-Daily")
-#Here is the clunky way before the G:drive fix
-path.met<- 'G:/.shortcut-targets-by-id/1mWNwI3qfNJ4JMjvpD8hJxnyHMLV6EfSk/Arboretum Met Data/GHCN-Daily'
-# Read in the older dataset. This is because the GHCND at the arboretum changed in 2007 and we need to pull from both
-met.old <- read.csv(file.path(path.met, "MortonArb_GHCND-USC00119221_1895-2007.csv"))
-met.old$DATE <- as.Date(met.old$DATE) # Convert this column to a special datatype that's recognized as a date
-summary(met.old)
-
-# Read in the newer dataset
-met.new <- read.csv(file.path(path.met, "MortonArb_GHCND-USC00115097_2007-04-01_2019-12-31.csv"))
-met.new$DATE <- as.Date(met.new$DATE) # Convert this column to a special datatype that's recognized as a date
-summary(met.new)
-
-# Check to make sure we're in metric (earlier I had a mixture of units and that was bad)
-range(met.old$TMAX, na.rm=T)
-range(met.new$TMAX, na.rm=T)
-
-
-# Combine the old and the new datasets into a new data frame.  We don't want all columns, so just take the ones we care about
-met.all <- rbind(met.old[,c("STATION", "DATE", "PRCP", "SNOW", "SNWD", "TMAX", "TMIN")],
-                 met.new[,c("STATION", "DATE", "PRCP", "SNOW", "SNWD", "TMAX", "TMIN")])
-
-summary(met.all)
-
-#Pulling out useful date values
-met.all$YEAR <- lubridate::year(met.all$DATE)
-met.all$MONTH <- lubridate::month(met.all$DATE)
-met.all$DAY <- lubridate::day(met.all$DATE)
-met.all$YDAY <- lubridate::yday(met.all$DATE)
-
-#Setting our chosen years
-met.all <- met.all[met.all$YEAR>1995 & met.all$YEAR<2020,]
-
-#Adding TMEAN
-met.all$TMEAN <- (met.all$TMAX + met.all$TMIN)/2
-
-
-summary(met.all)
-
-# Adding in growing degree-days with base temp of 5
-met.all$GDD5 <- ifelse(met.all$TMEAN>5, met.all$TMEAN-5, 0)
-met.all$GDD5.cum <- NA
-summary(met.all)
-
-
-# Calculate the cumulative growing degree days for each day/year
-for(YR in unique(met.all$YEAR)){
-  dat.tmp <- met.all[met.all$YEAR==YR, ]
-  gdd5.cum=0 
-  d5.miss = 0
-  for(i in 1:nrow(dat.tmp)){
-    if(is.na(dat.tmp$GDD5[i])){ 
-      gdd5.cum <- gdd5.cum+0
-    } else {
-      gdd5.cum <- gdd5.cum+dat.tmp$GDD5[i] 
-    }
-      dat.tmp[i,"GDD5.cum"] <- gdd5.cum
-  }
-  met.all[met.all$YEAR==YR, "GDD5.cum"] <- dat.tmp$GDD5.cum
-}
-summary(dat.tst)
-
-#This is the loop where we take our weather data and add it to our observation data frame
-#So here we need to add in our MODIS data (dat.tst) and change this code to fit the values in that data frame
-dat.tst$GDD5.cum <- NA
-for(DAT in paste(dat.tst$value_date)){
-  if(length(met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]) > 0){
-    dat.tst[dat.tst$value_date==as.Date(DAT),"GDD5.cum"] <- met.all[met.all$DATE==as.Date(DAT), "GDD5.cum"]
-  }
-}
-
-View(dat.tst)
-
-
-write.csv(dat.tst, file.path('../data_raw/MODIS', paste0('TEST_GDD_', site.id, '.csv')), row.names <- F) #generate new save path for this like Test_GDD...
-          
 #-------------------------------------------------------------------------------------#
 #This works for a single point at the arboretum using data we already have downloaded.
 #However we are going to want to do this for locations all across the country.
@@ -96,38 +14,38 @@ write.csv(dat.tst, file.path('../data_raw/MODIS', paste0('TEST_GDD_', site.id, '
 
 
 #Setting the points to download the daymet data from
-#path.doc <- 'C:/Users/aerna/OneDrive/Documents/Research Data REU 2020' or '../Documents/Research Data REU 2020'
-path.doc <- "C:/Users/lucie/Documents/NPN_data/"
+path.daymet <- "../data_raw/DAYMET"
+if(!dir.exists(path.daymet)) dir.create(path.daymet)
 
-#ystart <- min(dat.MODIS$Year)
-ystart <- 2018
-
-#yend <- max(dat.MODIS$Year)
-yend <- 2019
-
-pointsfile <- "MODIS_points.csv"
-
-#Subsetting to only include lat and long (and for now the first rows to make testing easier)
-#q.lat <- dat.tst[,(c=1:2)]
-lat.in=39.788276
-lon.in=-94.010451 #could this not be omitted because at this point the Test_MODIS objects should be loaded/ran in this script?
-q.lat <- data.frame("site" = "Daymet", "lat" = lat.in, "long" = lon.in)
-
-#creating a proxy "site" column because the batch function needs it
-#q.lat$site <- "Daymet"
-#q.lat <- q.lat[,c(3,1,2)]
-#q.lat <- unique(q.lat)
-
-#Writing the csv file of lat and longs because batch function needs to read a file instead of a dataframe
-write.csv(q.lat, file.path(path.doc, file = pointsfile), row.names=FALSE)
+summary(dat.tst)
 
 
-setwd(path.doc)
+# Creating a point list and time range that matches your MODIS dataset
+modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.tst, 
+                       FUN=min)
+names(modis.pts)[4] <- "yr.start"
+modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.tst, 
+                              FUN=max)[,4]
+modis.pts
+
+
+#Writing the csv file of lat and longs because daymetr batch function needs to read a file instead of a dataframe
+write.csv(modis.pts, file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".csv")), row.names=FALSE)
+
+# if(!dir.exist(path.daymet)) dir.create(path.daymet)
 #Downloading all of the damet data for each point. Internal =TRUE means it creates a nested list. Set false to actually download a file
-lat.list <- daymetr::download_daymet_batch(file_location = pointsfile,
-                                           start = ystart,
-                                           end = yend,
+lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.daymet, "MODIS_TEST_points.csv"),
+                                           start = min(modis.pts$yr.start),
+                                           end = max(modis.pts$yr.end),
                                            internal = T)
+
+
+# This gives us a list with one layer per site (I think)
+length(lat.list)
+class(lat.list[[1]])
+summary(lat.list[[1]])
+summary(lat.list[[1]][["data"]]) # Lets us look at the data for the first site
+
 
 #Lets look at the structure of what we are given
 summary(lat.list)
