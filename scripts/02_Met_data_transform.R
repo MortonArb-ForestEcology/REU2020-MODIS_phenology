@@ -1,5 +1,7 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
 
+dat.tst <- read.csv(file.path('../Research Data REU 2020/REU2020-MODIS_phenology/data_raw/MODIS', paste0(dat.tst, 'TEST_Greenup_', site.id, '.csv'))
+summary(dat.tst)
 
 path.g <- "G:/My Drive"
 #path.g <- "/Volumes/GoogleDrive/My Drive"
@@ -81,8 +83,11 @@ for(DAT in paste(dat.tst$value_date)){
 }
 
 View(dat.tst)
- #generate new save path for this like Test_GDD...
+ 
+dir.exists('../data_raw/MODIS')
+write.csv(dat.tst, file.path('../data_raw/MODIS', paste0('TEST_GDD_', site.id, '.csv')), row.names <- F) #generate new save path for this like Test_GDD...
 
+          
 #-------------------------------------------------------------------------------------#
 #This works for a single point at the arboretum using data we already have downloaded.
 #However we are going to want to do this for locations all across the country.
