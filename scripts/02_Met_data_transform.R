@@ -83,8 +83,8 @@ for(DAT in paste(dat.tst$value_date)){
 }
 
 View(dat.tst)
- 
-dir.exists('../data_raw/MODIS')
+
+
 write.csv(dat.tst, file.path('../data_raw/MODIS', paste0('TEST_GDD_', site.id, '.csv')), row.names <- F) #generate new save path for this like Test_GDD...
 
           
