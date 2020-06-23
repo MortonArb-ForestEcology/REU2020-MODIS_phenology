@@ -5,11 +5,11 @@ if(!dir.exists(path.daymet)) dir.create(path.daymet)
 
 
 # Note: We will probably want this to go by species, rather than site, but for now this works
-site.id = 'IvyBranchFarm'
+site.id = 'MortonArb'
 
 # This will probably get changed to a list of sites that we have NPN data for for each species
-dat.tst <- read.csv(file.path('../data_raw/MODIS', paste0("TEST_Greenup_", site.id, ".csv")))
-summary(dat.tst)
+dat.MODIS <- read.csv(file.path('../data_raw/MODIS', paste0("MODIS_Greenup_", site.id, ".csv")))
+summary(dat.MODIS)
 
 #-------------------------------------------------------------------------------------#
 #This works for a single point at the arboretum using data we already have downloaded.
@@ -19,15 +19,15 @@ summary(dat.tst)
 #install.packages("daymetr")
 
 
-summary(dat.tst)
+summary(dat.MODIS)
 
 
 # Creating a point list and time range that matches your MODIS dataset
 # Note: This will probably change down the road
-modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.tst, 
+modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
                        FUN=min)
 names(modis.pts)[4] <- "yr.start"
-modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.tst, 
+modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
                               FUN=max)[,4]
 modis.pts
 
@@ -36,12 +36,11 @@ modis.pts
 write.csv(modis.pts, file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".csv")), row.names=FALSE)
 
 # if(!dir.exist(path.daymet)) dir.create(path.daymet)
-#Downloading all of the damet data for each point. Internal =TRUE means it creates a nested list. Set false to actually download a file
-lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.daymet, "MODIS_TEST_points.csv"),
+#Downloading all of the daymet data for each point. Internal =TRUE means it creates a nested list. Set false to actually download a file
+lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".csv")),
                                            start = min(modis.pts$yr.start),
                                            end = max(modis.pts$yr.end),
                                            internal = T)
-
 
 # This gives us a list with one layer per site (I think)
 length(lat.list)
@@ -49,7 +48,6 @@ names(lat.list) <- modis.pts$site # Giving the different layers of the list the 
 # class(lat.list[[1]])
 summary(lat.list[[1]])
 summary(lat.list[[1]][["data"]]) # Lets us look at the data for the first site
-
 
 #Lets look at the structure of what we are given
 summary(lat.list)
@@ -79,7 +77,7 @@ rm(lat.list) # Removing lat.list to save memory
 #This is where we start preparing for the loop for GDD5 calculation.
 # We'll take the daymet data, calculate GDD5 and make it a flattened object
 #-----------------------------------------------------------------------#
-#This package is needed for the %>% pipe used in the loop to summarise data
+#This package is needed for the %>% pipe used in the loop to summarize data
 # library(dplyr)
 
 #Making sure we only go through relevant years we are calculating gdd5 for
@@ -112,19 +110,20 @@ calc.gdd5 <- function(df.met){
 } # End funciton
 
 
-# Apply our df.met funciton to all layers of our list;
+# Apply our df.met function to all layers of our list;
 # Note: we are overwriting the list, so be careful
 list.met <- lapply(list.met, calc.gdd5)
-summary(list.met2[[1]])
+summary(list.met[[1]])
 
 # Unlist the met to save it to a dataframe that will be easier to share
 df.met <- dplyr::bind_rows(list.met)
 head(df.met)
 
 # Quick graph to make sure things look okay
+library(ggplot2)
 ggplot(data=df.met) +
   geom_line(aes(x=yday, y=GDD5.cum, group=year))
 
-#need save path?
+
 write.csv(df.met, file.path(path.daymet, paste0("TEST_DAYMET_", site.id, ".csv")), row.names=FALSE)
 
