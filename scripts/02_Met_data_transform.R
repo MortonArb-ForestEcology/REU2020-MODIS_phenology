@@ -1,6 +1,6 @@
 #This script will serve to download the daymet weather data for every location we use for a set of years
 #Setting the points to download the daymet data from
-path.daymet <- "../data_raw/DAYMET"
+path.daymet <- '../data_raw/DAYMET'
 if(!dir.exists(path.daymet)) dir.create(path.daymet)
 
 
