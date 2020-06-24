@@ -21,12 +21,12 @@ mtbands <- MODISTools::mt_bands('MCD12Q2')
 dim(mtbands)
 
 #get list of dates for greenup
-dat.d8 <- MODISTools::mt_dates('MCD12Q2', lat <- lat.in, lon <- lon.in)
+dat.d8 <- MODISTools::mt_dates('MCD12Q2', lat = lat.in, lon = lon.in)
 dat.d8 #see the temporal range of available data for this area. Should be from 2001 - 2017
 
 mtbands #choose the variables of interest for the next step, !!!! use only the _01 bands !!!!
 #focusing on the variables in question, Here is it Greenup.Num_Modes_01
-dat.MODIS <- MODISTools::mt_subset(product <- 'MCD12Q2', band=c('Greenup.Num_Modes_01', 'MidGreenup.Num_Modes_01'), lat <- lat.in, lon <-lon.in, start <- '1995-01-01', site_name <- site.id)
+dat.MODIS <- MODISTools::mt_subset(product = 'MCD12Q2', band=c('Greenup.Num_Modes_01', 'MidGreenup.Num_Modes_01'), lat = lat.in, lon=lon.in, start= '1995-01-01', site_name = site.id)
 head(dat.MODIS)
 dat.MODIS
 

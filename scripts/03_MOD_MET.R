@@ -15,13 +15,27 @@ summary(dat.MODIS)
 df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("TEST_DAYMET_", site.id, ".csv")))
 summary(df.met)
 
-Mod.Met <-merge(dat.MODIS, df.met)
+# What we need to do: get GDD extracted from df.met for dates in dat.MODIS
+# Dates are defined by unique year and yday combinations
+# In dat.MODIS each row is a unique observation; with a mostly unique date --> need a GDD.cum for each row
 
-d <- apply.yearly(strptime(Mod.Met$yday, format = '%Y'), FUN= mean)
+for(i in 1:nrow(dat.MODIS)){
+  # dat.MODIS[i,]
+  # We need to use greenup.year, greenup.yday
+  yr.now <- dat.MODIS[i, "greenup.year"] # same as dat.MODIS[i, "greenup.yr"]
+  yday.now <- dat.MODIS[i, "greenup.yday"]
+  
+  # We need to get certain rows --> we need 2 pieces of info to match
+  #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
+  dat.MODIS[i,"GDD5.cum"] <- df.met[df.met$year==yr.now & df.met$yday==yday.now,"GDD5.cum"]
+}
 
-View(d)
-summary(Mod.Met)
-View(Mod.Met)
+
+
+# View(d)
+summary(dat.MODIS)
+head(dat.MODIS)
+# View(Mod.Met)
 
 
 ggplot(data = Mod.Met, mapping = aes(x = yday, y = GDD5.cum, group = year)) +
@@ -32,4 +46,4 @@ ggplot(data = Mod.Met, mapping = aes(x = yday, y = GDD5.cum, group = year)) +
 #check to see what is left
 names(Mod.Met)
 
-write.csv(Mod.Met, file.path(path.MODIS, paste0("MOD_MET_", site.id, ".csv")), row.names=FALSE)
+write.csv(dat.MODIS, file.path(path.MODIS, paste0("MODIS_MET_", site.id, ".csv")), row.names=FALSE)
