@@ -4,7 +4,7 @@
 #library(MODISTools)
 #library(ggplot2)
 #library(daymetr)
-#library(xts)
+
 #could be changed to be individual species not site
 path.MODIS <- '../data_raw/MODIS'
 site.id <- 'MortonArb'
@@ -30,20 +30,20 @@ for(i in 1:nrow(dat.MODIS)){
   dat.MODIS[i,"GDD5.cum"] <- df.met[df.met$year==yr.now & df.met$yday==yday.now,"GDD5.cum"]
 }
 
-
-
-# View(d)
-summary(dat.MODIS)
 head(dat.MODIS)
-# View(Mod.Met)
+
+unique(dat.MODIS$BAND)
+
+path.png <- '../data_raw/MODISMET'
+png(filename= file.path(path.png, paste0('MODIS_Met_Plot_', site.id, '.png')))
+
+ggplot(data = dat.MODIS, mapping = aes(x = BAND, y = GDD5.cum)) +
+  #facet_wrap(~BAND, scales="free") +
+  geom_boxplot()
 
 
-ggplot(data = Mod.Met, mapping = aes(x = yday, y = GDD5.cum, group = year)) +
-  geom_line()
-#This will clean out any variables that are unnecessary
-#Mod.Met <- Mod.Met[-c(4:5, 14, 19)]
+summary(dat.MODIS)
 
-#check to see what is left
-names(Mod.Met)
-
-write.csv(dat.MODIS, file.path(path.MODIS, paste0("MODIS_MET_", site.id, ".csv")), row.names=FALSE)
+dat.out <- file.path("../data_processed")
+if(!dir.exists(dat.out)) dir.create(dat.out)
+write.csv(dat.MODIS, file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")), row.names=F)
