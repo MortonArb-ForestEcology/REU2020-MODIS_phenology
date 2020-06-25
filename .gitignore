@@ -1,3 +1,7 @@
 
 scripts/MODIS_Met_Plot_MortonArb.png
 data_raw/MODISMET/MODIS_Met_Plot_MortonArb.png
+.DS_Store
+
+data_raw/
+data_processed/
