@@ -1,0 +1,86 @@
+#----------------------------------------------------------------------------------------------------------------------------------#
+# Script by : Lucien Fitzpatrick
+# Project: Living Collections Phenology Forecasting
+# Purpose: To use arb weather data and phenology monitoring data to create a predicitve model of bud burst timing
+#          This script serves as the Bayesian model which will become the final product
+# Inputs: dat.comb dataframe that is created by the Organize_Data_Pheno.R script
+# Outputs: Currently, a hindcast of a species modeled day of budburst vs observed date of budburst
+# Notes: This script is based on exercises from the ecological forecasting textbook
+#        In order to use rjags you need JAGS installed. rjags is simply for interfacing. It can be found at http://mcmc-jags.sourceforge.net/
+#-----------------------------------------------------------------------------------------------------------------------------------#
+
+#THIS IS WHER YOU DO THINGS
+dat.comb <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
+dat.comb <- dat.comb[dat.comb$band == 'Greenup.Num_Modes_01',]
+
+#---------------------------------------------------#
+#This section sets up the model itself
+#---------------------------------------------------#
+#rjags for the model and coda for the summary statistics
+library(rjags)
+library(coda)
+#YOU WILL NEED JAGS INSTALLED rjags is a package for interfacing but you need the program itself http://mcmc-jags.sourceforge.net/
+
+
+#Setting up the Jags model itself
+
+univariate_regression <- "
+model{
+  THRESH ~ dnorm(0, .001)
+  Prec ~ dgamma(.1, .1)    ## prior precision 
+
+
+  for(i in 1:n){
+	  mu[i] <- THRESH                   ## process model ANOVA
+	  y[i]  ~ dnorm(mu[i],Prec)		        ## data model
+  }
+}
+"
+
+#Checking how good of a predictor they currently seem
+plot(dat.comb$GDD5.cum, dat.comb$greenup.yday)
+
+#------------------------------------------------------#
+#This section converts our observed into the neccessary format, defines our uninformed prior, and sets up our MCMC chains
+#------------------------------------------------------#
+
+#Converting to list format needed for JAGs
+#THIS IS WHAT MATTERS TO ANDREW!!!!!
+burst.list <- list(y = dat.comb$GDD5.cum, n = length(dat.comb$GDD5.cum))
+
+#Setting the number of MCMC chains and their parameters
+nchain = 3
+inits <- list()
+for(i in 1:nchain){
+  inits[[i]] <- list(THRESH = rnorm(1,0,5), Prec = runif(1,1/200,1/20))
+}
+
+#---------------------------------------------------------#
+#This section actually runs the model and then provides ways to check the output and clean it
+#---------------------------------------------------------#
+#running the model
+burst.model   <- jags.model (file = textConnection(univariate_regression),
+                             data = burst.list,
+                             inits = inits,
+                             n.chains = 3)
+
+
+#Converting the ooutput into a workable format
+#DO THINGS HERE SOMETIMES
+burst.out   <- coda.samples (model = burst.model,
+                             variable.names = c("THRESH", "Prec"),
+                             n.iter = 5000)
+
+
+#Trace plot and distribution. For trace make sure they are very overlapped showing convergence
+plot(burst.out)
+
+
+#Checking that convergence happened
+#1 is ideal especially where youll be
+#below 1.05 is fine
+gelman.diag(burst.out)
+
+
+summary(burst.out)
+
