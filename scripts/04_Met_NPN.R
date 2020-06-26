@@ -11,25 +11,36 @@ summary(dat.npn)
 #----------------------------
 head(dat.npn)
 
-dat.npn$mean.bud <- (dat.npn$first_yes_doy + dat.npn$last_yes_doy)/2 #get a mean bud burst yday
-#dat.burst <- dat.npn[dat.npn$phenophase_id == '371',]
+dat.npn$mean.phase <- (dat.npn$first_yes_doy + dat.npn$last_yes_doy)/2 #get a mean of each phenophase yday
 
-head(dat.npn)
+#need to not take the gdd5 of all phenophases, but only breaking leaf buds
+yday.burst <- dat.npn[dat.npn$phenophase_id == '371',]
+
+head(yday.burst)
+
 dat.npn$mean.bud <- round(x= dat.npn$mean.bud, digits = 0)
+
+unique(dat.npn$individual_id)
 
 summary(dat.npn$mean.bud)
 
-#the smaller frame needs to constrict the larger frame will only go to row 26 before having to input 0, = error
-for(i in 1:nrow(df.met)){
+for(i in 1:33){
   # We need to use med.bud
+  bud.yday <- dat.npn[i, 'yday.bud']
   bud.year <- dat.npn[i, "first_yes_year"]
-  bud.m <- dat.npn[i, "mean.bud"]
+  bud.m <- dat.npn[i, "mean.phase"]
   
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.npn row we're working with
   dat.npn[i,"GDD5.cum"] <- df.met[df.met$year==bud.year & df.met$yday==bud.m, "GDD5.cum"] #df.met$year==bud.year & df.met$yday==bud.m,
 }
-View(dat.npn)
+
+dat.npn$GDD5.cum <- round(x= dat.npn$GDD5.cum, digits = 0)
+head(dat.npn)
+
+library(ggplot2)
+ggplot(data = dat.npn, mapping = aes(x= GDD5.cum, y= mean.phase)) + 
+  geom_point()
 
 write.csv(dat.npn, file.path(path.npn, "TEST_MortonArb_NPN_MET.csv"), row.names=F)
 
