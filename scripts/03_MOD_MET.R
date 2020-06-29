@@ -34,13 +34,14 @@ head(dat.MODIS)
 
 unique(dat.MODIS$BAND)
 
-path.png <- '../data_raw/MODISMET'
-png(filename= file.path(path.png, paste0('MODIS_Met_Plot_', site.id, '.png')))
+path.png <- '../figures/MODIS_Met'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
 
+png(filename= file.path(path.png, paste0('MODIS_Met_Plot_', site.id, '.png')))
 ggplot(data = dat.MODIS, mapping = aes(x = BAND, y = GDD5.cum)) +
   #facet_wrap(~BAND, scales="free") +
   geom_boxplot()
-
+dev.off()
 
 summary(dat.MODIS)
 

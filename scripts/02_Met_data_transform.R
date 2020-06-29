@@ -24,11 +24,11 @@ summary(dat.MODIS)
 
 # Creating a point list and time range that matches your MODIS dataset
 # Note: This will probably change down the road
-#modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
-                      # FUN=min)
-#names(modis.pts)[4] <- "yr.start"
-#modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
-                              #FUN=max)[,4]
+modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS,
+FUN=min)
+names(modis.pts)[4] <- "yr.start"
+modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS,
+FUN=max)[,4]
 
 
 #Writing the csv file of lat and longs because daymetr batch function needs to read a file instead of a dataframe
@@ -37,10 +37,10 @@ write.csv(modis.pts, file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".cs
 # if(!dir.exist(path.daymet)) dir.create(path.daymet)
 #Downloading all of the daymet data for each point. Internal =TRUE means it creates a nested list. Set false to actually download a file
 lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".csv")),
-                                           start = 2017,
+                                           start = 2000,
                                            end = 2019,
                                            internal = T)
-View(lat.list)
+# View(lat.list)
 # This gives us a list with one layer per site (I think)
 length(lat.list)
 #names(lat.list) <- modis.pts$site # Giving the different layers of the list the site names they correspond to
