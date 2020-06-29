@@ -24,12 +24,11 @@ summary(dat.MODIS)
 
 # Creating a point list and time range that matches your MODIS dataset
 # Note: This will probably change down the road
-modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
-                       FUN=min)
-names(modis.pts)[4] <- "yr.start"
-modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
-                              FUN=max)[,4]
-modis.pts
+#modis.pts <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
+                      # FUN=min)
+#names(modis.pts)[4] <- "yr.start"
+#modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS, 
+                              #FUN=max)[,4]
 
 
 #Writing the csv file of lat and longs because daymetr batch function needs to read a file instead of a dataframe
@@ -38,13 +37,13 @@ write.csv(modis.pts, file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".cs
 # if(!dir.exist(path.daymet)) dir.create(path.daymet)
 #Downloading all of the daymet data for each point. Internal =TRUE means it creates a nested list. Set false to actually download a file
 lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".csv")),
-                                           start = min(modis.pts$yr.start),
-                                           end = max(modis.pts$yr.end),
+                                           start = 2017,
+                                           end = 2019,
                                            internal = T)
-
+View(lat.list)
 # This gives us a list with one layer per site (I think)
 length(lat.list)
-names(lat.list) <- modis.pts$site # Giving the different layers of the list the site names they correspond to
+#names(lat.list) <- modis.pts$site # Giving the different layers of the list the site names they correspond to
 # class(lat.list[[1]])
 summary(lat.list[[1]])
 summary(lat.list[[1]][["data"]]) # Lets us look at the data for the first site
@@ -67,12 +66,12 @@ list.met <- list()
 for(i in seq_along(lat.list)){
   list.met[[i]] <- data.frame(site=modis.pts$site[i], latitude=modis.pts$latitude[i], longitude=modis.pts$longitude[i], lat.list[[i]]$data)
 }
-names(list.met) <-  modis.pts$site
+#names(list.met) <-  modis.pts$site
 summary(list.met)
 summary(list.met[[1]])
 
 rm(lat.list) # Removing lat.list to save memory
-
+summary(list.met[[1]])
 #-----------------------------------------------------------------------#
 #This is where we start preparing for the loop for GDD5 calculation.
 # We'll take the daymet data, calculate GDD5 and make it a flattened object
