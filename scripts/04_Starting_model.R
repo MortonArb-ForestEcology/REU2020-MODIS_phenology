@@ -2,9 +2,9 @@
 # Script by : Lucien Fitzpatrick
 # Project: Living Collections Phenology Forecasting
 # Purpose: To use arb weather data and phenology monitoring data to create a predicitve model of bud burst timing
-#          This script serves as the Bayesian model which will become the final product
+#          This script serves as the basic Bayesian model which will be built off of
 # Inputs: dat.comb dataframe that is created by the Organize_Data_Pheno.R script
-# Outputs: Currently, a hindcast of a species modeled day of budburst vs observed date of budburst
+# Outputs: Model Prediciton of the GDD5 threshold
 # Notes: This script is based on exercises from the ecological forecasting textbook
 #        In order to use rjags you need JAGS installed. rjags is simply for interfacing. It can be found at http://mcmc-jags.sourceforge.net/
 #-----------------------------------------------------------------------------------------------------------------------------------#
