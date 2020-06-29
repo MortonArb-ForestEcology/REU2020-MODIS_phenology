@@ -10,6 +10,9 @@
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
 #THIS IS WHER YOU DO THINGS
+dat.out <- "../data_processed/"
+site.id <- "MortonArb"
+
 dat.comb <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
 dat.comb <- dat.comb[dat.comb$band == 'Greenup.Num_Modes_01',]
 
