@@ -14,7 +14,14 @@ dat.out <- "../data_processed/"
 site.id <- "MortonArb"
 
 dat.comb <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
-dat.comb <- dat.comb[dat.comb$band == 'Greenup.Num_Modes_01',]
+dat.greenup <- dat.comb[dat.comb$BAND == 'Greenup',]
+dat.midgreen <- dat.comb[dat.comb$BAND == 'MidGreenup',]
+summary(dat.comb)
+
+dat.npn <- read.csv("../data_processed/NPN/TEST_MortonArb_NPN_MET.csv")
+summary(dat.npn)
+head(dat.npn)
+
 
 #---------------------------------------------------#
 #This section sets up the model itself
@@ -26,7 +33,6 @@ library(coda)
 
 
 #Setting up the Jags model itself
-
 univariate_regression <- "
 model{
   THRESH ~ dnorm(0, .001)
@@ -41,16 +47,11 @@ model{
 "
 
 #Checking how good of a predictor they currently seem
-plot(dat.comb$GDD5.cum, dat.comb$greenup.yday)
+# plot(dat.comb$GDD5.cum, dat.comb$greenup.yday)
 
 #------------------------------------------------------#
 #This section converts our observed into the neccessary format, defines our uninformed prior, and sets up our MCMC chains
 #------------------------------------------------------#
-
-#Converting to list format needed for JAGs
-#THIS IS WHAT MATTERS TO ANDREW!!!!!
-burst.list <- list(y = dat.comb$GDD5.cum, n = length(dat.comb$GDD5.cum))
-
 #Setting the number of MCMC chains and their parameters
 nchain = 3
 inits <- list()
@@ -58,9 +59,14 @@ for(i in 1:nchain){
   inits[[i]] <- list(THRESH = rnorm(1,0,5), Prec = runif(1,1/200,1/20))
 }
 
+
 #---------------------------------------------------------#
 #This section actually runs the model and then provides ways to check the output and clean it
 #---------------------------------------------------------#
+#Converting to list format needed for JAGs
+#THIS IS WHAT MATTERS TO ANDREW!!!!! == this is where we give it the data to do stats on
+burst.list <- list(y = dat.comb$GDD5.cum, n = length(dat.comb$GDD5.cum))
+
 #running the model
 burst.model   <- jags.model (file = textConnection(univariate_regression),
                              data = burst.list,
@@ -87,3 +93,25 @@ gelman.diag(burst.out)
 
 summary(burst.out)
 
+mean(dat.comb$GDD5.cum)
+
+
+#Removing burnin before convergence occurred -- this is the model "warmup"
+burnin = 1000                                ## determine convergence from GBR output
+burst.burn <- window(burst.out,start=burnin)  ## remove burn-in
+
+
+# save the part of the stats from when the model worked and converged
+burst.df2 <- as.data.frame(as.matrix(burst.burn))
+summary(burst.df2)
+dim(burst.df2)
+
+# re-creating the density plot ourselves
+library(ggplot2)
+ggplot(burst.df2) +
+  geom_density(aes(x=THRESH))
+
+# save the output
+path.mod.out <- "../data_processed/mod.gdd5.MortonArb"
+if(!dir.exists(path.mod.out)) dir.create(path.mod.out)
+write.csv(burst.df2, file.path(path.mod.out, "THRESH_GDD5_MODIS_Greenup.csv"), row.names=F)
