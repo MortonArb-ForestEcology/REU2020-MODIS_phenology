@@ -5,3 +5,4 @@ data_raw/MODISMET/MODIS_Met_Plot_MortonArb.png
 
 data_raw/*
 data_processed/*
+*.png
