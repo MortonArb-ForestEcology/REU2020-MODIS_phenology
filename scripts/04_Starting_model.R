@@ -13,16 +13,29 @@
 dat.out <- "../data_processed/"
 site.id <- "MortonArb"
 
-dat.comb <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
-dat.greenup <- dat.comb[dat.comb$BAND == 'Greenup',]
-dat.midgreen <- dat.comb[dat.comb$BAND == 'MidGreenup',]
-summary(dat.comb)
+#Here is the different data to compare. All are constrained to GDD5.cum
+#------------------------------
+#MODIS Threshold Estimate, Greenup
+dat.1 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
+Greenup.dat <- dat.comb[dat.comb$BAND == 'Greenup',]
+Greenup.gdd <- round(Greenup.dat$GDD5.cum)
+head(Greenup.gdd)
 
-dat.npn <- read.csv("../data_processed/NPN/TEST_MortonArb_NPN_MET.csv")
-summary(dat.npn)
-head(dat.npn)
+#-----------------------------
+#MODIS Threshold Estimate, MidGreenup
 
+dat.2 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
+MidGreenup.dat <- dat.comb[dat.comb$BAND == 'MidGreenup',]
+MidGreenup.gdd <- round(MidGreenup.dat$GDD5.cum)
+head(MidGreenup.gdd)
 
+#-----------------------------
+#NPN Threshold Estimate
+
+NPN.dat <- read.csv(file.path(dat.out, paste0('TEST_', site.id, '_NPN_MET.csv')))
+NPN.burst <- NPN.dat[NPN.dat$phenophase_id == '371',]
+NPN.gdd <- NPN.burst$GDD5.cum
+head(NPN.gdd)
 #---------------------------------------------------#
 #This section sets up the model itself
 #---------------------------------------------------#
@@ -64,54 +77,120 @@ for(i in 1:nchain){
 #This section actually runs the model and then provides ways to check the output and clean it
 #---------------------------------------------------------#
 #Converting to list format needed for JAGs
-#THIS IS WHAT MATTERS TO ANDREW!!!!! == this is where we give it the data to do stats on
-burst.list <- list(y = dat.comb$GDD5.cum, n = length(dat.comb$GDD5.cum))
+#This is where we give it the data to do stats on
+
+#Inputs = green.list , midgreen.list , NPN.list
+#Inputs = Greenup.gdd , MidGreenup.gdd , NPN.gdd
+green.list <- list(y = Greenup.gdd, n = length(Greenup.gdd))
+midgreen.list <- list(y = MidGreenup.gdd, n = length(MidGreenup.gdd))
+NPN.list <- list(y = NPN.gdd, n = length(NPN.gdd))
 
 #running the model
-burst.model   <- jags.model (file = textConnection(univariate_regression),
-                             data = burst.list,
+#Inputs = green.mod , midgreen.mod , NPN.mod
+green.mod   <- jags.model (file = textConnection(univariate_regression),
+                             data = green.list,
                              inits = inits,
                              n.chains = 3)
+midgreen.mod <- jags.model (file = textConnection(univariate_regression),
+                            data = midgreen.list,
+                            inits = inits,
+                            n.chains = 3)
+NPN.mod <- jags.model (file = textConnection(univariate_regression),
+                       data = NPN.list,
+                       inits = inits,
+                       n.chains = 3)
 
 
-#Converting the ooutput into a workable format
+#Converting the output into a workable format
 #DO THINGS HERE SOMETIMES
-burst.out   <- coda.samples (model = burst.model,
+green.out   <- coda.samples (model = green.mod,
+                             variable.names = c("THRESH", "Prec"),
+                             n.iter = 5000)
+midgreen.out   <- coda.samples (model = midgreen.mod,
+                             variable.names = c("THRESH", "Prec"),
+                             n.iter = 5000)
+NPN.out   <- coda.samples (model = NPN.mod,
                              variable.names = c("THRESH", "Prec"),
                              n.iter = 5000)
 
 
 #Trace plot and distribution. For trace make sure they are very overlapped showing convergence
-plot(burst.out)
+#---------------------
+#For Greenup.gdd
+plot(green.out)
+summary(green.out)
 
+#For MidGreenup.gdd
+plot(midgreen.out)
+summary(midgreen.out)
+
+#For NPN.gdd
+plot(NPN.out)
+summary(NPN.out)
 
 #Checking that convergence happened
-#1 is ideal especially where youll be
-#below 1.05 is fine
-gelman.diag(burst.out)
-
-
-summary(burst.out)
-
-mean(dat.comb$GDD5.cum)
-
+#1 is ideal, below 1.05 is fine
+gelman.diag(green.out)
+gelman.diag(midgreen.out)
+gelman.diag(NPN.out)
+#--------------------
 
 #Removing burnin before convergence occurred -- this is the model "warmup"
 burnin = 1000                                ## determine convergence from GBR output
-burst.burn <- window(burst.out,start=burnin)  ## remove burn-in
+green.burn <- window(green.out, start= burnin)  ## remove burn-in
+midgreen.burn <- window(midgreen.out, start= burnin)
+NPN.burn <- window(NPN.out, start= burnin)
 
 
 # save the part of the stats from when the model worked and converged
-burst.df2 <- as.data.frame(as.matrix(burst.burn))
-summary(burst.df2)
-dim(burst.df2)
+stats.greenup <- as.data.frame(as.matrix(green.burn))
+summary(stats.greenup)
+dim(stats.greenup)
 
-# re-creating the density plot ourselves
+stats.midgreenup <- as.data.frame(as.matrix(midgreen.burn))
+summary(stats.midgreenup)
+dim(stats.midgreenup)
+
+stats.NPN <- as.data.frame(as.matrix(NPN.burn))
+summary(stats.NPN)
+dim(stats.NPN)
+
+# re-creating the density plot
 library(ggplot2)
-ggplot(burst.df2) +
+
+ggplot(stats.greenup) +
   geom_density(aes(x=THRESH))
 
-# save the output
+ggplot(stats.midgreenup) +
+  geom_density(aes(x= THRESH))
+
+ggplot(stats.NPN) +
+  geom_density(aes(x= THRESH))
+
+stats.all <- data.frame(greenup= stats.greenup,
+                        midgreenup= stats.midgreenup, 
+                        NPN= stats.NPN, 
+                        stringsAsFactors=FALSE)
+summary(stats.all)
+
+#graph all the densities together to see overlap.
+figures.dat <- '../figures'
+if(!dir.exists(figures.dat)) dir.create(figures.dat)
+png(width= 750, filename= file.path(figures.dat, 'THRESH_FIG_MortonArb.png'))
+    
+ggplot(data= stats.all) +
+  ggtitle('Comparison of Growing Degree Day Thresholds at The Morton Arboretum') +
+  geom_density(mapping = aes(x= greenup.THRESH, color = 'Greenup')) +
+  geom_density(mapping = aes(x= midgreenup.THRESH, color = 'Midgreenup')) +
+  geom_density(mapping = aes(x= NPN.THRESH, color = 'NPN')) +
+  scale_x_continuous('THRESH (5C GDD)', breaks= seq(from= '-110', to='300', by= 20)) +
+  scale_y_continuous('DENSITY (%)')
+dev.off()
+
+# save the outputs
 path.mod.out <- "../data_processed/mod.gdd5.MortonArb"
 if(!dir.exists(path.mod.out)) dir.create(path.mod.out)
-write.csv(burst.df2, file.path(path.mod.out, "THRESH_GDD5_MODIS_Greenup.csv"), row.names=F)
+write.csv(stats.greenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_Greenup.csv"), row.names=F)
+write.csv(stats.midgreenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_MidGreenup.csv"), row.names=F)
+write.csv(stats.NPN, file.path(path.mod.out, "THRESH_GDD5_NPN.csv"), row.names=F) 
+
