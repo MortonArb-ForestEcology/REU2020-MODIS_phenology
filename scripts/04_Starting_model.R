@@ -17,7 +17,7 @@ site.id <- "MortonArb"
 #------------------------------
 #MODIS Threshold Estimate, Greenup
 dat.1 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
-Greenup.dat <- dat.comb[dat.comb$BAND == 'Greenup',]
+Greenup.dat <- dat.1[dat.1$BAND == 'Greenup',]
 Greenup.gdd <- round(Greenup.dat$GDD5.cum)
 head(Greenup.gdd)
 
@@ -25,7 +25,7 @@ head(Greenup.gdd)
 #MODIS Threshold Estimate, MidGreenup
 
 dat.2 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
-MidGreenup.dat <- dat.comb[dat.comb$BAND == 'MidGreenup',]
+MidGreenup.dat <- dat.2[dat.2$BAND == 'MidGreenup',]
 MidGreenup.gdd <- round(MidGreenup.dat$GDD5.cum)
 head(MidGreenup.gdd)
 
