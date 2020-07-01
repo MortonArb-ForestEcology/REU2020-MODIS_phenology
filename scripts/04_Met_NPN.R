@@ -11,6 +11,8 @@ summary(dat.alba)
 
 dat.macrocarpa <- read.csv(file.path('../data_raw/NPN', paste0("Bur_MortonArb_QUAL.csv")))
 summary(dat.macrocarpa)
+
+dat.arb <- read.csv("../data_raw/NPN/TEST_MortonArb_OakCollection_PhenoLeaf.csv")
 #----------------------------
 head(dat.alba)
 head(dat.macrocarpa)

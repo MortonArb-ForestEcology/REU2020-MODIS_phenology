@@ -16,17 +16,16 @@ site.id <- "MortonArb"
 #Here is the different data to compare. All are constrained to GDD5.cum
 #------------------------------
 #MODIS Threshold Estimate, Greenup
-dat.1 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
+dat.modis <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
 Greenup.dat <- dat.1[dat.1$BAND == 'Greenup',]
-Greenup.gdd <- round(Greenup.dat$GDD5.cum)
+# Greenup.gdd <- round(Greenup.dat$GDD5.cum)
 head(Greenup.gdd)
 
 #-----------------------------
 #MODIS Threshold Estimate, MidGreenup
-
 dat.2 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
 MidGreenup.dat <- dat.2[dat.2$BAND == 'MidGreenup',]
-MidGreenup.gdd <- round(MidGreenup.dat$GDD5.cum)
+# MidGreenup.gdd <- round(MidGreenup.dat$GDD5.cum)
 head(MidGreenup.gdd)
 
 #-----------------------------
@@ -36,6 +35,7 @@ alba.dat <- read.csv(file.path(dat.out, paste0('Alba_', site.id, '_NPN_MET.csv')
 alba.burst <- alba.dat[alba.dat$phenophase_id == '371',]
 alba.gdd <- alba.burst$GDD5.cum
 head(alba.gdd)
+summary(alba.dat)
 
 bur.dat <- read.csv(file.path(dat.out, paste0('Bur_', site.id, '_NPN_MET.csv')))
 bur.burst <- bur.dat[bur.dat$phenophase_id == '371',]
@@ -87,10 +87,11 @@ for(i in 1:nchain){
 
 #Inputs = green.list , midgreen.list , NPN.list
 #Inputs = Greenup.gdd , MidGreenup.gdd , NPN.gdd
-green.list <- list(y = Greenup.gdd, n = length(Greenup.gdd))
-midgreen.list <- list(y = MidGreenup.gdd, n = length(MidGreenup.gdd))
+green.list <- list(y = dat.modis$GDD5.cum[dat.modis$BAND=="Greenup"], n = length(dat.modis$GDD5.cum[dat.modis$BAND=="Greenup"]))
+midgreen.list <- list(y = dat.modis[dat.modis$BAND=="MidGreenup", "GDD5.cum"], n = length(dat.modis[dat.modis$BAND=="MidGreenup", "GDD5.cum"]))
 alba.list <- list(y = alba.gdd, n = length(alba.gdd))
 bur.list <- list(y = bur.gdd, n = length(bur.gdd))
+
 #running the model
 #Inputs = green.mod , midgreen.mod , NPN.mod
 green.mod   <- jags.model (file = textConnection(univariate_regression),
@@ -177,6 +178,8 @@ stats.bur <- as.data.frame(as.matrix(bur.burn))
 summary(stats.bur)
 dim(stats.bur)
 
+# Once you have the information you NEED, you think about how to put it together
+
 # re-creating the density plot
 library(ggplot2)
 
@@ -192,11 +195,39 @@ ggplot(stats.alba) +
 ggplot(stats.bur) +
   geom_density(aes(x= THRESH))
 
+# This is "wide" data
 stats.all <- data.frame(greenup= stats.greenup,
                         midgreenup= stats.midgreenup, 
                         alba= stats.alba, bur= stats.bur,
                         stringsAsFactors=FALSE)
 summary(stats.all)
+
+# We want "long" data
+stats.macro <- stats.bur
+
+# What pieces of information do we need to distinguish
+stats.greenup$name <- "greenup"
+stats.midgreenup$name <- "midgreenup"
+stats.alba$name <- "Q. alba"
+stats.macro$name <- "Q. macrocarpa"
+
+stats.greenup$type <- "MODIS"
+stats.midgreenup$type <- "MODIS"
+stats.alba$type <- "NPN"
+stats.macro$type <- "NPN"
+
+# Combine our different data frames into "long" format 
+dat.all <- rbind(stats.greenup, stats.midgreenup, stats.alba, stats.macro)
+dat.all$name <- as.factor(dat.all$name)
+dat.all$type <- as.factor(dat.all$type)
+summary(dat.all)
+
+ggplot(data= dat.all) +
+  # facet_wrap(~type) + # breaks things into separate panels
+  ggtitle('Comparison of Growing Degree Day Thresholds at The Morton Arboretum') +
+  geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
+  scale_color_manual(values=c("darkblue", "lightblue", "darkgreen", "lightgreen")) +
+  scale_fill_manual(values=c("darkblue", "lightblue", "darkgreen", "lightgreen"))
 
 #graph all the densities together to see overlap.
 figures.dat <- '../figures'
