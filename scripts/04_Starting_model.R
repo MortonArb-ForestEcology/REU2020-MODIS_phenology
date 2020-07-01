@@ -54,7 +54,7 @@ library(coda)
 #Setting up the Jags model itself
 univariate_regression <- "
 model{
-  THRESH ~ dnorm(0, .001)
+  THRESH ~ dnorm(0, .0001)
   Prec ~ dgamma(.1, .1)    ## prior precision 
 
 
