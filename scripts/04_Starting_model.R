@@ -32,7 +32,7 @@ head(MidGreenup.gdd)
 #-----------------------------
 #NPN Threshold Estimate
 
-NPN.dat <- read.csv(file.path(dat.out, paste0('TEST_', site.id, '_NPN_MET.csv')))
+NPN.dat <- read.csv(file.path(dat.out, paste0('/NPN/TEST_', site.id, '_NPN_MET.csv')))
 NPN.burst <- NPN.dat[NPN.dat$phenophase_id == '371',]
 NPN.gdd <- NPN.burst$GDD5.cum
 head(NPN.gdd)
@@ -48,7 +48,7 @@ library(coda)
 #Setting up the Jags model itself
 univariate_regression <- "
 model{
-  THRESH ~ dnorm(0, .001)
+  THRESH ~ dnorm(0, .0001)
   Prec ~ dgamma(.1, .1)    ## prior precision 
 
 
@@ -58,6 +58,8 @@ model{
   }
 }
 "
+
+
 
 #Checking how good of a predictor they currently seem
 # plot(dat.comb$GDD5.cum, dat.comb$greenup.yday)
@@ -85,21 +87,23 @@ green.list <- list(y = Greenup.gdd, n = length(Greenup.gdd))
 midgreen.list <- list(y = MidGreenup.gdd, n = length(MidGreenup.gdd))
 NPN.list <- list(y = NPN.gdd, n = length(NPN.gdd))
 
+
 #running the model
 #Inputs = green.mod , midgreen.mod , NPN.mod
 green.mod   <- jags.model (file = textConnection(univariate_regression),
                              data = green.list,
                              inits = inits,
                              n.chains = 3)
+
 midgreen.mod <- jags.model (file = textConnection(univariate_regression),
                             data = midgreen.list,
                             inits = inits,
                             n.chains = 3)
+
 NPN.mod <- jags.model (file = textConnection(univariate_regression),
                        data = NPN.list,
                        inits = inits,
                        n.chains = 3)
-
 
 #Converting the output into a workable format
 #DO THINGS HERE SOMETIMES

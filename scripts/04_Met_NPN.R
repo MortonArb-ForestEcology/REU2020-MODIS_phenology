@@ -44,5 +44,5 @@ ggplot(data = dat.burst, mapping = aes(x= GDD5.cum, y= burst.yday)) +
 
 processed.npn <- '../data_processed/NPN'
 if(!dir.exists(processed.npn)) dir.create(processed.npn)
-write.csv(dat.npn, file.path(processed.npn, "TEST_MortonArb_NPN_MET.csv"), row.names=F)
+write.csv(dat.burst, file.path(processed.npn, "TEST_MortonArb_NPN_MET.csv"), row.names=F)
 
