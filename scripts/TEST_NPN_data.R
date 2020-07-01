@@ -33,15 +33,26 @@ quercus.phenophase <- npn_get_phenophases_for_taxon(genus_ids=unique(npn.quercus
 # station_ids=26202 gets just The Morton Arboretum Oak Collection (just for now)
 # years = we can narrow this down, but we probably want everything we can get
 # request_source = something the function needs so NPN knows whose using this
-dat.npn <- npn_download_individual_phenometrics(species_ids=npn.quercus$species_id[npn.quercus$species=="alba"],
+dat.alba <- npn_download_individual_phenometrics(species_ids=npn.quercus$species_id[npn.quercus$species=="alba"],
                                                 station_ids = 26202, years=2000:2020
                                                 , request_source="The Morton Arboretum")
-dat.npn[dat.npn==-9999] <- NA
-unique(dat.npn$phenophase_description)
-summary(dat.npn)
+
+dat.macrocarpa <- npn_download_individual_phenometrics(species_ids=npn.quercus$species_id[npn.quercus$species=="macrocarpa"],
+                                                 station_ids = 26202, years=2000:2020
+                                                 , request_source="The Morton Arboretum")
+dat.alba[dat.alba==-9999] <- NA
+unique(dat.alba$phenophase_description)
+summary(dat.alba)
+
+dat.macrocarpa[dat.macrocarpa==-9999] <- NA
+unique(dat.macrocarpa$phenophase_description)
+summary(dat.macrocarpa)
 
 # Note: this has more phenophases that we actually want right now, but lets just stick with it
-write.csv(dat.npn, file.path(path.npn, "TEST_MortonArb_QUAL.csv"), row.names=F)
+write.csv(dat.alba, file.path(path.npn, "Alba_MortonArb_QUAL.csv"), row.names=F)
+
+# Note: this has more phenophases that we actually want right now, but lets just stick with it
+write.csv(dat.macrocarpa, file.path(path.npn, "Bur_MortonArb_QUAL.csv"), row.names=F)
 
 # Doing another quick search for the Arb, but getting everything from our oak collection; note that it is MUCH slower
 # We're also only get a couple phenophases that we actually care about for this project
