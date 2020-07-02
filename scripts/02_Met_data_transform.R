@@ -30,7 +30,6 @@ names(modis.pts)[4] <- "yr.start"
 modis.pts$yr.end <- aggregate(greenup.year~site+latitude+longitude, data=dat.MODIS,
 FUN=max)[,4]
 
-
 #Writing the csv file of lat and longs because daymetr batch function needs to read a file instead of a dataframe
 write.csv(modis.pts, file.path(path.daymet, paste0("TEST_POINTS_", site.id, ".csv")), row.names=FALSE)
 
@@ -124,5 +123,5 @@ ggplot(data=df.met) +
   geom_line(aes(x=yday, y=GDD5.cum, group=year))
 
 
-write.csv(df.met, file.path(path.daymet, paste0("TEST_DAYMET_", site.id, ".csv")), row.names=FALSE)
+write.csv(df.met, file.path(path.daymet, paste0("DAYMET_Data_", site.id, ".csv")), row.names=FALSE)
 

@@ -16,7 +16,7 @@ site.id <- "MortonArb"
 #Here is the different data to compare. All are constrained to GDD5.cum
 #------------------------------
 #MODIS Threshold Estimate, Greenup
-dat.modis <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
+dat.1 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
 Greenup.dat <- dat.1[dat.1$BAND == 'Greenup',]
 # Greenup.gdd <- round(Greenup.dat$GDD5.cum)
 head(Greenup.gdd)
@@ -87,9 +87,11 @@ for(i in 1:nchain){
 
 #Inputs = green.list , midgreen.list , NPN.list
 #Inputs = Greenup.gdd , MidGreenup.gdd , NPN.gdd
+
+#resolve
 green.list <- list(y = dat.modis$GDD5.cum[dat.modis$BAND=="Greenup"], n = length(dat.modis$GDD5.cum[dat.modis$BAND=="Greenup"]))
 midgreen.list <- list(y = dat.modis[dat.modis$BAND=="MidGreenup", "GDD5.cum"], n = length(dat.modis[dat.modis$BAND=="MidGreenup", "GDD5.cum"]))
-alba.list <- list(y = alba.gdd, n = length(alba.gdd))
+#resolve
 bur.list <- list(y = bur.gdd, n = length(bur.gdd))
 
 #running the model
@@ -249,6 +251,6 @@ path.mod.out <- "../data_processed/mod.gdd5.MortonArb"
 if(!dir.exists(path.mod.out)) dir.create(path.mod.out)
 write.csv(stats.greenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_Greenup.csv"), row.names=F)
 write.csv(stats.midgreenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_MidGreenup.csv"), row.names=F)
-write.csv(stats.alba, file.path(path.mod.out, "THRESH_GDD5_Alba.csv"), row.names=F) 
+#resolve
 write.csv(stats.bur, file.path(path.mod.out, "THRESH_GDD5_Bur.csv"), row.names=F) 
 

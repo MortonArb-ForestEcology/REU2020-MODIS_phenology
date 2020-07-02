@@ -12,7 +12,7 @@ site.id <- 'MortonArb'
 dat.MODIS <- read.csv(file.path('../data_raw/MODIS', paste0("MODIS_Greenup_", site.id, ".csv")))
 summary(dat.MODIS)
 
-df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("TEST_DAYMET_", site.id, ".csv")))
+df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_", site.id, ".csv")))
 summary(df.met)
 
 # What we need to do: get GDD extracted from df.met for dates in dat.MODIS
