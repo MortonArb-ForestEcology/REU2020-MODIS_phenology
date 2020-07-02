@@ -5,7 +5,6 @@ library(MODISTools)
 #install.packages("ggplot2")
 library(ggplot2)
 
-#coordinates found from Google Earth of Andrew's Ivy Branch Farm
 site.id <- 'MortonArb'
 lat.in <- 41.813583
 lon.in <- -88.052897
