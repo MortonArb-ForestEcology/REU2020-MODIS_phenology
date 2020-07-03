@@ -1,9 +1,8 @@
-#Here the products from the daymet and MODIS scripts will be combined
+#Here the raw data from the DAYMET and MODIS will be combined
 
-#packages
-#library(MODISTools)
-#library(ggplot2)
-#library(daymetr)
+library(MODISTools)
+library(ggplot2)
+library(daymetr)
 
 #could be changed to be individual species not site
 path.MODIS <- '../data_raw/MODIS'
@@ -17,7 +16,7 @@ summary(df.met)
 
 # What we need to do: get GDD extracted from df.met for dates in dat.MODIS
 # Dates are defined by unique year and yday combinations
-# In dat.MODIS each row is a unique observation; with a mostly unique date --> need a GDD.cum for each row
+# In dat.MODIS each row is a unique observation; need a GDD.cum for each row
 
 for(i in 1:nrow(dat.MODIS)){
   # dat.MODIS[i,]
@@ -39,7 +38,6 @@ if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
 
 png(filename= file.path(path.png, paste0('MODIS_Met_Plot_', site.id, '.png')))
 ggplot(data = dat.MODIS, mapping = aes(x = BAND, y = GDD5.cum)) +
-  #facet_wrap(~BAND, scales="free") +
   geom_boxplot()
 dev.off()
 

@@ -6,41 +6,47 @@ df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_", site.i
 summary(df.met)
 
 #get NPN data
-dat.macrocarpa <- read.csv(file.path('../data_raw/NPN', paste0("Bur_MortonArb_QUAL.csv")))
-summary(dat.macrocarpa)
-
-dat.arb <- read.csv("../data_raw/NPN/TEST_MortonArb_OakCollection_PhenoLeaf.csv")
+path.npn <- "../data_raw/NPN/"
+if(!dir.exists(path.npn)) dir.create(path.npn)
+oak.leaf <- read.csv(file.path(path.npn, paste0('Quercus_', site.id, '.csv')))
 #----------------------------
 
-head(dat.macrocarpa)
+head(oak.leaf)
 
-dat.macrocarpa$phases.yday <- (dat.macrocarpa$first_yes_doy + dat.macrocarpa$last_yes_doy)/2 #get a mean of each phenophase yday
+oak.leaf$phases.yday <- (oak.leaf$first_yes_doy + oak.leaf$last_yes_doy)/2 #get a mean of each phenophase yday
 
-unique(dat.macrocarpa$individual_id)
+#fixes the loop by getting rid of the .00 decimal of oak.leaf$phases.yday to match df.met$yday
+oak.leaf$phases.yday <- round(oak.leaf$phases.yday)
 
+unique(oak.leaf$individual_id)
 
-for(i in 1:nrow(dat.macrocarpa)){
+for(i in 1:nrow(oak.leaf)){
   # We need to use med.bud
-  bud.yday <- dat.macrocarpa[i, 'phases.yday']
-  bud.year <- dat.macrocarpa[i, "first_yes_year"]
+  bud.yday <- oak.leaf[i, 'phases.yday']
+  bud.year <- oak.leaf[i, "first_yes_year"]
   
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.npn row we're working with
-  dat.macrocarpa[i,"GDD5.cum"] <- df.met[df.met$year==bud.year & df.met$yday==bud.yday, "GDD5.cum"] #df.met$year==bud.year & df.met$yday==bud.m,
+  oak.leaf[i,"GDD5.cum"] <- df.met[df.met$year==bud.year & df.met$yday==bud.yday, "GDD5.cum"]
 }
 
+head(oak.leaf)
 
-bur.burst <- dat.macrocarpa[dat.macrocarpa$phenophase_id == '371',]
-summary(bur.burst)
-bur.burst$burst.yday <- bur.burst$phases.yday
+#this specifies the phenophase by its id. 371 is 'Breaking Leaf Buds'
+oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371',]
+summary(oak.budburst)
 
 library(ggplot2)
 
-ggplot(data = bur.burst, mapping = aes(x= GDD5.cum, y= burst.yday)) + 
-  facet_wrap(bur.burst$first_yes_year) +
+path.png <- '../figures/'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
+png(filename= file.path(path.png, paste0('Quercus_Plot_', site.id, '_NPN.png')))
+
+ggplot(data = oak.budburst, mapping = aes(x= GDD5.cum, y= phases.yday)) + 
+  facet_wrap(oak.budburst$first_yes_year) +
   geom_point()
 
-processed.npn <- '../data_processed/'
-if(!dir.exists(processed.npn)) dir.create(processed.npn)
-write.csv(bur.burst, file.path(processed.npn, "Bur_MortonArb_NPN_MET.csv"), row.names=F)
-
+dev.off()
+dat.processed <- '../data_processed/'
+if(!dir.exists(dat.processed)) dir.create(dat.processed)
+write.csv(oak.budburst, file.path(dat.processed, paste0('Quercus_', site.id, '_NPN_MET.csv')), row.names=F)

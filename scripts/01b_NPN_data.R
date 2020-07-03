@@ -10,12 +10,11 @@
 # library('devtools')
 # devtools::install_github("usa-npn/rnpn")
 library(rnpn)
+site.id <- 'MortonArb'
 
-#resolve
-path.npn <- "../data_raw/NPN"
+path.npn <- "../data_raw/NPN/"
 if(!dir.exists(path.npn)) dir.create(path.npn)
-if(!dir.exists(file.path(path.npn, "npn_raw"))) dir.create(file.path(path.npn, "npn_raw"))
-if(!dir.exists(file.path(path.npn, "summaries"))) dir.create(file.path(path.npn, "summaries"))
+
 # -----------------------------------
 
 
@@ -34,16 +33,16 @@ quercus.phenophase <- npn_get_phenophases_for_taxon(genus_ids=unique(npn.quercus
 # station_ids=26202 gets just The Morton Arboretum Oak Collection (just for now)
 # years = we can narrow this down, but we probably want everything we can get
 # request_source = something the function needs so NPN knows whose using this
-dat.macrocarpa <- npn_download_individual_phenometrics(species_ids=npn.quercus$species_id[npn.quercus$species=="macrocarpa"],
+dat.npn <- npn_download_individual_phenometrics(species_ids=npn.quercus$species_id[npn.quercus$species=="macrocarpa"],
                                                  station_ids = 26202, years=2000:2020
                                                  , request_source="The Morton Arboretum")
 
-dat.macrocarpa[dat.macrocarpa==-9999] <- NA
-unique(dat.macrocarpa$phenophase_description)
-summary(dat.macrocarpa)
+dat.npn[dat.npn==-9999] <- NA
+unique(dat.npn$phenophase_description)
+summary(dat.npn)
 
 # Note: this has more phenophases that we actually want right now, but lets just stick with it
-write.csv(dat.macrocarpa, file.path(path.npn, "Bur_MortonArb_QUAL.csv"), row.names=F)
+write.csv(dat.npn, file.path(path.npn, paste0("NPN", site.id, "_QUAL.csv")), row.names=F)
 
 # Doing another quick search for the Arb, but getting everything from our oak collection; note that it is MUCH slower
 # We're also only get a couple phenophases that we actually care about for this project
@@ -60,7 +59,7 @@ dim(oak.leaf)
 length(unique(oak.leaf$species)) # 12 unique species
 length(unique(oak.leaf$individual_id)) # 31 unique trees
 
-write.csv(oak.leaf, file.path(path.npn, "TEST_MortonArb_OakCollection_PhenoLeaf.csv"), row.names=F)
+write.csv(oak.leaf, file.path(path.npn, paste0('Quercus_', site.id, '.csv')), row.names=F)
 
 # -----------------------------------
 
