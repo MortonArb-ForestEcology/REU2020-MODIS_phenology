@@ -9,38 +9,20 @@
 #        In order to use rjags you need JAGS installed. rjags is simply for interfacing. It can be found at http://mcmc-jags.sourceforge.net/
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
-#THIS IS WHER YOU DO THINGS
-dat.out <- "../data_processed/"
+#THIS IS WHERE YOU DO THINGS
+dat.processed <- "../data_processed/"
 site.id <- "MortonArb"
 
 #Here is the different data to compare. All are constrained to GDD5.cum
 #------------------------------
-#MODIS Threshold Estimate, Greenup
-dat.1 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
-Greenup.dat <- dat.1[dat.1$BAND == 'Greenup',]
-# Greenup.gdd <- round(Greenup.dat$GDD5.cum)
-head(Greenup.gdd)
-
-#-----------------------------
-#MODIS Threshold Estimate, MidGreenup
-dat.2 <- read.csv(file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")))
-MidGreenup.dat <- dat.2[dat.2$BAND == 'MidGreenup',]
-# MidGreenup.gdd <- round(MidGreenup.dat$GDD5.cum)
-head(MidGreenup.gdd)
+#MODIS Threshold Estimates for 15% greenup <- (greenup) and 50% greenup <- (midgreenup)
+dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_", site.id, ".csv")))
+head(dat.MODIS)
 
 #-----------------------------
 #NPN Threshold Estimate
-
-alba.dat <- read.csv(file.path(dat.out, paste0('Alba_', site.id, '_NPN_MET.csv')))
-alba.burst <- alba.dat[alba.dat$phenophase_id == '371',]
-alba.gdd <- alba.burst$GDD5.cum
-head(alba.gdd)
-summary(alba.dat)
-
-bur.dat <- read.csv(file.path(dat.out, paste0('Bur_', site.id, '_NPN_MET.csv')))
-bur.burst <- bur.dat[bur.dat$phenophase_id == '371',]
-bur.gdd <- bur.burst$GDD5.cum
-head(bur.gdd)
+oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_", site.id, "_NPN_MET.csv")))
+head(oak.budburst)
 
 #---------------------------------------------------#
 #This section sets up the model itself
@@ -69,7 +51,7 @@ model{
 # plot(dat.comb$GDD5.cum, dat.comb$greenup.yday)
 
 #------------------------------------------------------#
-#This section converts our observed into the neccessary format, defines our uninformed prior, and sets up our MCMC chains
+#This section converts our observed into the necessary format, defines our uninformed prior, and sets up our MCMC chains
 #------------------------------------------------------#
 #Setting the number of MCMC chains and their parameters
 nchain = 3
@@ -85,17 +67,23 @@ for(i in 1:nchain){
 #Converting to list format needed for JAGs
 #This is where we give it the data to do stats on
 
-#Inputs = green.list , midgreen.list , NPN.list
-#Inputs = Greenup.gdd , MidGreenup.gdd , NPN.gdd
+green.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum']))
 
-#resolve
-green.list <- list(y = dat.modis$GDD5.cum[dat.modis$BAND=="Greenup"], n = length(dat.modis$GDD5.cum[dat.modis$BAND=="Greenup"]))
-midgreen.list <- list(y = dat.modis[dat.modis$BAND=="MidGreenup", "GDD5.cum"], n = length(dat.modis[dat.modis$BAND=="MidGreenup", "GDD5.cum"]))
-#resolve
-bur.list <- list(y = bur.gdd, n = length(bur.gdd))
+midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum']))
+
+#choose here which species to model
+unique(oak.budburst$species)
+summary(oak.budburst)
+
+montana.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'GDD5.cum']))
+alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'GDD5.cum']))
+gambelii.list <- list(y = oak.budburst[oak.budburst$species == 'gambelii', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'gambelii', 'GDD5.cum']))
+rubra.list <- list(y = oak.budburst[oak.budburst$species == 'rubra', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'rubra', 'GDD5.cum']))
 
 #running the model
-#Inputs = green.mod , midgreen.mod , NPN.mod
+#good oaks = rubra 9, gambelii 13, shumardii 7, montana 10, alba 9, macrocarpa 7, velutina 10, imbricaria 11, 
+#bad oaks = palustris, lobata, phellos 3, ilicifolia 6
+
 green.mod   <- jags.model (file = textConnection(univariate_regression),
                              data = green.list,
                              inits = inits,
@@ -104,15 +92,22 @@ midgreen.mod <- jags.model (file = textConnection(univariate_regression),
                             data = midgreen.list,
                             inits = inits,
                             n.chains = 3)
-alba.mod <- jags.model (file = textConnection(univariate_regression),
-                       data = alba.list,
+montana.mod <- jags.model (file = textConnection(univariate_regression),
+                       data = montana.list,
                        inits = inits,
                        n.chains = 3)
-bur.mod <- jags.model (file = textConnection(univariate_regression),
-                        data = bur.list,
+alba.mod <- jags.model (file = textConnection(univariate_regression),
+                           data = alba.list,
+                           inits = inits,
+                           n.chains = 3)
+gambelii.mod <- jags.model (file = textConnection(univariate_regression),
+                        data = gambelii.list,
                         inits = inits,
                         n.chains = 3)
-
+rubra.mod <- jags.model (file = textConnection(univariate_regression),
+                        data = rubra.list,
+                        inits = inits,
+                        n.chains = 3)
 
 #Converting the output into a workable format
 #DO THINGS HERE SOMETIMES
@@ -122,14 +117,18 @@ green.out   <- coda.samples (model = green.mod,
 midgreen.out   <- coda.samples (model = midgreen.mod,
                              variable.names = c("THRESH", "Prec"),
                              n.iter = 5000)
-alba.out   <- coda.samples (model = alba.mod,
+montana.out   <- coda.samples (model = montana.mod,
                              variable.names = c("THRESH", "Prec"),
                              n.iter = 5000)
-bur.out   <- coda.samples (model = bur.mod,
+alba.out   <- coda.samples (model = alba.mod,
                             variable.names = c("THRESH", "Prec"),
                             n.iter = 5000)
-
-
+gambelii.out   <- coda.samples (model = gambelii.mod,
+                            variable.names = c("THRESH", "Prec"),
+                            n.iter = 5000)
+rubra.out   <- coda.samples (model = rubra.mod,
+                            variable.names = c("THRESH", "Prec"),
+                            n.iter = 5000)
 #Trace plot and distribution. For trace make sure they are very overlapped showing convergence
 #---------------------
 #For Greenup.gdd
@@ -141,18 +140,27 @@ plot(midgreen.out)
 summary(midgreen.out)
 
 #For NPN.gdd
+plot(montana.out)
+summary(montana.out)
+
 plot(alba.out)
 summary(alba.out)
 
-plot(bur.out)
-summary(bur.out)
+plot(gambelii.out)
+summary(gambelii.out)
+
+plot(rubra.out)
+summary(rubra.out)
+
 
 #Checking that convergence happened
 #1 is ideal, below 1.05 is fine
 gelman.diag(green.out)
 gelman.diag(midgreen.out)
+gelman.diag(montana.out)
 gelman.diag(alba.out)
-gelman.diag(bur.out)
+gelman.diag(gambelii.out)
+gelman.diag(rubra.out)
 #--------------------
 
 #Removing burnin before convergence occurred -- this is the model "warmup"
@@ -160,8 +168,9 @@ burnin = 1000                                ## determine convergence from GBR o
 green.burn <- window(green.out, start= burnin)  ## remove burn-in
 midgreen.burn <- window(midgreen.out, start= burnin)
 alba.burn <- window(alba.out, start= burnin)
-bur.burn <- window(bur.out, start= burnin)
-
+montana.burn <- window(montana.out, start= burnin)
+gambelii.burn <- window(gambelii.out, start= burnin)
+rubra.burn <- window(rubra.out, start= burnin)
 
 # save the part of the stats from when the model worked and converged
 stats.greenup <- as.data.frame(as.matrix(green.burn))
@@ -176,9 +185,17 @@ stats.alba <- as.data.frame(as.matrix(alba.burn))
 summary(stats.alba)
 dim(stats.alba)
 
-stats.bur <- as.data.frame(as.matrix(bur.burn))
-summary(stats.bur)
-dim(stats.bur)
+stats.montana <- as.data.frame(as.matrix(montana.burn))
+summary(stats.montana)
+dim(stats.montana)
+
+stats.gambelii <- as.data.frame(as.matrix(gambelii.burn))
+summary(stats.gambelii)
+dim(stats.gambelii)
+
+stats.rubra <- as.data.frame(as.matrix(rubra.burn))
+summary(stats.rubra)
+dim(stats.rubra)
 
 # Once you have the information you NEED, you think about how to put it together
 
@@ -197,60 +214,47 @@ ggplot(stats.alba) +
 ggplot(stats.bur) +
   geom_density(aes(x= THRESH))
 
-# This is "wide" data
-stats.all <- data.frame(greenup= stats.greenup,
-                        midgreenup= stats.midgreenup, 
-                        alba= stats.alba, bur= stats.bur,
-                        stringsAsFactors=FALSE)
-summary(stats.all)
-
-# We want "long" data
-stats.macro <- stats.bur
-
 # What pieces of information do we need to distinguish
 stats.greenup$name <- "greenup"
 stats.midgreenup$name <- "midgreenup"
 stats.alba$name <- "Q. alba"
-stats.macro$name <- "Q. macrocarpa"
+stats.rubra$name <- "Q. rubra"
+stats.montana$name <- "Q. montana"
+stats.gambelii$name <- "Q. gambelii"
 
 stats.greenup$type <- "MODIS"
 stats.midgreenup$type <- "MODIS"
 stats.alba$type <- "NPN"
-stats.macro$type <- "NPN"
+stats.montana$type <- "NPN"
+stats.gambelii$type <- "NPN"
+stats.rubra$type <- "NPN"
 
 # Combine our different data frames into "long" format 
-dat.all <- rbind(stats.greenup, stats.midgreenup, stats.alba, stats.macro)
+dat.all <- rbind(stats.greenup, stats.midgreenup, stats.alba, stats.montana, stats.gambelii, stats.rubra)
 dat.all$name <- as.factor(dat.all$name)
 dat.all$type <- as.factor(dat.all$type)
 summary(dat.all)
 
-ggplot(data= dat.all) +
-  # facet_wrap(~type) + # breaks things into separate panels
-  ggtitle('Comparison of Growing Degree Day Thresholds at The Morton Arboretum') +
-  geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
-  scale_color_manual(values=c("darkblue", "lightblue", "darkgreen", "lightgreen")) +
-  scale_fill_manual(values=c("darkblue", "lightblue", "darkgreen", "lightgreen"))
 
-#graph all the densities together to see overlap.
 figures.dat <- '../figures'
 if(!dir.exists(figures.dat)) dir.create(figures.dat)
-png(width= 750, filename= file.path(figures.dat, 'THRESH_FIG_MortonArb.png'))
-    
-ggplot(data= stats.all) +
-  ggtitle('Comparison of Growing Degree Day Thresholds at The Morton Arboretum') +
-  geom_density(mapping = aes(x= greenup.THRESH, color = 'Greenup')) +
-  geom_density(mapping = aes(x= midgreenup.THRESH, color = 'Midgreenup')) +
-  geom_density(mapping = aes(x= alba.THRESH, color = 'Alba')) +
-  geom_density(mapping = aes(x= bur.THRESH, color = 'Bur')) +
-  scale_x_continuous('THRESH (5C GDD)', breaks= seq(from= '-110', to='300', by= 20)) +
-  scale_y_continuous('DENSITY (%)')
-dev.off()
+png(width= 750, filename= file.path(figures.dat, 'THRESH_Oaks_MortonArb.png'))
 
+ggplot(data= dat.all) +
+  # facet_wrap(~type) + # breaks things into separate panels
+  ggtitle('Comparison of Growing Degree Day Thresholds of 4 Quercus species at The Morton Arboretum') +
+  geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
+  scale_color_manual(values=c("darkblue", "lightblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3')) +
+  scale_fill_manual(values=c("darkblue", "lightblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3'))
+dev.off()
+  
 # save the outputs
 path.mod.out <- "../data_processed/mod.gdd5.MortonArb"
 if(!dir.exists(path.mod.out)) dir.create(path.mod.out)
 write.csv(stats.greenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_Greenup.csv"), row.names=F)
 write.csv(stats.midgreenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_MidGreenup.csv"), row.names=F)
-#resolve
-write.csv(stats.bur, file.path(path.mod.out, "THRESH_GDD5_Bur.csv"), row.names=F) 
+write.csv(stats.alba, file.path(path.mod.out, "THRESH_alba.csv"), row.names=F) 
+write.csv(stats.montana, file.path(path.mod.out, "THRESH_montana.csv"), row.names=F) 
+write.csv(stats.rubra, file.path(path.mod.out, "THRESH_rubra.csv"), row.names=F) 
+write.csv(stats.gambelii, file.path(path.mod.out, "THRESH_gambelii.csv"), row.names=F) 
 
