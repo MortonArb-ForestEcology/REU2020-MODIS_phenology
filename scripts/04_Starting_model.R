@@ -72,14 +72,15 @@ green.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum'], n = le
 midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum']))
 
 #choose here which species to model
-unique(oak.budburst$species)
+summary(oak.budburst$GDD5.cum[oak.budburst$species == 'gambelii'])
 summary(oak.budburst)
+
 
 montana.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'GDD5.cum']))
 alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'GDD5.cum']))
 gambelii.list <- list(y = oak.budburst[oak.budburst$species == 'gambelii', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'gambelii', 'GDD5.cum']))
 rubra.list <- list(y = oak.budburst[oak.budburst$species == 'rubra', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'rubra', 'GDD5.cum']))
-
+View(gambelii.list)
 #running the model
 #good oaks = rubra 9, gambelii 13, shumardii 7, montana 10, alba 9, macrocarpa 7, velutina 10, imbricaria 11, 
 #bad oaks = palustris, lobata, phellos 3, ilicifolia 6
@@ -197,24 +198,8 @@ stats.rubra <- as.data.frame(as.matrix(rubra.burn))
 summary(stats.rubra)
 dim(stats.rubra)
 
-# Once you have the information you NEED, you think about how to put it together
 
-# re-creating the density plot
-library(ggplot2)
-
-ggplot(stats.greenup) +
-  geom_density(aes(x=THRESH))
-
-ggplot(stats.midgreenup) +
-  geom_density(aes(x= THRESH))
-
-ggplot(stats.alba) +
-  geom_density(aes(x= THRESH))
-
-ggplot(stats.bur) +
-  geom_density(aes(x= THRESH))
-
-# What pieces of information do we need to distinguish
+# What pieces of information do we need to distinguish?
 stats.greenup$name <- "greenup"
 stats.midgreenup$name <- "midgreenup"
 stats.alba$name <- "Q. alba"
@@ -235,7 +220,7 @@ dat.all$name <- as.factor(dat.all$name)
 dat.all$type <- as.factor(dat.all$type)
 summary(dat.all)
 
-
+library(ggplot2)
 figures.dat <- '../figures'
 if(!dir.exists(figures.dat)) dir.create(figures.dat)
 png(width= 750, filename= file.path(figures.dat, 'THRESH_Oaks_MortonArb.png'))
@@ -245,9 +230,11 @@ ggplot(data= dat.all) +
   ggtitle('Comparison of Growing Degree Day Thresholds of 4 Quercus species at The Morton Arboretum') +
   geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
   scale_color_manual(values=c("darkblue", "lightblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3')) +
-  scale_fill_manual(values=c("darkblue", "lightblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3'))
-dev.off()
-  
+  scale_fill_manual(values=c("blue", "dodgerblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3')) +
+  scale_x_continuous('THRESH (5C Growing Degree Days)') +
+  scale_y_continuous('DENSITY (%)')
+#dev.off()
+
 # save the outputs
 path.mod.out <- "../data_processed/mod.gdd5.MortonArb"
 if(!dir.exists(path.mod.out)) dir.create(path.mod.out)
