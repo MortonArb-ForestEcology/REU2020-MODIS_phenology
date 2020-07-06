@@ -24,6 +24,9 @@ head(dat.MODIS)
 oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_", site.id, "_NPN_MET.csv")))
 head(oak.budburst)
 
+oak.leaves <- read.csv(file.path(dat.processed, paste0("Quercus_Leaves", site.id, "_NPN_MET.csv")))
+head(oak.budburst)
+
 #---------------------------------------------------#
 #This section sets up the model itself
 #---------------------------------------------------#
@@ -75,6 +78,7 @@ midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], 
 summary(oak.budburst$GDD5.cum[oak.budburst$species == 'gambelii'])
 summary(oak.budburst)
 
+#add list for leaves here
 
 montana.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'GDD5.cum']))
 alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'GDD5.cum']))

@@ -30,11 +30,14 @@ for(i in 1:nrow(oak.leaf)){
   oak.leaf[i,"GDD5.cum"] <- df.met[df.met$year==bud.year & df.met$yday==bud.yday, "GDD5.cum"]
 }
 
-head(oak.leaf)
+tail(oak.leaf)
 
 #this specifies the phenophase by its id. 371 is 'Breaking Leaf Buds'
 oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371',]
 summary(oak.budburst)
+
+oak.leaves <- oak.leaf[oak.leaf$phenophase_id == '483',]
+summary(oak.leaves)
 
 library(ggplot2)
 
@@ -50,3 +53,4 @@ dev.off()
 dat.processed <- '../data_processed/'
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
 write.csv(oak.budburst, file.path(dat.processed, paste0('Quercus_', site.id, '_NPN_MET.csv')), row.names=F)
+write.csv(oak.leaves, file.path(dat.processed, paste0('Quercus_Leaves', site.id, '_NPN_MET.csv')), row.names=F)
