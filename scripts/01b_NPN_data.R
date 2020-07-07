@@ -54,10 +54,17 @@ oak.leaf[oak.leaf==-9999] <- NA
 summary(oak.leaf)
 dim(oak.leaf)
 
-oak.buburst <- oak.leaf[oak.leaf$phenophase_id == '371']
+oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371']
+summary(oak.buburst[oak.budburst$species == 'gambelii'])
+
+burst.id <- aggregate(oak.budburst, by = list(oak.budburst$individual_id), FUN = TMAX)
+
+
+
 oak.leaves <- oak.leaf[oak.leaf$phenophase_id == '471']
 oak.fallen <- oak.leaf[oak.leaf$phenophase_id == '483']
 
+library(ggplot2)
 #alter object to see different raw NPN data for the phenophases of interest.
 ggplot(data = oak.budburst) +
   geom_boxplot(mapping = aes(x = species, y = last_yes_doy)) +
