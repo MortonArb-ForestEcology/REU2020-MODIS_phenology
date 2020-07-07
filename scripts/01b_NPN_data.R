@@ -37,6 +37,7 @@ dat.npn <- npn_download_individual_phenometrics(species_ids=npn.quercus$species_
                                                  station_ids = 26202, years=2000:2020
                                                  , request_source="The Morton Arboretum")
 
+?npn_download_individual_phenometrics
 dat.npn[dat.npn==-9999] <- NA
 unique(dat.npn$phenophase_description)
 summary(dat.npn)
@@ -55,8 +56,9 @@ summary(oak.leaf)
 dim(oak.leaf)
 
 oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371']
-summary(oak.buburst[oak.budburst$species == 'gambelii'])
+View(oak.buburst[oak.budburst$species == 'gambelii'])
 
+#trying to get rid of multiple consecutive budburst series within the same year for the same tree.
 burst.id <- aggregate(oak.budburst, by = list(oak.budburst$individual_id), FUN = TMAX)
 
 
