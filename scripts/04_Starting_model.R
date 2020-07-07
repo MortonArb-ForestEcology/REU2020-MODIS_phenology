@@ -237,7 +237,7 @@ ggplot(data= dat.all) +
   scale_fill_manual(values=c("blue", "dodgerblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3')) +
   scale_x_continuous('THRESH (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (%)')
-#dev.off()
+dev.off()
 
 # save the outputs
 path.mod.out <- "../data_processed/mod.gdd5.MortonArb"

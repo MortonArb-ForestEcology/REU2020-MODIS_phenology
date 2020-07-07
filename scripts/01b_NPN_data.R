@@ -54,8 +54,19 @@ oak.leaf[oak.leaf==-9999] <- NA
 summary(oak.leaf)
 dim(oak.leaf)
 
+oak.buburst <- oak.leaf[oak.leaf$phenophase_id == '371']
+oak.leaves <- oak.leaf[oak.leaf$phenophase_id == '471']
+oak.fallen <- oak.leaf[oak.leaf$phenophase_id == '483']
 
+#alter object to see different raw NPN data for the phenophases of interest.
+ggplot(data = oak.budburst) +
+  geom_boxplot(mapping = aes(x = species, y = last_yes_doy)) +
+  geom_point(mapping = aes(x = species, y = last_yes_doy, color = as.character(last_yes_year))) +
+  scale_x_discrete(' Q. species') +
+  scale_y_continuous('Last Budburst (Yday)') +
+  ggtitle('Last Budburst Event for Quercus in 2017-2019 from NPN at The Morton Arboretum')
 
+  
 length(unique(oak.leaf$species)) # 12 unique species
 length(unique(oak.leaf$individual_id)) # 31 unique trees
 
