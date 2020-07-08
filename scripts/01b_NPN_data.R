@@ -56,7 +56,8 @@ summary(oak.leaf)
 dim(oak.leaf)
 
 oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371']
-View(oak.buburst[oak.budburst$species == 'gambelii'])
+#refer to https://docs.google.com/document/d/1hHlDuY8WzCpZHmai323gRfmsfiNX9BhK5QYN7l93XsQ/edit, step 3 
+summary(oak.budburst[oak.budburst$species =='gambelii'], oak.budburst[oak.budburst$first_yes_year == '2017' ])
 
 #trying to get rid of multiple consecutive budburst series within the same year for the same tree.
 burst.id <- aggregate(oak.budburst, by = list(oak.budburst$individual_id), FUN = TMAX)
