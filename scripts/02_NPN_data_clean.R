@@ -88,6 +88,11 @@ dat.budburst[dat.budburst$phenophase_id==371 & dat.budburst$individual_id==13286
 ########## --------------------- ################
 # leaves
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
+########## --------------------- ################
+
+
+
+
 
 # Falling Leaves
 summary(oak.leaf[oak.leaf$phenophase_id==471,])
