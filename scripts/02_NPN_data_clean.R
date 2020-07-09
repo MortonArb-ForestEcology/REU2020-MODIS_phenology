@@ -78,7 +78,7 @@ for(IND in unique(dat.budburst$individual_id)){
 summary(dat.budburst)
 
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
-dat.budburst[dat.budburst$phenophase_id==371 & dat.budburst$individual_id==132863,]
+dat.budburst[dat.budburst$individual_id==132863,]
 ########## --------------------- ################
 
 
@@ -99,7 +99,6 @@ oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>355 & !is.na(oak.l
 oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>355 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
 dim(oak.leaf[oak.leaf$phenophase_id==483,])
-#left with 7 observations. this removed almost 94% of the data.
 
 # So now we feel like we have relatively good "leaves" data, but we still have multiple observations per tree; options: earliest, latest, mean
 # We're making the data APPROPRIATE for the hypothesis rather than making it MEET the hypothesis
@@ -141,7 +140,7 @@ for(IND in unique(dat.leaves$individual_id)){
 }
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
-dat.leaves[dat.leaves$phenophase_id==483 & dat.leaves$individual_id==132863,]
+dat.leaves[dat.leaves$individual_id==132863,]
 
 
 
