@@ -11,8 +11,8 @@ oak.leaf$species_id <- as.factor(oak.leaf$species_id)
 oak.leaf$individual_id <- as.factor(oak.leaf$individual_id)
 oak.leaf$phenophase_id <- as.factor(oak.leaf$phenophase_id)
 oak.leaf$phenophase_description <- as.factor(oak.leaf$phenophase_description)
+oak.leaf$site_id <- site.id
 summary(oak.leaf)
-
 
 # ------------------------------------------
 # Deciding what data is "good" or "bad"
@@ -50,7 +50,7 @@ summary(dat.budburst)
 
 for(IND in unique(dat.budburst$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we dont' care about which year it is
-  dat.budburst[dat.budburst$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
+  dat.budburst[dat.budburst$individual_id==IND, c("site.id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
   
   for(YR in unique(dat.budburst$year[dat.budburst$individual_id==IND])){
     # creating a handy index for what row we're working with
@@ -76,16 +76,23 @@ for(IND in unique(dat.budburst$individual_id)){
   }
 }
 summary(dat.budburst)
-
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 dat.budburst[dat.budburst$individual_id==132863,]
-########## --------------------- ################
+
+hist(dat.budburst$first.mean)
+hist(dat.budburst$last.mean)
+
+
+
+ggplot(data = dat.budburst, mapping = aes(x = species == c('alba', 'rubra'), y = first.mean)) +
+  ggtitle('3 year averages for 4 Quercus species bud burst onset at The Morton Arboretum') +
+  geom_line()
+
+ 
 
 
 ########## --------------------- ################
-# ANDREW'S HOMEWORK: Repeat what we did for budburst with Leaves
-# 1. Criteria for bad values
-# 2. Aggregation (copy above loop, switch phenophase out)
+
 
 ########## --------------------- ################
 # Leaves '483'
@@ -95,8 +102,8 @@ hist(oak.leaf[oak.leaf$phenophase_id==483, 'last_yes_doy'])
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
 
 # Getting rid of leaf phenophase observations after Sept 22 (first day of Autumn ~265) because we just want new/live leaves per the usanpn "Leaves" description for Tree/Shrub.
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>355 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>355 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
+oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>365 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
+oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>365 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
 dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
@@ -113,7 +120,7 @@ summary(dat.leaves)
 
 for(IND in unique(dat.leaves$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
-  dat.leaves[dat.leaves$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
+  dat.leaves[dat.leaves$individual_id==IND, c("site.id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
   
   for(YR in unique(dat.leaves$year[dat.leaves$individual_id==IND])){
     # creating a handy index for what row we're working with
@@ -138,11 +145,16 @@ for(IND in unique(dat.leaves$individual_id)){
     }
   }
 }
+#checking to see if it got rid of the multiple entries per year for a single tree.
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
 dat.leaves[dat.leaves$individual_id==132863,]
+hist(dat.leaves$first.mean)
+hist(dat.leaves$last.mean)
 
-
+#removes the Inf/-Inf values that I do not remember how they got there -Andrew
+dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
+dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
 
 
 # Falling Leaves
