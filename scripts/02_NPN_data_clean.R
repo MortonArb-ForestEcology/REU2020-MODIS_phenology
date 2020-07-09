@@ -83,15 +83,11 @@ hist(dat.budburst$first.mean)
 hist(dat.budburst$last.mean)
 
 
-
-ggplot(data = dat.budburst, mapping = aes(x = species == c('alba', 'rubra'), y = first.mean)) +
-  ggtitle('3 year averages for 4 Quercus species bud burst onset at The Morton Arboretum') +
-  geom_line()
-
- 
-
-
-########## --------------------- ################
+ggplot(data = dat.budburst, mapping = aes(x = species, y = first.mean)) +
+  ggtitle('2017-2019 averages for Quercus species bud burst onset at The Morton Arboretum') +
+  geom_boxplot() +
+  scale_y_continuous('Average Bud Burst Onset (DOY)') +
+  scale_x_discrete('Quercus')
 
 
 ########## --------------------- ################
@@ -155,6 +151,18 @@ hist(dat.leaves$last.mean)
 #removes the Inf/-Inf values that I do not remember how they got there -Andrew
 dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
 dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
+
+ggplot(data = dat.leaves, mapping = aes(x = species, y = first.mean)) +
+  ggtitle('2017-2019 averages for full sized true leaves onset for Quercus at The Morton Arboretum') +
+  geom_boxplot() +
+  scale_y_continuous('Average leaves onset (DOY)') +
+  scale_x_discrete('Quercus')
+
+path.clean <- "../data_raw/NPN/cleaned/"
+if(!dir.exists(path.clean)) dir.create(path.clean)
+
+write.csv(dat.budburst, file.path(path.clean, paste0('Quercus_bud_', site.id, '.csv')), row.names=F)
+write.csv(dat.leaves, file.path(path.clean, paste0('Quercus_leaf_', site.id, '.csv')), row.names=F)
 
 
 # Falling Leaves
