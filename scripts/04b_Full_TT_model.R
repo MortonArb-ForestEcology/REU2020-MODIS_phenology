@@ -35,24 +35,41 @@ NPN_regression <- "
   model{
     
     for(k in 1:nObs){
-      mu[k] <- Species[sp[k]] + THRESH #Combination of species Threshold and individual effect
+      #mu[k] <- Species[sp[k]] 
+      mu[k] <- Site[loc[k]] 
       y[k] ~ dnorm(mu[k], sPrec)
     }
     
-    for(t in 1:nSp){
-    Species[t] <- ind[pln[t]] + c[t]
-    c[t] ~ dnorm(0, aPrec)
+    for(k in 1:nObs){
+      #mu[k] <- Species[sp[k]] 
+      munew[k] <- Site[loc[k]] 
+      Ynew[k] ~ dnorm(munew[k], sPrec)
+    }
+    
+    #for(t in 1:nSp){
+    #Species[t] <- ind[pln[t]] + c[t]
+    #c[t] ~ dnorm(0, aPrec)
+    #}
+    
+    for(t in 1:nLoc){
+    Site[t] <- Ex[t] 
+    Ex[t] ~ dnorm(0, aPrec)
     }
 
     
-    for(i in 1:nPln){
-        ind[i] <-  b[i]
-        b[i] ~ dnorm(0, bPrec)
-    }
-    aPrec ~ dgamma(0.1, 0.1)
-    bPrec ~ dgamma(0.1, 0.1)
+    #for(i in 1:nPln){
+    #    ind[i] <-  b[i]
+    #    b[i] ~ dnorm(0, bPrec)
+    #}
+    aPrec ~ dgamma(1, 0.01)
+    #bPrec ~ dgamma(1, 0.1)
     sPrec ~ dgamma(0.1, 0.1)
-    THRESH ~ dnorm(200, .001)
+    
+    d[1] <- max(Ynew[])
+    d[2] <- min(Ynew[])
+    d[3] <- max(Ynew[])-min(Ynew[])
+    d[4] <- mean(Ynew[])
+    d[5] <- sd(Ynew[])
 
   }
   "
@@ -60,8 +77,9 @@ NPN_regression <- "
 #Individual_id is plant number equivalnet
 #change this
 NPN.list <- list(y = dat.comb$GDD5.cum, nObs = length(dat.comb$GDD5.cum) ,
-                   pln = as.numeric(factor(dat.comb$PlantNumber)), nPln = length(unique(dat.comb$PlantNumber)),
-                   sp = as.numeric(factor(dat.comb$Species)), nSp = length(unique(dat.comb$Species)))
+                   loc = as.numeric(factor(dat.comb$Site)), nLoc = length(unique(dat.comb$Site)))
+                   #pln = as.numeric(factor(dat.comb$PlantNumber)), nPln = length(unique(dat.comb$PlantNumber)),
+                   #sp = as.numeric(factor(dat.comb$Species)), nSp = length(unique(dat.comb$Species)))
                    
 
 
@@ -84,8 +102,8 @@ burst.model   <- jags.model (file = textConnection(NPN_regression),
 
 #Converting the ooutput into a workable format
 burst.out   <- coda.samples (model = burst.model,
-                             variable.names = c("THRESH", "Species"," ind", "sPrec", "aPrec", "bPrec"),
-                             n.iter = 100000)
+                             variable.names = c("Site", "sPrec", "aPrec"),
+                             n.iter = 150000)
 
 DIC2 <- dic.samples(burst.model, 50000)
 
