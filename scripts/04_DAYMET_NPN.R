@@ -18,23 +18,23 @@ head(dat.leaves)
 unique(dat.budburst$individual_id)
 unique(dat.leaves$individual_id)
 
+budburst.list <- list(y = dat.budburst, n = length(dat.budburst$first.mean))
+
+dat.budburst$GDD5.cum <- NA
 #Need a way to pass over the NA values in dat.budburst$first.mean
-for(i in 1:nrow(dat.budburst)) {
+for(i in 1:nrow(dat.budburst)){
  
   bud.year <- dat.budburst[i, "year"]
   bud.yday <- dat.budburst[i, "first.mean"]
 
-  ifelse (i = NA, 1) {
-    1
-  }
-    else 1
+  if(dat.budburst[dat.budburst$first.mean == is.na,]) next
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
-  dat.budburst[i,"GDD5.cum"] <- df.met[df.met$year==bud.year & df.met$yday==bud.yday,"GDD5.cum"]
-  
+  dat.budburst[i,"GDD5.cum"] <-df.met[df.met$year==bud.year & df.met$yday==bud.yday,"GDD5.cum"]
 }
 
-View(dat.budburst)
+summary(dat.budburst)
+
 tail(dat.budburst)
 
 library(ggplot2)
