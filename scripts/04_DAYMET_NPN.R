@@ -1,5 +1,3 @@
-
-
 #get DAYMET data
 site.id <- 'MortonArb'
 df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_", site.id, ".csv")))
@@ -35,14 +33,28 @@ for(i in 1:nrow(dat.budburst)){
   dat.budburst[i,"GDD5.cum"] <-df.met[df.met$year==bud.year & df.met$yday==bud.yday,"GDD5.cum"]
 }
 
-tail(dat.budburst)
+summary(dat.budburst)
+library(ggplot2)
 
+path.png <- '../figures/'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
+#adjust the title as needed depending on the input. i.e. first.mean, first.max, first.min in the for loop to calculate GDD5.cum
+
+png(filename= file.path(path.png, paste0('Budburst_Onset_', site.id, '_NPN.png')))
+
+ggplot(data = dat.budburst, mapping = aes(x = species, y = GDD5.cum)) +
+  ggtitle('2017-2019 Maximum Thermal Time at Bud Burst Onset of 12 Quercus at The Morton Arboretum') +
+  geom_boxplot() +
+  scale_y_continuous('Average Onset (GDD5.cum)') +
+  scale_x_discrete('Quercus')
+
+dev.off()
 #------------------------------
 #Leaves Onset GDD5
 for(i in 1:nrow(dat.leaves)){
   
   bud.year <- dat.leaves[i, "year"]
-  bud.yday <- dat.leaves[i, "first.max"]
+  bud.yday <- dat.leaves[i, "first.mean"]
   
   if(is.na(dat.leaves$first.mean[i])) next
   # We need to get certain rows --> we need 2 pieces of info to match
@@ -50,40 +62,20 @@ for(i in 1:nrow(dat.leaves)){
   dat.leaves[i,"GDD5.cum"] <-df.met[df.met$year==bud.year & df.met$yday==bud.yday,"GDD5.cum"]
 }
 
-tail(dat.leaves)
-
-summary(dat.budburst)
-hist(dat.budburst$GDD5.cum, main = 'Minimum Thermal Time at Bud Burst Onset of 12 Oaks at The Morton Arboretum', xlab = 'Thermal Time (5C Growing Degree Days)',
-     ylab = 'Frequency', xlim = c(0,500), breaks = 6)
-
-#need to place filters on the DOYs in first.min and first.max
+#adjust the title as needed depending on the input. i.e. first.mean, first.max, first.min in the for loop to calculate GDD5.cum
 summary(dat.leaves)
-hist(dat.leaves$GDD5.cum, main = 'Maximum Thermal Time at Leaf Onset of 12 Oaks at The Morton Arboretum', xlab = 'Thermal Time (5C Growing Degree Days)',
-     ylab = 'Frequency', breaks = 6)
-library(ggplot2)
-
-path.png <- '../figures/'
-if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
-
-png(filename= file.path(path.png, paste0('Budburst_Onset_', site.id, '_NPN.png')))
-
-ggplot(data = dat.budburst, mapping = aes(x= GDD5.cum, y= first.mean)) + 
-  facet_wrap(dat.budburst$year) +
-  geom_point(mapping=aes(color=species)) +
-  ggtitle('Growing Degree Days for 12 Quercus species taken from NPN in 2017-2019 at The Morton Arboretum')+
-  scale_x_continuous('5C Growing Degree Days')+
-  scale_y_continuous('Bud Burst Onset (DOY)')
-dev.off()
 
 png(filename= file.path(path.png, paste0('Leaves_Onset_', site.id, '_NPN.png')))
 
-ggplot(data = dat.leaves, mapping = aes(x= GDD5.cum, y= first.mean)) + 
-  facet_wrap(dat.leaves$year) +
-  geom_point(mapping=aes(color=species)) +
-  ggtitle('Growing Degree Days for 12 Quercus species taken from NPN in 2017-2019 at The Morton Arboretum')+
-  scale_x_continuous('5C Growing Degree Days')+
-  scale_y_continuous('Leaves Onset (DOY)')
+ggplot(data = dat.leaves, mapping = aes(x = species, y = GDD5.cum)) +
+  ggtitle('2017-2019 Maximum Thermal Time at Leaf Out Onset of 12 Quercus at The Morton Arboretum') +
+  geom_boxplot() +
+  scale_y_continuous('Average Onset (GDD5.cum)') +
+  scale_x_discrete('Quercus')
+
 dev.off()
+#----------------------------
+
 dat.processed <- '../data_processed/'
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
 write.csv(dat.budburst, file.path(dat.processed, paste0('Quercus_bud', site.id, '_NPN_MET.csv')), row.names=F)

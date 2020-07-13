@@ -5,6 +5,7 @@ site.id <- 'MortonArb'
 
 path.npn <- "../data_raw/NPN/"
 
+
 oak.leaf <- read.csv(file.path(path.npn, paste0('Quercus_', site.id, '.csv')))
 oak.leaf$species <- as.factor(oak.leaf$species)
 oak.leaf$species_id <- as.factor(oak.leaf$species_id)
@@ -78,10 +79,6 @@ for(IND in unique(dat.budburst$individual_id)){
 summary(dat.budburst)
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 dat.budburst[dat.budburst$individual_id==132863,]
-
-hist(dat.budburst$first.mean)
-hist(dat.budburst$last.mean)
-
 
 ggplot(data = dat.budburst, mapping = aes(x = species, y = first.mean)) +
   ggtitle('2017-2019 averages for Quercus species bud burst onset at The Morton Arboretum') +
