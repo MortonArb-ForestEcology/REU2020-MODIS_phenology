@@ -42,7 +42,7 @@ tail(dat.budburst)
 for(i in 1:nrow(dat.leaves)){
   
   bud.year <- dat.leaves[i, "year"]
-  bud.yday <- dat.leaves[i, "first.mean"]
+  bud.yday <- dat.leaves[i, "first.max"]
   
   if(is.na(dat.leaves$first.mean[i])) next
   # We need to get certain rows --> we need 2 pieces of info to match
@@ -52,6 +52,14 @@ for(i in 1:nrow(dat.leaves)){
 
 tail(dat.leaves)
 
+summary(dat.budburst)
+hist(dat.budburst$GDD5.cum, main = 'Minimum Thermal Time at Bud Burst Onset of 12 Oaks at The Morton Arboretum', xlab = 'Thermal Time (5C Growing Degree Days)',
+     ylab = 'Frequency', xlim = c(0,500), breaks = 6)
+
+#need to place filters on the DOYs in first.min and first.max
+summary(dat.leaves)
+hist(dat.leaves$GDD5.cum, main = 'Maximum Thermal Time at Leaf Onset of 12 Oaks at The Morton Arboretum', xlab = 'Thermal Time (5C Growing Degree Days)',
+     ylab = 'Frequency', breaks = 6)
 library(ggplot2)
 
 path.png <- '../figures/'
