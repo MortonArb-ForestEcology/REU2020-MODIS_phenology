@@ -21,10 +21,10 @@ head(dat.MODIS)
 
 #-----------------------------
 #NPN Threshold Estimate
-oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_", site.id, "_NPN_MET.csv")))
+oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_bud", site.id, "_NPN_MET.csv")))
 head(oak.budburst)
 
-oak.leaves <- read.csv(file.path(dat.processed, paste0("Quercus_Leaves", site.id, "_NPN_MET.csv")))
+oak.leaves <- read.csv(file.path(dat.processed, paste0("Quercus_leaf", site.id, "_NPN_MET.csv")))
 head(oak.budburst)
 
 #---------------------------------------------------#
@@ -74,17 +74,23 @@ green.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum'], n = le
 
 midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum']))
 
-#choose here which species to model
-summary(oak.budburst$GDD5.cum[oak.budburst$species == 'gambelii'])
-summary(oak.budburst)
+#looking at the species available in the NPN data
+unique(oak.budburst$species)
 
-#add list for leaves here
+unique(oak.leaves$species)
 
-montana.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'GDD5.cum']))
-alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'GDD5.cum']))
-gambelii.list <- list(y = oak.budburst[oak.budburst$species == 'gambelii', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'gambelii', 'GDD5.cum']))
-rubra.list <- list(y = oak.budburst[oak.budburst$species == 'rubra', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'rubra', 'GDD5.cum']))
-View(gambelii.list)
+#bud burst lists
+bud.mont.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'GDD5.cum']))
+bud.alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'GDD5.cum']))
+bud.gamb.list <- list(y = oak.budburst[oak.budburst$species == 'gambelii', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'gambelii', 'GDD5.cum']))
+bud.rubr.list <- list(y = oak.budburst[oak.budburst$species == 'rubra', 'GDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'rubra', 'GDD5.cum']))
+
+#leaves list
+leaf.mont.list <- list(y = oak.leaves[oak.leaves$species == 'montana', 'GDD5.cum'], n = length(oak.leaves[oak.leaves$species== 'montana', 'GDD5.cum']))
+leaf.alba.list <- list(y = oak.leaves[oak.leaves$species == 'alba', 'GDD5.cum'], n = length(oak.leaves[oak.leaves$species== 'alba', 'GDD5.cum']))
+leaf.gamb.list <- list(y = oak.leaves[oak.leaves$species == 'gambelii', 'GDD5.cum'], n = length(oak.leaves[oak.leaves$species== 'gambelii', 'GDD5.cum']))
+leaf.rubr.list <- list(y = oak.leaves[oak.leaves$species == 'rubra', 'GDD5.cum'], n = length(oak.leaves[oak.leaves$species== 'rubra', 'GDD5.cum']))
+
 #running the model
 #good oaks = rubra 9, gambelii 13, shumardii 7, montana 10, alba 9, macrocarpa 7, velutina 10, imbricaria 11, 
 #bad oaks = palustris, lobata, phellos 3, ilicifolia 6
@@ -97,20 +103,20 @@ midgreen.mod <- jags.model (file = textConnection(univariate_regression),
                             data = midgreen.list,
                             inits = inits,
                             n.chains = 3)
-montana.mod <- jags.model (file = textConnection(univariate_regression),
-                       data = montana.list,
+bud.mont.mod <- jags.model (file = textConnection(univariate_regression),
+                       data = bud.mont.list,
                        inits = inits,
                        n.chains = 3)
-alba.mod <- jags.model (file = textConnection(univariate_regression),
-                           data = alba.list,
+bud.alba.mod <- jags.model (file = textConnection(univariate_regression),
+                           data = bud.alba.list,
                            inits = inits,
                            n.chains = 3)
-gambelii.mod <- jags.model (file = textConnection(univariate_regression),
-                        data = gambelii.list,
+bud.gamb.mod <- jags.model (file = textConnection(univariate_regression),
+                        data = bud.gamb.list,
                         inits = inits,
                         n.chains = 3)
-rubra.mod <- jags.model (file = textConnection(univariate_regression),
-                        data = rubra.list,
+bud.rubr.mod <- jags.model (file = textConnection(univariate_regression),
+                        data = bud.rubr.list,
                         inits = inits,
                         n.chains = 3)
 
@@ -122,16 +128,16 @@ green.out   <- coda.samples (model = green.mod,
 midgreen.out   <- coda.samples (model = midgreen.mod,
                              variable.names = c("THRESH", "Prec"),
                              n.iter = 5000)
-montana.out   <- coda.samples (model = montana.mod,
+bud.mont.out   <- coda.samples (model = bud.mont.mod,
                              variable.names = c("THRESH", "Prec"),
                              n.iter = 5000)
-alba.out   <- coda.samples (model = alba.mod,
+bud.alba.out   <- coda.samples (model = bud.alba.mod,
                             variable.names = c("THRESH", "Prec"),
                             n.iter = 5000)
-gambelii.out   <- coda.samples (model = gambelii.mod,
+bud.gamb.out   <- coda.samples (model = bud.gamb.mod,
                             variable.names = c("THRESH", "Prec"),
                             n.iter = 5000)
-rubra.out   <- coda.samples (model = rubra.mod,
+bud.rubr.out   <- coda.samples (model = bud.rubr.mod,
                             variable.names = c("THRESH", "Prec"),
                             n.iter = 5000)
 #Trace plot and distribution. For trace make sure they are very overlapped showing convergence
@@ -145,107 +151,107 @@ plot(midgreen.out)
 summary(midgreen.out)
 
 #For NPN.gdd
-plot(montana.out)
-summary(montana.out)
+plot(bud.mont.out)
+summary(bud.mont.out)
 
-plot(alba.out)
-summary(alba.out)
+plot(bud.alba.out)
+summary(bud.alba.out)
 
-plot(gambelii.out)
-summary(gambelii.out)
+plot(bud.gamb.out)
+summary(bud.gamb.out)
 
-plot(rubra.out)
-summary(rubra.out)
+plot(bud.rubr.out)
+summary(bud.rubr.out)
 
 
 #Checking that convergence happened
 #1 is ideal, below 1.05 is fine
 gelman.diag(green.out)
 gelman.diag(midgreen.out)
-gelman.diag(montana.out)
-gelman.diag(alba.out)
-gelman.diag(gambelii.out)
-gelman.diag(rubra.out)
+gelman.diag(bud.mont.out)
+gelman.diag(bud.alba.out)
+gelman.diag(bud.gamb.out)
+gelman.diag(bud.rubr.out)
 #--------------------
 
 #Removing burnin before convergence occurred -- this is the model "warmup"
 burnin = 1000                                ## determine convergence from GBR output
 green.burn <- window(green.out, start= burnin)  ## remove burn-in
 midgreen.burn <- window(midgreen.out, start= burnin)
-alba.burn <- window(alba.out, start= burnin)
-montana.burn <- window(montana.out, start= burnin)
-gambelii.burn <- window(gambelii.out, start= burnin)
-rubra.burn <- window(rubra.out, start= burnin)
+bud.alba.burn <- window(bud.alba.out, start= burnin)
+bud.mont.burn <- window(bud.mont.out, start= burnin)
+bud.gamb.burn <- window(bud.gamb.out, start= burnin)
+bud.rubr.burn <- window(bud.rubr.out, start= burnin)
 
 # save the part of the stats from when the model worked and converged
 stats.greenup <- as.data.frame(as.matrix(green.burn))
 summary(stats.greenup)
-dim(stats.greenup)
+
 
 stats.midgreenup <- as.data.frame(as.matrix(midgreen.burn))
 summary(stats.midgreenup)
-dim(stats.midgreenup)
 
-stats.alba <- as.data.frame(as.matrix(alba.burn))
-summary(stats.alba)
-dim(stats.alba)
 
-stats.montana <- as.data.frame(as.matrix(montana.burn))
-summary(stats.montana)
-dim(stats.montana)
+bud.stats.alba <- as.data.frame(as.matrix(bud.alba.burn))
+summary(bud.stats.alba)
 
-stats.gambelii <- as.data.frame(as.matrix(gambelii.burn))
-summary(stats.gambelii)
-dim(stats.gambelii)
 
-stats.rubra <- as.data.frame(as.matrix(rubra.burn))
-summary(stats.rubra)
-dim(stats.rubra)
+bud.stats.mont <- as.data.frame(as.matrix(bud.mont.burn))
+summary(bud.stats.mont)
+
+
+bud.stats.gamb <- as.data.frame(as.matrix(bud.gamb.burn))
+summary(bud.stats.gamb)
+
+
+bud.stats.rubr <- as.data.frame(as.matrix(bud.rubr.burn))
+summary(bud.stats.rubr)
+
 
 
 # What pieces of information do we need to distinguish?
 stats.greenup$name <- "greenup"
 stats.midgreenup$name <- "midgreenup"
-stats.alba$name <- "Q. alba"
-stats.rubra$name <- "Q. rubra"
-stats.montana$name <- "Q. montana"
-stats.gambelii$name <- "Q. gambelii"
+bud.stats.alba$name <- "Q. alba"
+bud.stats.rubr$name <- "Q. rubra"
+bud.stats.mont$name <- "Q. montana"
+bud.stats.gamb$name <- "Q. gambelii"
 
 stats.greenup$type <- "MODIS"
 stats.midgreenup$type <- "MODIS"
-stats.alba$type <- "NPN"
-stats.montana$type <- "NPN"
-stats.gambelii$type <- "NPN"
-stats.rubra$type <- "NPN"
+bud.stats.alba$type <- "NPN"
+bud.stats.mont$type <- "NPN"
+bud.stats.gamb$type <- "NPN"
+bud.stats.rubr$type <- "NPN"
 
 # Combine our different data frames into "long" format 
-dat.all <- rbind(stats.greenup, stats.midgreenup, stats.alba, stats.montana, stats.gambelii, stats.rubra)
-dat.all$name <- as.factor(dat.all$name)
-dat.all$type <- as.factor(dat.all$type)
-summary(dat.all)
+bud.dat.all <- rbind(stats.greenup, stats.midgreenup, bud.stats.alba, bud.stats.mont, bud.stats.gamb, bud.stats.rubr)
+bud.dat.all$name <- as.factor(bud.dat.all$name)
+bud.dat.all$type <- as.factor(bud.dat.all$type)
+summary(bud.dat.all)
 
 library(ggplot2)
 figures.dat <- '../figures'
 if(!dir.exists(figures.dat)) dir.create(figures.dat)
 png(width= 750, filename= file.path(figures.dat, 'THRESH_Oaks_MortonArb.png'))
 
-ggplot(data= dat.all) +
+ggplot(data= bud.dat.all) +
   # facet_wrap(~type) + # breaks things into separate panels
-  ggtitle('Comparison of Growing Degree Day Thresholds of 4 Quercus species at The Morton Arboretum') +
+  ggtitle('Thermal Time Thresholds at Average Bud Burst Onset of 4 Quercus at The Morton Arboretum') +
   geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
   scale_color_manual(values=c("darkblue", "lightblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3')) +
   scale_fill_manual(values=c("blue", "dodgerblue", "olivedrab", "olivedrab1", 'olivedrab2','olivedrab3')) +
   scale_x_continuous('THRESH (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (%)')
-dev.off()
+#dev.off()
 
 # save the outputs
 path.mod.out <- "../data_processed/mod.gdd5.MortonArb"
 if(!dir.exists(path.mod.out)) dir.create(path.mod.out)
 write.csv(stats.greenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_Greenup.csv"), row.names=F)
 write.csv(stats.midgreenup, file.path(path.mod.out, "THRESH_GDD5_MODIS_MidGreenup.csv"), row.names=F)
-write.csv(stats.alba, file.path(path.mod.out, "THRESH_alba.csv"), row.names=F) 
-write.csv(stats.montana, file.path(path.mod.out, "THRESH_montana.csv"), row.names=F) 
-write.csv(stats.rubra, file.path(path.mod.out, "THRESH_rubra.csv"), row.names=F) 
-write.csv(stats.gambelii, file.path(path.mod.out, "THRESH_gambelii.csv"), row.names=F) 
+write.csv(bud.stats.alba, file.path(path.mod.out, "THRESH_bud_alba.csv"), row.names=F) 
+write.csv(bud.stats.mont, file.path(path.mod.out, "THRESH_bud_montana.csv"), row.names=F) 
+write.csv(bud.stats.rubr, file.path(path.mod.out, "THRESH_bud_rubra.csv"), row.names=F) 
+write.csv(bud.stats.gamb, file.path(path.mod.out, "THRESH_bud_gambelii.csv"), row.names=F) 
 
