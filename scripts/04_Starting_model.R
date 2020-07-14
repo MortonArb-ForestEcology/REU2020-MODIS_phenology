@@ -23,6 +23,13 @@ head(dat.MODIS)
 #NPN Threshold Estimate
 oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_bud", site.id, "_NPN_MET.csv")))
 head(oak.budburst)
+summary(oak.budburst)
+oak.budburst$species <- as.factor(oak.budburst$species)
+
+oak.budburst$species <- as.factor(oak.budburst$species)
+summary(oak.budburst[!is.na(oak.budburst$first.mean), 'species'])
+
+
 
 oak.leaves <- read.csv(file.path(dat.processed, paste0("Quercus_leaf", site.id, "_NPN_MET.csv")))
 head(oak.budburst)
