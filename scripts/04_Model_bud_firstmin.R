@@ -343,7 +343,7 @@ ggplot(data= bud.first.min) +
 dev.off()
 
 # save the outputs
-path.mod.firstmin <- "../data_processed/mod.firstmin.MortonArb"
+path.mod.bud.firstmin <- "../data_processed/mod.bud.firstmin.MortonArb"
 if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
 write.csv(stats.greenup, file.path(path.mod.firstmin, "THRESH_MODIS_Greenup.csv"), row.names=F)
 write.csv(stats.midgreenup, file.path(path.mod.firstmin, "THRESH_MODIS_MidGreenup.csv"), row.names=F)
