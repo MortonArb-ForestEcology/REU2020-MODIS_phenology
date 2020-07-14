@@ -28,7 +28,7 @@ oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_bud", site.id,
 head(oak.budburst)
 summary(oak.budburst)
 oak.budburst$species <- as.factor(oak.budburst$species)
-summary(oak.budburst[!is.na(oak.budburst$first.mean), 'species'])
+summary(oak.budburst[!is.na(oak.budburst$first.min), 'species'])
 #not using phellos and lobata, too few observaitons
 
 #---------------------------------------------------#
@@ -80,107 +80,107 @@ midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], 
 
 unique(oak.budburst$species) #choosing to exclude phellos and lobata
 
-#bud burst lists for dat.budburst$MeanGDD5.cum
-bud.ilic.list <- list(y = oak.budburst[oak.budburst$species == 'ilicifolia', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'ilicifolia', 'MeanGDD5.cum']))
-bud.imbr.list <- list(y = oak.budburst[oak.budburst$species == 'imbricaria', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'imbricaria', 'MeanGDD5.cum']))
-bud.macr.list <- list(y = oak.budburst[oak.budburst$species == 'macrocarpa', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'macrocarpa', 'MeanGDD5.cum']))
-bud.palu.list <- list(y = oak.budburst[oak.budburst$species == 'palustris', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'palustris', 'MeanGDD5.cum']))
-bud.shum.list <- list(y = oak.budburst[oak.budburst$species == 'shumardii', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'shumardii', 'MeanGDD5.cum']))
-bud.velu.list <- list(y = oak.budburst[oak.budburst$species == 'velutina', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'velutina', 'MeanGDD5.cum']))
-bud.gamb.list <- list(y = oak.budburst[oak.budburst$species == 'gambelii', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'gambelii', 'MeanGDD5.cum']))
-bud.mont.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'MeanGDD5.cum']))
-bud.rubr.list <- list(y = oak.budburst[oak.budburst$species == 'rubra', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'rubra', 'MeanGDD5.cum']))
-bud.alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'MeanGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'MeanGDD5.cum']))
+#bud burst lists for dat.budburst$MinGDD5.cum
+minbud.ilic.list <- list(y = oak.budburst[oak.budburst$species == 'ilicifolia', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'ilicifolia', 'MinGDD5.cum']))
+minbud.imbr.list <- list(y = oak.budburst[oak.budburst$species == 'imbricaria', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'imbricaria', 'MinGDD5.cum']))
+minbud.macr.list <- list(y = oak.budburst[oak.budburst$species == 'macrocarpa', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'macrocarpa', 'MinGDD5.cum']))
+minbud.palu.list <- list(y = oak.budburst[oak.budburst$species == 'palustris', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'palustris', 'MinGDD5.cum']))
+minbud.shum.list <- list(y = oak.budburst[oak.budburst$species == 'shumardii', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'shumardii', 'MinGDD5.cum']))
+minbud.velu.list <- list(y = oak.budburst[oak.budburst$species == 'velutina', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'velutina', 'MinGDD5.cum']))
+minbud.gamb.list <- list(y = oak.budburst[oak.budburst$species == 'gambelii', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'gambelii', 'MinGDD5.cum']))
+minbud.mont.list <- list(y = oak.budburst[oak.budburst$species == 'montana', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'montana', 'MinGDD5.cum']))
+minbud.rubr.list <- list(y = oak.budburst[oak.budburst$species == 'rubra', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'rubra', 'MinGDD5.cum']))
+minbud.alba.list <- list(y = oak.budburst[oak.budburst$species == 'alba', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'alba', 'MinGDD5.cum']))
 
 #running the model
 
 green.mod   <- jags.model (file = textConnection(univariate_regression),
-                             data = green.list,
-                             inits = inits,
-                             n.chains = 3)
+                           data = green.list,
+                           inits = inits,
+                           n.chains = 3)
 midgreen.mod <- jags.model (file = textConnection(univariate_regression),
                             data = midgreen.list,
                             inits = inits,
                             n.chains = 3)
 bud.mont.mod <- jags.model (file = textConnection(univariate_regression),
-                       data = bud.mont.list,
-                       inits = inits,
-                       n.chains = 3)
+                            data = minbud.mont.list,
+                            inits = inits,
+                            n.chains = 3)
 bud.alba.mod <- jags.model (file = textConnection(univariate_regression),
-                           data = bud.alba.list,
-                           inits = inits,
-                           n.chains = 3)
+                            data = minbud.alba.list,
+                            inits = inits,
+                            n.chains = 3)
 bud.gamb.mod <- jags.model (file = textConnection(univariate_regression),
-                        data = bud.gamb.list,
-                        inits = inits,
-                        n.chains = 3)
+                            data = minbud.gamb.list,
+                            inits = inits,
+                            n.chains = 3)
 bud.rubr.mod <- jags.model (file = textConnection(univariate_regression),
-                        data = bud.rubr.list,
-                        inits = inits,
-                        n.chains = 3)
+                            data = minbud.rubr.list,
+                            inits = inits,
+                            n.chains = 3)
 bud.ilic.mod <- jags.model (file = textConnection(univariate_regression),
-                            data = bud.ilic.list,
+                            data = minbud.ilic.list,
                             inits = inits,
                             n.chains = 3)
 bud.imbr.mod <- jags.model (file = textConnection(univariate_regression),
-                            data = bud.imbr.list,
+                            data = minbud.imbr.list,
                             inits = inits,
                             n.chains = 3)
 bud.macr.mod <- jags.model (file = textConnection(univariate_regression),
-                            data = bud.macr.list,
+                            data = minbud.macr.list,
                             inits = inits,
                             n.chains = 3)
 bud.palu.mod <- jags.model (file = textConnection(univariate_regression),
-                            data = bud.palu.list,
+                            data = minbud.palu.list,
                             inits = inits,
                             n.chains = 3)
 bud.shum.mod <- jags.model (file = textConnection(univariate_regression),
-                            data = bud.shum.list,
+                            data = minbud.shum.list,
                             inits = inits,
                             n.chains = 3)
 bud.velu.mod <- jags.model (file = textConnection(univariate_regression),
-                            data = bud.velu.list,
+                            data = minbud.velu.list,
                             inits = inits,
                             n.chains = 3)
 
 #Converting the output into a workable format
 #DO THINGS HERE SOMETIMES
 green.out <- coda.samples (model = green.mod,
-                            variable.names = c("THRESH", "Prec"),
-                             n.iter = 5000)
+                           variable.names = c("THRESH", "Prec"),
+                           n.iter = 5000)
 midgreen.out <- coda.samples (model = midgreen.mod,
-                            variable.names = c("THRESH", "Prec"),
-                             n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.mont.out <- coda.samples (model = bud.mont.mod,
-                            variable.names = c("THRESH", "Prec"),
-                             n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                            variable.names = c("THRESH", "Prec"),
-                            n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.gamb.out <- coda.samples (model = bud.gamb.mod,
-                            variable.names = c("THRESH", "Prec"),
-                            n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.rubr.out <- coda.samples (model = bud.rubr.mod,
-                            variable.names = c("THRESH", "Prec"),
-                            n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.ilic.out <- coda.samples (model = bud.ilic.mod,
-                            variable.names = c("THRESH", "Prec"),
-                                n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.imbr.out <- coda.samples (model = bud.imbr.mod,
-                            variable.names = c("THRESH", "Prec"),
-                                n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.macr.out <- coda.samples (model = bud.macr.mod,
-                            variable.names = c("THRESH", "Prec"),
-                                n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.palu.out <- coda.samples (model = bud.palu.mod,
-                            variable.names = c("THRESH", "Prec"),
-                                n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.shum.out <- coda.samples (model = bud.shum.mod,
-                            variable.names = c("THRESH", "Prec"),
-                                n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 bud.velu.out <- coda.samples (model = bud.velu.mod,
-                            variable.names = c("THRESH", "Prec"),
-                                n.iter = 5000)
+                              variable.names = c("THRESH", "Prec"),
+                              n.iter = 5000)
 
 #Trace plot and distribution. For trace make sure they are very overlapped showing convergence
 #---------------------
@@ -320,41 +320,41 @@ bud.stats.shum$type <- "NPN"
 bud.stats.velu$type <- "NPN"
 
 # Combine our different data frames into "long" format 
-bud.first.mean <- rbind(stats.greenup, stats.midgreenup, bud.stats.alba, bud.stats.mont, bud.stats.gamb, bud.stats.rubr, bud.stats.ilic, bud.stats.imbr
-                     ,bud.stats.macr, bud.stats.palu, bud.stats.shum, bud.stats.velu)
-bud.first.mean$name <- as.factor(bud.first.mean$name)
-bud.first.mean$type <- as.factor(bud.first.mean$type)
-summary(bud.first.mean)
+bud.first.min <- rbind(stats.greenup, stats.midgreenup, bud.stats.alba, bud.stats.mont, bud.stats.gamb, bud.stats.rubr, bud.stats.ilic, bud.stats.imbr
+                        ,bud.stats.macr, bud.stats.palu, bud.stats.shum, bud.stats.velu)
+bud.first.min$name <- as.factor(bud.first.min$name)
+bud.first.min$type <- as.factor(bud.first.min$type)
+summary(bud.first.min)
 
 library(ggplot2)
 figures.dat <- '../figures'
 if(!dir.exists(figures.dat)) dir.create(figures.dat)
-png(width= 750, filename= file.path(figures.dat, 'THRESH_bud_firstmean_MortonArb.png'))
+png(width= 750, filename= file.path(figures.dat, 'THRESH_bud_firstmin_MortonArb.png'))
 
-ggplot(data= bud.first.mean) +
-  ggtitle('Thermal Time Thresholds at First Mean Bud Burst Onset of Quercus at The Morton Arboretum') +
+ggplot(data= bud.first.min) +
+  ggtitle('Thermal Time Thresholds at First Minimum Bud Burst Onset of Quercus at The Morton Arboretum') +
   geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
   scale_color_manual(values=c("darkblue", "lightblue", "mediumspringgreen", "olivedrab2", 'goldenrod1','darkolivegreen4', 'goldenrod3', 'aquamarine3'
                               , 'olivedrab4', 'chartreuse3', 'forestgreen', 'lightgreen')) +
   scale_fill_manual(values=c("darkblue", "lightblue", "mediumspringgreen", "olivedrab2", 'goldenrod1','darkolivegreen4', 'goldenrod3', 'aquamarine3'
                              , 'olivedrab4', 'chartreuse3', 'forestgreen', 'lightgreen'))  +
-  scale_x_continuous('Thermal Time Threshold Mean (5C Growing Degree Days)') +
+  scale_x_continuous('Thermal Time Threshold Minimum (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (%)')
 dev.off()
 
 # save the outputs
-path.mod.firstmean <- "../data_processed/mod.firstmean.MortonArb"
-if(!dir.exists(path.mod.firstmean)) dir.create(path.mod.firstmean)
-write.csv(stats.greenup, file.path(path.mod.firstmean, "THRESH_MODIS_Greenup.csv"), row.names=F)
-write.csv(stats.midgreenup, file.path(path.mod.firstmean, "THRESH_MODIS_MidGreenup.csv"), row.names=F)
-write.csv(bud.stats.alba, file.path(path.mod.firstmean, "THRESH_bud_firstmean_alba.csv"), row.names=F) 
-write.csv(bud.stats.mont, file.path(path.mod.firstmean, "THRESH_bud_firstmean_montana.csv"), row.names=F) 
-write.csv(bud.stats.gamb, file.path(path.mod.firstmean, "THRESH_bud_firstmean_gambelii.csv"), row.names=F) 
-write.csv(bud.stats.rubr, file.path(path.mod.firstmean, "THRESH_bud_firstmean_rubra.csv"), row.names=F) 
-write.csv(bud.stats.ilic, file.path(path.mod.firstmean, "THRESH_bud_firstmean_ilicifolia.csv"), row.names=F) 
-write.csv(bud.stats.imbr, file.path(path.mod.firstmean, "THRESH_bud_firstmean_imbricaria.csv"), row.names=F) 
-write.csv(bud.stats.macr, file.path(path.mod.firstmean, "THRESH_bud_firstmean_macrocarpa.csv"), row.names=F) 
-write.csv(bud.stats.palu, file.path(path.mod.firstmean, "THRESH_bud_firstmean_palustris.csv"), row.names=F) 
-write.csv(bud.stats.shum, file.path(path.mod.firstmean, "THRESH_bud_firstmean_shumardii.csv"), row.names=F) 
-write.csv(bud.stats.velu, file.path(path.mod.firstmean, "THRESH_bud_firstmean_velutina.csv"), row.names=F) 
+path.mod.firstmin <- "../data_processed/mod.firstmin.MortonArb"
+if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
+write.csv(stats.greenup, file.path(path.mod.firstmin, "THRESH_MODIS_Greenup.csv"), row.names=F)
+write.csv(stats.midgreenup, file.path(path.mod.firstmin, "THRESH_MODIS_MidGreenup.csv"), row.names=F)
+write.csv(bud.stats.alba, file.path(path.mod.firstmin, "THRESH_bud_firstmin_alba.csv"), row.names=F) 
+write.csv(bud.stats.mont, file.path(path.mod.firstmin, "THRESH_bud_firstmin_montana.csv"), row.names=F) 
+write.csv(bud.stats.gamb, file.path(path.mod.firstmin, "THRESH_bud_firstmin_gambelii.csv"), row.names=F) 
+write.csv(bud.stats.rubr, file.path(path.mod.firstmin, "THRESH_bud_firstmin_rubra.csv"), row.names=F) 
+write.csv(bud.stats.ilic, file.path(path.mod.firstmin, "THRESH_bud_firstmin_ilicifolia.csv"), row.names=F) 
+write.csv(bud.stats.imbr, file.path(path.mod.firstmin, "THRESH_bud_firstmin_imbricaria.csv"), row.names=F) 
+write.csv(bud.stats.macr, file.path(path.mod.firstmin, "THRESH_bud_firstmin_macrocarpa.csv"), row.names=F) 
+write.csv(bud.stats.palu, file.path(path.mod.firstmin, "THRESH_bud_firstmin_palustris.csv"), row.names=F) 
+write.csv(bud.stats.shum, file.path(path.mod.firstmin, "THRESH_bud_firstmin_shumardii.csv"), row.names=F) 
+write.csv(bud.stats.velu, file.path(path.mod.firstmin, "THRESH_bud_firstmin_velutina.csv"), row.names=F) 
 
