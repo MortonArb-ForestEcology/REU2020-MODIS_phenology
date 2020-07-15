@@ -1,22 +1,20 @@
 #Here the raw data from the DAYMET and MODIS will be combined
-
+#This will give the MODIS data a GDD5 and GDD5.cum for the site given
 library(MODISTools)
 library(ggplot2)
 library(daymetr)
 
-#could be changed to be individual species not site
-path.MODIS <- '../data_raw/MODIS'
 site.id <- 'MortonArb'
 
-dat.MODIS <- read.csv(file.path('../data_raw/MODIS', paste0("MODIS_Greenup_", site.id, ".csv")))
+path.MODIS <- '../data_raw/MODIS'
+if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
+dat.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_Greenup_Raw_", site.id, ".csv")))
 summary(dat.MODIS)
 
-df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_", site.id, ".csv")))
+path.DAYMET <- '../data_raw/DAYMET'
+if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
+df.met <- read.csv(file.path(path.DAYMET, paste0("DAYMET_Data_Raw_", site.id, ".csv")))
 summary(df.met)
-
-# What we need to do: get GDD extracted from df.met for dates in dat.MODIS
-# Dates are defined by unique year and yday combinations
-# In dat.MODIS each row is a unique observation; need a GDD.cum for each row
 
 for(i in 1:nrow(dat.MODIS)){
   # dat.MODIS[i,]
@@ -30,19 +28,16 @@ for(i in 1:nrow(dat.MODIS)){
 }
 
 head(dat.MODIS)
-
 unique(dat.MODIS$BAND)
 
-path.png <- '../figures/MODIS_Met'
-if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
-
-png(filename= file.path(path.png, paste0('MODIS_Met_Plot_', site.id, '.png')))
+path.figures <- '../REU2020-MODIS_phenology/figures'
+if(!dir.exists(path.figures)) dir.create(path.figures, recursive=T)
+png(filename= file.path(path.figures, paste0('MODIS_Met_Plot_', site.id, '.png')))
 ggplot(data = dat.MODIS, mapping = aes(x = BAND, y = GDD5.cum)) +
+  ggtitle('Thermal Time at 15% Greenup and 50% MidGreenuup at The Morton Arboretum from 2001-2019') +
   geom_boxplot()
 dev.off()
 
-summary(dat.MODIS)
-
-dat.out <- file.path("../data_processed")
-if(!dir.exists(dat.out)) dir.create(dat.out)
-write.csv(dat.MODIS, file.path(dat.out, paste0("MODIS_MET_", site.id, ".csv")), row.names=F)
+dat.processed <- file.path("../data_processed/MODIS")
+if(!dir.exists(dat.processed)) dir.create(dat.processed)
+write.csv(dat.MODIS, file.path(dat.processed, paste0("MODIS_MET_GDD5", site.id, ".csv")), row.names=F)
