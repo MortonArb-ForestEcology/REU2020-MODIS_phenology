@@ -11,20 +11,20 @@
 #-----------------------------------------------------------------------------------------------------------------------------------#
 #!!!! Specifically for "Breaking Leaf Buds" Phenophase and MODIS!!!!
 #-----------------------------------------------------------------------------------------------------------------------------------#
-
-#THIS IS WHERE YOU DO THINGS
-dat.processed <- "../data_processed/"
 site.id <- "MortonArb"
-
-#Here is the different data to compare. All are constrained to GDD5.cum
-#------------------------------
+#THIS IS WHERE YOU DO THINGS
 #MODIS Threshold Estimates for 15% greenup <- (greenup) and 50% greenup <- (midgreenup)
-dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_", site.id, ".csv")))
+dat.processed <- file.path("../data_processed/MODIS")
+if(!dir.exists(dat.processed)) dir.create(dat.processed)
+dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_GDD5", site.id, ".csv")))
 head(dat.MODIS)
 
 #-----------------------------
 #NPN Threshold Estimate
-oak.budburst <- read.csv(file.path(dat.processed, paste0("Quercus_bud", site.id, "_NPN_MET.csv")))
+path.clean <- "../data_processed/NPN/cleaned"
+if(!dir.exists(path.clean)) dir.create(path.clean)
+
+oak.budburst <- read.csv(file.path(path.clean, paste0("Quercus_bud_GDD5", site.id, "_NPN.csv")))
 head(oak.budburst)
 summary(oak.budburst)
 oak.budburst$species <- as.factor(oak.budburst$species)

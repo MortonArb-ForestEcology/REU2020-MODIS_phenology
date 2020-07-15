@@ -1,12 +1,12 @@
-# Cleaning the NPN Data -- what we need is 1 observation per tree per year.  We don't have that quite yet.
+# Cleaning the NPN Data -- what we need is 1 observation per tree per year.
 
 library(ggplot2)
 site.id <- 'MortonArb'
 
-path.npn <- "../data_raw/NPN/"
+path.NPN <- "../data_raw/NPN/uncleaned"
 
 
-oak.leaf <- read.csv(file.path(path.npn, paste0('Quercus_', site.id, '.csv')))
+oak.leaf <- read.csv(file.path(path.NPN, paste0('NPN_Quercus_Raw_', site.id, '.csv')))
 oak.leaf$species <- as.factor(oak.leaf$species)
 oak.leaf$species_id <- as.factor(oak.leaf$species_id)
 oak.leaf$individual_id <- as.factor(oak.leaf$individual_id)
@@ -20,7 +20,7 @@ summary(oak.leaf)
 # ------------------------------------------
 # Using a 10-day thresholds since prior/next no as an indicator of questionable data  or if there is no value for that (first obs of the year)
 # What this code says data[ROWS, COLUMNS]
-# if the days since last no is greather than 10 OR (| mean OR) there is no "no" observation before a yes
+# if the days since last no is greater than 10 OR (| mean OR) there is no "no" observation before a yes
 oak.leaf[oak.leaf$numdays_since_prior_no>10 | is.na(oak.leaf$numdays_since_prior_no), c("first_yes_doy", "first_yes_julian_date")] <- NA
 
 oak.leaf[oak.leaf$numdays_until_next_no>10 | is.na(oak.leaf$numdays_until_next_no), c("last_yes_doy", "last_yes_julian_date")] <- NA
