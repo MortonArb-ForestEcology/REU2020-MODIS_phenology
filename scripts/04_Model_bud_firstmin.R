@@ -12,24 +12,27 @@
 #!!!! Specifically for "Breaking Leaf Buds" Phenophase and MODIS!!!!
 #-----------------------------------------------------------------------------------------------------------------------------------#
 site.id <- "MortonArb"
-#THIS IS WHERE YOU DO THINGS
+
+#Here is the different data to compare. All are constrained to GDD5.cum
+#------------------------------
 #MODIS Threshold Estimates for 15% greenup <- (greenup) and 50% greenup <- (midgreenup)
 dat.processed <- file.path("../data_processed/MODIS")
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
-dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_GDD5", site.id, ".csv")))
+dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_GDD5_", site.id, ".csv")))
 head(dat.MODIS)
 
 #-----------------------------
 #NPN Threshold Estimate
-path.clean <- "../data_processed/NPN/cleaned"
+path.clean <- "../data_processed/NPN"
 if(!dir.exists(path.clean)) dir.create(path.clean)
 
-oak.budburst <- read.csv(file.path(path.clean, paste0("Quercus_bud_GDD5", site.id, "_NPN.csv")))
+oak.budburst <- read.csv(file.path(path.clean, paste0("Quercus_bud_GDD5_", site.id, "_NPN.csv")))
 head(oak.budburst)
 summary(oak.budburst)
 oak.budburst$species <- as.factor(oak.budburst$species)
 summary(oak.budburst[!is.na(oak.budburst$first.min), 'species'])
-#not using phellos and lobata, too few observaitons
+#not using phellos and lobata, too few observations
+
 
 #---------------------------------------------------#
 #This section sets up the model itself
@@ -38,7 +41,6 @@ summary(oak.budburst[!is.na(oak.budburst$first.min), 'species'])
 library(rjags)
 library(coda)
 #YOU WILL NEED JAGS INSTALLED rjags is a package for interfacing but you need the program itself http://mcmc-jags.sourceforge.net/
-
 
 #Setting up the Jags model itself
 univariate_regression <- "
@@ -67,7 +69,6 @@ for(i in 1:nchain){
   inits[[i]] <- list(THRESH = rnorm(1,0,5), Prec = runif(1,1/200,1/20))
 }
 
-
 #---------------------------------------------------------#
 #This section actually runs the model and then provides ways to check the output and clean it
 #---------------------------------------------------------#
@@ -77,8 +78,6 @@ for(i in 1:nchain){
 green.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum']))
 
 midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum']))
-
-unique(oak.budburst$species) #choosing to exclude phellos and lobata
 
 #bud burst lists for dat.budburst$MinGDD5.cum
 minbud.ilic.list <- list(y = oak.budburst[oak.budburst$species == 'ilicifolia', 'MinGDD5.cum'], n = length(oak.budburst[oak.budburst$species== 'ilicifolia', 'MinGDD5.cum']))
@@ -144,7 +143,7 @@ bud.velu.mod <- jags.model (file = textConnection(univariate_regression),
                             n.chains = 3)
 
 #Converting the output into a workable format
-#DO THINGS HERE SOMETIMES
+
 green.out <- coda.samples (model = green.mod,
                            variable.names = c("THRESH", "Prec"),
                            n.iter = 5000)
@@ -327,9 +326,9 @@ bud.first.min$type <- as.factor(bud.first.min$type)
 summary(bud.first.min)
 
 library(ggplot2)
-figures.dat <- '../figures'
-if(!dir.exists(figures.dat)) dir.create(figures.dat)
-png(width= 750, filename= file.path(figures.dat, 'THRESH_bud_firstmin_MortonArb.png'))
+path.figures <- "../figures"
+if(!dir.exists(path.figures)) dir.create(path.figures)
+png(width= 750, filename= file.path(path.figures, paste0('Thresh_bud_firstmin_MortonArb.png')))
 
 ggplot(data= bud.first.min) +
   ggtitle('Thermal Time Thresholds at First Minimum Bud Burst Onset of Quercus at The Morton Arboretum') +
@@ -343,7 +342,7 @@ ggplot(data= bud.first.min) +
 dev.off()
 
 # save the outputs
-path.mod.bud.firstmin <- "../data_processed/mod.bud.firstmin.MortonArb"
+path.mod.firstmin <- "../data_processed/bud.firstmin.MortonArb"
 if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
 write.csv(stats.greenup, file.path(path.mod.firstmin, "THRESH_MODIS_Greenup.csv"), row.names=F)
 write.csv(stats.midgreenup, file.path(path.mod.firstmin, "THRESH_MODIS_MidGreenup.csv"), row.names=F)
@@ -357,4 +356,3 @@ write.csv(bud.stats.macr, file.path(path.mod.firstmin, "THRESH_bud_firstmin_macr
 write.csv(bud.stats.palu, file.path(path.mod.firstmin, "THRESH_bud_firstmin_palustris.csv"), row.names=F) 
 write.csv(bud.stats.shum, file.path(path.mod.firstmin, "THRESH_bud_firstmin_shumardii.csv"), row.names=F) 
 write.csv(bud.stats.velu, file.path(path.mod.firstmin, "THRESH_bud_firstmin_velutina.csv"), row.names=F) 
-

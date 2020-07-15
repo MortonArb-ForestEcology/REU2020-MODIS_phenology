@@ -19,21 +19,16 @@ summary(oak.leaf)
 # Deciding what data is "good" or "bad"
 # ------------------------------------------
 # Using a 10-day thresholds since prior/next no as an indicator of questionable data  or if there is no value for that (first obs of the year)
-# What this code says data[ROWS, COLUMNS]
 # if the days since last no is greater than 10 OR (| mean OR) there is no "no" observation before a yes
 oak.leaf[oak.leaf$numdays_since_prior_no>10 | is.na(oak.leaf$numdays_since_prior_no), c("first_yes_doy", "first_yes_julian_date")] <- NA
 
 oak.leaf[oak.leaf$numdays_until_next_no>10 | is.na(oak.leaf$numdays_until_next_no), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf)
 
-# looking at some of the weird events
 # BLB = 371; FL= 471; Leaves = 483
-
-
 ########## --------------------- ################
 # Bud burst
 ########## --------------------- ################
-hist(oak.leaf[oak.leaf$phenophase_id==371, "last_yes_doy"])
 
 # Getting rid of bud burst after July 1 (~182) because we just want SPRING budburst
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$first_yes_doy>182 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
@@ -42,7 +37,6 @@ summary(oak.leaf[oak.leaf$phenophase_id==371,])
 10/95
 
 # So now we feel like we have relatively good budburst data, but we still have multiple observaitons per tree; options: earliest, latest, mean
-# We're making the data APPROPRIATE for the hypothesis rather than making it MEET the hypothesis
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$individual_id==132863,]
 # Aggregateing using a formula; in R, y=mx+b is y ~ m*x + b 
 dat.budburst <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.leaf$phenophase_id==371]), each=length(unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))),
@@ -50,7 +44,7 @@ dat.budburst <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.l
 summary(dat.budburst)                           
 
 for(IND in unique(dat.budburst$individual_id)){
-  # adding some individual metadata -- this only needs to be done for each tree; we dont' care about which year it is
+  # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
   dat.budburst[dat.budburst$individual_id==IND, c("site.id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
   
   for(YR in unique(dat.budburst$year[dat.budburst$individual_id==IND])){
@@ -78,14 +72,9 @@ for(IND in unique(dat.budburst$individual_id)){
 }
 summary(dat.budburst)
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
-dat.budburst[dat.budburst$individual_id==132863,]
 
-ggplot(data = dat.budburst, mapping = aes(x = species, y = first.mean)) +
-  ggtitle('2017-2019 averages for Quercus species bud burst onset at The Morton Arboretum') +
-  geom_boxplot() +
-  scale_y_continuous('Average Bud Burst Onset (DOY)') +
-  scale_x_discrete('Quercus')
-
+hist(dat.budburst$first.mean)
+hist(dat.budburst$first.min)
 
 ########## --------------------- ################
 # Leaves '483'
@@ -103,7 +92,6 @@ dim(oak.leaf[oak.leaf$phenophase_id==483,])
 # So now we feel like we have relatively good "leaves" data, but we still have multiple observations per tree; options: earliest, latest, mean
 # We're making the data APPROPRIATE for the hypothesis rather than making it MEET the hypothesis
 
-#checking to ensure that the multiple observations issue stil persists in this phenophase
 oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$individual_id==132863,]
 
 # Aggregating using a formula; in R, y=mx+b is y ~ m*x + b 
@@ -141,27 +129,16 @@ for(IND in unique(dat.leaves$individual_id)){
 #checking to see if it got rid of the multiple entries per year for a single tree.
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
-dat.leaves[dat.leaves$individual_id==132863,]
-hist(dat.leaves$first.mean)
-hist(dat.leaves$last.mean)
 
-#removes the Inf/-Inf values that I do not remember how they got there -Andrew
+hist(dat.leaves$first.mean)
+hist(dat.leaves$first.min)
+
+#removes the Inf/-Inf values
 dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
 dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
 
-ggplot(data = dat.leaves, mapping = aes(x = species, y = first.mean)) +
-  ggtitle('2017-2019 averages for full sized true leaves onset for Quercus at The Morton Arboretum') +
-  geom_boxplot() +
-  scale_y_continuous('Average leaves onset (DOY)') +
-  scale_x_discrete('Quercus')
-
-path.clean <- "../data_raw/NPN/cleaned/"
+path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
+write.csv(dat.budburst, file.path(path.clean, paste0('NPN_Quercus_bud_', site.id, '.csv')), row.names=F)
+write.csv(dat.leaves, file.path(path.clean, paste0('NPN_Quercus_leaf_', site.id, '.csv')), row.names=F)
 
-write.csv(dat.budburst, file.path(path.clean, paste0('Quercus_bud_', site.id, '.csv')), row.names=F)
-write.csv(dat.leaves, file.path(path.clean, paste0('Quercus_leaf_', site.id, '.csv')), row.names=F)
-
-
-# Falling Leaves
-summary(oak.leaf[oak.leaf$phenophase_id==471,])
-# ------------------------------------------

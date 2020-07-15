@@ -40,4 +40,5 @@ dev.off()
 
 dat.processed <- file.path("../data_processed/MODIS")
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
-write.csv(dat.MODIS, file.path(dat.processed, paste0("MODIS_MET_GDD5", site.id, ".csv")), row.names=F)
+write.csv(dat.MODIS, file.path(dat.processed, paste0("MODIS_MET_GDD5_", site.id, ".csv")), row.names=F)
+

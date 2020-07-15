@@ -12,19 +12,22 @@
 #!!!! Specifically for "Leaves" Phenophase and MODIS !!!!
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
-dat.processed <- "../data_processed/"
 site.id <- "MortonArb"
 
 #Here is the different data to compare. All are constrained to GDD5.cum
 #------------------------------
 #MODIS Threshold Estimates for 15% greenup <- (greenup) and 50% greenup <- (midgreenup)
-dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_", site.id, ".csv")))
+dat.processed <- file.path("../data_processed/MODIS")
+if(!dir.exists(dat.processed)) dir.create(dat.processed)
+dat.MODIS <- read.csv(file.path(dat.processed, paste0("MODIS_MET_GDD5_", site.id, ".csv")))
 head(dat.MODIS)
+
 
 #-----------------------------
 #NPN Threshold Estimate
-
-oak.leaves <- read.csv(file.path(dat.processed, paste0("Quercus_leaf", site.id, "_NPN_MET.csv")))
+path.cleaned <- "../data_processed/NPN"
+if(!dir.exists(path.cleaned)) dir.create(path.cleaned)
+oak.leaves <- read.csv(file.path(path.cleaned, paste0("Quercus_leaf_GDD5_", site.id, "_NPN.csv")))
 head(oak.leaves)
 oak.leaves$species <- as.factor(oak.leaves$species)
 summary(oak.leaves[!is.na(oak.leaves$first.min), 'species'])
@@ -76,8 +79,6 @@ for(i in 1:nchain){
 green.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'Greenup', 'GDD5.cum']))
 
 midgreen.list <- list(y = dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum'], n = length(dat.MODIS[dat.MODIS$BAND== 'MidGreenup', 'GDD5.cum']))
-
-unique(oak.leaves$species) #choosing to exclude phellos and lobata
 
 #leaves list for dat.leaves$MinGDD5.cum
 minleaf.ilic.list <- list(y = oak.leaves[oak.leaves$species == 'ilicifolia', 'MinGDD5.cum'], n = length(oak.leaves[oak.leaves$species== 'ilicifolia', 'MinGDD5.cum']))
@@ -143,7 +144,7 @@ leaf.velu.mod <- jags.model (file = textConnection(univariate_regression),
                             n.chains = 3)
 
 #Converting the output into a workable format
-#DO THINGS HERE SOMETIMES
+
 green.out <- coda.samples (model = green.mod,
                            variable.names = c("THRESH", "Prec"),
                            n.iter = 5000)
@@ -326,9 +327,9 @@ leaf.first.min$type <- as.factor(leaf.first.min$type)
 summary(leaf.first.min)
 
 library(ggplot2)
-figures.dat <- '../figures'
-if(!dir.exists(figures.dat)) dir.create(figures.dat)
-png(width= 750, filename= file.path(figures.dat, 'THRESH_leaf_firstmin_MortonArb.png'))
+path.figures <- "../figures"
+if(!dir.exists(path.figures)) dir.create(path.figures)
+png(width= 750, filename= file.path(path.figures, paste0('Thresh_leaf_firstmin_MortonArb.png')))
 
 ggplot(data= leaf.first.min) +
   ggtitle('Thermal Time Thresholds at First Minimum leaf Onset of Quercus at The Morton Arboretum') +
@@ -342,7 +343,7 @@ ggplot(data= leaf.first.min) +
 dev.off()
 
 # save the outputs
-path.mod.leaf.firstmin <- "../data_processed/mod.leaf.firstmin.MortonArb"
+path.mod.leaf.firstmin <- "../data_processed/leaf.firstmin.MortonArb"
 if(!dir.exists(path.mod.leaf.firstmin)) dir.create(path.mod.leaf.firstmin)
 write.csv(stats.greenup, file.path(path.mod.leaf.firstmin, "THRESH_MODIS_Greenup.csv"), row.names=F)
 write.csv(stats.midgreenup, file.path(path.mod.leaf.firstmin, "THRESH_MODIS_MidGreenup.csv"), row.names=F)

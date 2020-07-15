@@ -2,23 +2,18 @@
 
 
 site.id <- 'MortonArb'
-df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_", site.id, ".csv")))
+df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_Raw_", site.id, ".csv")))
 summary(df.met)
 
 #get cleaned NPN data
 path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
-dat.budburst <- read.csv(file.path(path.clean, paste0('Quercus_bud_', site.id, '.csv')))
-dat.leaves <- read.csv(file.path(path.clean, paste0('Quercus_leaf_', site.id, '.csv')))
+dat.budburst <- read.csv(file.path(path.clean, paste0('NPN_Quercus_bud_', site.id, '.csv')))
+dat.leaves <- read.csv(file.path(path.clean, paste0('NPN_Quercus_leaf_', site.id, '.csv')))
 
 #----------------------------
-
 head(dat.budburst)
 head(dat.leaves)
-
-#be careful using this in large datasets
-unique(dat.budburst$individual_id)
-unique(dat.leaves$individual_id)
 
 #these two yday values are calculated to different decimals. One has to conform to the other.
 dat.budburst$first.mean <- round(dat.budburst$first.mean, digits = 0)
@@ -53,6 +48,7 @@ for(i in 1:nrow(dat.budburst)){
   #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
   dat.budburst[i,"MinGDD5.cum"] <-df.met[df.met$year==Minbud.year & df.met$yday==Minbud.yday,"GDD5.cum"]
 }
+
 #checking for new GDD5 columns
 summary(dat.budburst)
 
@@ -61,13 +57,13 @@ summary(dat.budburst)
 
 for(i in 1:nrow(dat.leaves)){
   
-  bud.year <- dat.leaves[i, "year"]
-  bud.yday <- dat.leaves[i, "first.mean"]
+  Meanleaf.year <- dat.leaves[i, "year"]
+  Meanleaf.yday <- dat.leaves[i, "first.mean"]
   
   if(is.na(dat.leaves$first.mean[i])) next
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
-  dat.leaves[i,"MeanGDD5.cum"] <-df.met[df.met$year==bud.year & df.met$yday==bud.yday,"GDD5.cum"]
+  dat.leaves[i,"MeanGDD5.cum"] <-df.met[df.met$year==Meanleaf.year & df.met$yday==Meanleaf.yday,"GDD5.cum"]
 }
 
 #------------------------------
@@ -88,7 +84,7 @@ for(i in 1:nrow(dat.leaves)){
 summary(dat.leaves)
 
 #------------------------------
-#quick comparisons with visuals
+
 library(ggplot2)
 path.png <- '../figures/'
 if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
@@ -135,8 +131,8 @@ dev.off()
 
 #----------------------------
 
-dat.processed <- '../data_processed/'
+dat.processed <- '../data_processed/NPN'
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
-write.csv(dat.budburst, file.path(dat.processed, paste0('Quercus_bud', site.id, '_NPN_MET.csv')), row.names=F)
-write.csv(dat.leaves, file.path(dat.processed, paste0('Quercus_leaf', site.id, '_NPN_MET.csv')), row.names=F)
+write.csv(dat.budburst, file.path(dat.processed, paste0('Quercus_bud_GDD5_', site.id, '_NPN.csv')), row.names=F)
+write.csv(dat.leaves, file.path(dat.processed, paste0('Quercus_leaf_GDD5_', site.id, '_NPN.csv')), row.names=F)
 
