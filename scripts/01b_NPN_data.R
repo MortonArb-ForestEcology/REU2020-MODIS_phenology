@@ -18,7 +18,7 @@ species.name <- 'Q.alba'
 npn.spp <- npn_species()
 npn.quercus <- npn.spp[npn.spp$genus=="Quercus",]
 
-oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 471),species_ids=npn.quercus$species_id[npn.quercus$species=="alba"], years=2000:2020, request_source="The Morton Arboretum")
+oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 471),species_ids=npn.quercus$species_id[npn.quercus$species=="alba"], years=2000:2019, request_source="The Morton Arboretum")
 oak.leaf[oak.leaf==-9999] <- NA
 dim(oak.leaf)
 head(oak.leaf)
@@ -29,10 +29,10 @@ summary(oak.budburst)
 oak.leaves <- oak.leaf[oak.leaf$phenophase_id == '471']
 summary(oak.leaves)
 
-#287 individual trees for WHite Oak "Breaking Leaf Buds" 
+#260 individual trees for WHite Oak "Breaking Leaf Buds" 
 length(unique(oak.budburst$individual_id))
 
-#263 individual trees for White Oak "Leaves"
+#261 individual trees for White Oak "Leaves"
 length(unique(oak.leaves$individual_id))
 
 #taking a look at the trends of the first observations for leaves and bud burst
