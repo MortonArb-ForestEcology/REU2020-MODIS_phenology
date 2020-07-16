@@ -9,13 +9,10 @@ if(!dir.exists(path.NPN)) dir.create(path.NPN)
 oak.leaf <- read.csv(file.path(path.NPN, paste0("NPN_Quercus_Raw_", species.name, ".csv")))
 summary(oak.leaf)
 
-#create a new column 'Year'. Going from 'xx-xx-2019' to '2019'
-#new column HERE
-
 # Creating a point list and time range that matches your MODIS dataset
 NPN.pts <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=min)
-#what is this doing?
+
 names(NPN.pts)[4] <- "yr.start"
 NPN.pts$yr.end <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=max)[,4]
