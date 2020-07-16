@@ -45,7 +45,7 @@ summary(lat.list)
 
 list.met <- list()
 for(i in seq_along(lat.list)){
-  list.met[[i]] <- data.frame(site=NPN.pts$site_id[i], latitude=NPN.pts$latitude[i], longitude=NPN.pts$longitude[i], lat.list[[i]]['data'])
+  list.met[[i]] <- data.frame(site=NPN.pts$site_id[i], latitude=NPN.pts$latitude[i], longitude=NPN.pts$longitude[i], lat.list[[i]]$data)
 }
 names(list.met) <-  NPN.pts$site_id
 summary(list.met)
