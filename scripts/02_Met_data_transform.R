@@ -53,7 +53,7 @@ names(list.met) <-  NPN.pts$site_id
 summary(list.met)
 summary(list.met[[1]])
 
-(lat.list) # Removing lat.list to save memory
+rm(lat.list) # Removing lat.list to save memory
 
 #-----------------------------------------------------------------------#
 #take the daymet data, calculate GDD5 and make it a flattened object
