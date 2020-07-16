@@ -73,11 +73,11 @@ for(i in 1:nrow(dat.leaves)){
   
   Minleaf.year <- dat.leaves[i, "year"]
   Minleaf.yday <- dat.leaves[i, "first.min"]
-  
+  Minleaf.site <- dat.leaves[i, 'site_id']
   if(is.na(dat.leaves$first.min[i])) next
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
-  dat.leaves[i,"MinGDD5.cum"] <-df.met[df.met$year==Minleaf.year & df.met$yday==Minleaf.yday,"GDD5.cum"]
+  dat.leaves[i,"MinGDD5.cum"] <-df.met[df.met$year==Minleaf.year & df.met$yday==Minleaf.yday & df.met$site==Minleaf.site,"GDD5.cum"]
 }
 
 #checking for new GDD5 columns
