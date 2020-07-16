@@ -13,72 +13,82 @@ path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
 dat.budburst <- read.csv(file.path(path.clean, paste0("NPN_Quercus_bud_", species.name, ".csv")))
 dat.leaves <- read.csv(file.path(path.clean, paste0("NPN_Quercus_leaf_", species.name, ".csv")))
-summary(dat.leaves)
-length(unique(dat.leaves$latitude))
 
-#need the lat and longs to match the lat and longs of the NPN data, so a loop?
-
-lat.in <- 
-lon.in <- 
-  
-  for(i in 1:nrow(dat.leaves)){
-    # dat.MODIS[i,]
-    # We need to use greenup.year, greenup.yday
-    yr.now <- dat.MODIS[i, "greenup.year"] # same as dat.MODIS[i, "greenup.yr"]
-    yday.now <- dat.MODIS[i, "greenup.yday"]
-    
-    # We need to get certain rows --> we need 2 pieces of info to match
-    #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
-    dat.MODIS[i,"GDD5.cum"] <- df.met[df.met$year==yr.now & df.met$yday==yday.now,"GDD5.cum"]
-  }
+#----------------------------------
+#Leaves sites greenup
+leaf.pts <- aggregate(site.id~latitude+longitude, data=dat.leaves,
+                     FUN=min)
+head(leaf.pts)
+names(leaf.pts)[1] <- 'lat'
+names(leaf.pts)[2] <- 'lon'
+names(leaf.pts)[3] <- 'site_name'
 
 #showing only the bands of interest within the product 'MCD12Q2
 mtbands <- MODISTools::mt_bands('MCD12Q2')
 dim(mtbands)
 
-#get list of dates for greenup
-dat.d8 <- MODISTools::mt_dates('MCD12Q2', lat = lat.in, lon = lon.in)
-summary(dat.d8) #see the temporal range of available data for this area. Should be from 2001 - 2017
-
 mtbands #choose the variables of interest for the next step, !!!! use only the _01 bands !!!!
-#focusing on the variables in question, Here is it Greenup.Num_Modes_01
-dat.MODIS <- MODISTools::mt_subset(product = 'MCD12Q2', band=c('Greenup.Num_Modes_01', 'MidGreenup.Num_Modes_01'), lat = lat.in, lon=lon.in, start= '1999-01-01')
-head(dat.MODIS)
 
-dat.MODIS$value[dat.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
+leaf.MODIS <- MODISTools::mt_batch_subset(df= leaf.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
+head(leaf.MODIS)
+
+
+leaf.MODIS$value[leaf.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
 
 #some formatting that will change the band names and alter the display of the dates
-dat.MODIS$calendar_date <- as.Date(dat.MODIS$calendar_date)
-dat.MODIS$band <- as.factor(dat.MODIS$band)
-dat.MODIS$BAND <- as.factor(sapply(dat.MODIS$band, FUN <- function(x){stringr::str_split(x, '[.]') [[1]][1]}))
+leaf.MODIS$calendar_date <- as.Date(leaf.MODIS$calendar_date)
+leaf.MODIS$band <- as.factor(leaf.MODIS$band)
+leaf.MODIS$BAND <- as.factor(sapply(leaf.MODIS$band, FUN <- function(x){stringr::str_split(x, '[.]') [[1]][1]}))
 
 #convert the days since 1970 value to a calendar date
-dat.MODIS$value_date <- as.Date('1970-01-01') + dat.MODIS$value
+leaf.MODIS$value_date <- as.Date('1970-01-01') + leaf.MODIS$value
 
-head(dat.MODIS)
+head(leaf.MODIS)
 
-dat.MODIS$greenup.year <- lubridate::year(dat.MODIS$value_date)
-dat.MODIS$greenup.yday <- lubridate::yday(dat.MODIS$value_date)
+leaf.MODIS$greenup.year <- lubridate::year(leaf.MODIS$value_date)
+leaf.MODIS$greenup.yday <- lubridate::yday(leaf.MODIS$value_date)
+
+hist(leaf.MODIS$greenup.yday)
+
+#-------------------------------------
+#bud burst sites greenup
+
+budburst.pts <- aggregate(site.id~latitude+longitude, data=dat.budburst,
+                          FUN=min)
+head(budburst.pts)
+names(budburst.pts)[1] <- 'lat'
+names(budburst.pts)[2] <- 'lon'
+names(budburst.pts)[3] <- 'site_name'
+
+budburst.MODIS <- MODISTools::mt_batch_subset(df= budburst.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
+head(budburst.MODIS)
+
+
+budburst.MODIS$value[budburst.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
+
+#some formatting that will change the band names and alter the display of the dates
+budburst.MODIS$calendar_date <- as.Date(budburst.MODIS$calendar_date)
+budburst.MODIS$band <- as.factor(budburst.MODIS$band)
+budburst.MODIS$BAND <- as.factor(sapply(budburst.MODIS$band, FUN <- function(x){stringr::str_split(x, '[.]') [[1]][1]}))
+
+#convert the days since 1970 value to a calendar date
+budburst.MODIS$value_date <- as.Date('1970-01-01') + budburst.MODIS$value
+
+head(budburst.MODIS)
+
+budburst.MODIS$greenup.year <- lubridate::year(budburst.MODIS$value_date)
+budburst.MODIS$greenup.yday <- lubridate::yday(budburst.MODIS$value_date)
+
+hist(budburst.MODIS$greenup.yday)
+#--------------------------------------
 
 #translate yday to calendar dates
 days.mrk <- data.frame(Label <- c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'Jun 1', 'Jul 1'),
                       Date <- c('2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01'))
 days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 
-#simple plot that should show the data for this area
-figures.dat <- '../figures'
-if(!dir.exists(figures.dat)) dir.create(figures.dat)
-png(width= 750, filename= file.path(figures.dat, paste0('Greenup_Plot_MODIS_', site.id, '.png')))
-ggplot(data = dat.MODIS, mapping = aes(x= greenup.year, y= greenup.yday)) +
-  ggtitle('MODIS Greenup and Midgreenup') +
-  geom_line(mapping= aes(color= BAND)) +
-  geom_point(color= 'orange', size= .5) + 
-  geom_text(label= dat.MODIS$greenup.yday, color= 'black', size = 5) +
-  scale_x_continuous('YEAR', breaks= seq(from= '1995', to='2020', by= 1 )) +
-  scale_y_continuous('DATE (YDay)', breaks= days.mrk$mrk.yday, labels= days.mrk$Label)
-dev.off() 
-
 # Storing the raw MODIS output 
 path.MODIS <- '../data_raw/MODIS'
 if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
-write.csv(dat.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_Raw_", site.id, ".csv")), row.names=F)
+write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_leaf_", species.name, ".csv")), row.names=F)
+write.csv(budburst.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_bud_", species.name, ".csv")), row.names=F)
