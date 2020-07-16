@@ -31,18 +31,20 @@ lat.list <- daymetr::download_daymet_batch(file_location = file.path(path.DAYMET
                                            start = 2000,
                                            end = 2019,
                                            internal = T)
+names(lat.list) <- NPN.pts$site_id # Giving the different layers of the list the site names they correspond to
 
+lat.list <- lat.list[sapply(lat.list, function(x) is.list(x))]
 
 # This should give us a list with one layer per site
 length(lat.list)
-names(lat.list) <- NPN.pts$site_id # Giving the different layers of the list the site names they correspond to
+
 class(lat.list[[1]])
 summary(lat.list[[1]])
 summary(lat.list[[1]][["data"]])
 summary(lat.list)
 
 #Creating a simplified list of the information we want
-
+NPN.pts <- NPN.pts[c(1:232),]
 list.met <- list()
 for(i in seq_along(lat.list)){
   list.met[[i]] <- data.frame(site=NPN.pts$site_id[i], latitude=NPN.pts$latitude[i], longitude=NPN.pts$longitude[i], lat.list[[i]]$data)
@@ -61,19 +63,20 @@ summary(list.met[[1]])
 
 #Making sure we only go through relevant years we are calculating GDD5 for
 summary(NPN.pts)
+NPN.pts <- list.met[[1]]
 calc.gdd5 <- function(NPN.pts){
-  NPN.pts$Date <- as.Date(paste(NPN.pts$first_yes_year, NPN.pts$first_yes_doy, sep="-"), format="%Y-%j")
+  NPN.pts$Date <- as.Date(paste(NPN.pts$year, NPN.pts$yday, sep="-"), format="%Y-%j")
   NPN.pts$TMEAN <- (NPN.pts$tmax..deg.c. + NPN.pts$tmin..deg.c.)/2
   NPN.pts$GDD5 <- ifelse(NPN.pts$TMEAN>5, NPN.pts$TMEAN-5, 0)
   NPN.pts$GDD5.cum <- NA
   
   
-  for(YR in min(NPN.pts$first_yes_year):max(NPN.pts$first_yes_year)){
+  for(YR in min(NPN.pts$year):max(NPN.pts$year)){
     #df.yr is all weather data for a year at a location
-    df.yr <- NPN.pts[NPN.pts$first_yes_year==YR,]
+    df.yr <- NPN.pts[NPN.pts$year==YR,]
     
     # Only calculate GDD5 if we have Jan 1; this is Daymet, so it should be fine
-    if(min(df.yr$first_yes_doy)==1){
+    if(min(df.yr$yday)==1){
       # If we have Jan 1, calculate cumulative growing degree-days
       df.yr$GDD5.cum <- cumsum(df.yr$GDD5)
     } else {
@@ -82,7 +85,7 @@ calc.gdd5 <- function(NPN.pts){
     }
     
     # Note: we could have done this differently,but this should be easier to diagnose
-    NPN.pts[NPN.pts$first_yes_year==YR, "GDD5.cum"] <- df.yr$GDD5.cum
+    NPN.pts[NPN.pts$year==YR, "GDD5.cum"] <- df.yr$GDD5.cum
   } # end year loop
   
   return(NPN.pts)
