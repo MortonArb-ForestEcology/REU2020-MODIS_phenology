@@ -7,9 +7,30 @@ library(MODISTools)
 #install.packages("ggplot2")
 library(ggplot2)
 
-site.id <- 'MortonArb'
-lat.in <- 41.813583
-lon.in <- -88.052897
+species.name <- 'Q.alba'
+
+path.clean <- "../data_raw/NPN/cleaned"
+if(!dir.exists(path.clean)) dir.create(path.clean)
+dat.budburst <- read.csv(file.path(path.clean, paste0("NPN_Quercus_bud_", species.name, ".csv")))
+dat.leaves <- read.csv(file.path(path.clean, paste0("NPN_Quercus_leaf_", species.name, ".csv")))
+summary(dat.leaves)
+length(unique(dat.leaves$latitude))
+
+#need the lat and longs to match the lat and longs of the NPN data, so a loop?
+
+lat.in <- 
+lon.in <- 
+  
+  for(i in 1:nrow(dat.leaves)){
+    # dat.MODIS[i,]
+    # We need to use greenup.year, greenup.yday
+    yr.now <- dat.MODIS[i, "greenup.year"] # same as dat.MODIS[i, "greenup.yr"]
+    yday.now <- dat.MODIS[i, "greenup.yday"]
+    
+    # We need to get certain rows --> we need 2 pieces of info to match
+    #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
+    dat.MODIS[i,"GDD5.cum"] <- df.met[df.met$year==yr.now & df.met$yday==yday.now,"GDD5.cum"]
+  }
 
 #showing only the bands of interest within the product 'MCD12Q2
 mtbands <- MODISTools::mt_bands('MCD12Q2')
@@ -21,7 +42,7 @@ summary(dat.d8) #see the temporal range of available data for this area. Should 
 
 mtbands #choose the variables of interest for the next step, !!!! use only the _01 bands !!!!
 #focusing on the variables in question, Here is it Greenup.Num_Modes_01
-dat.MODIS <- MODISTools::mt_subset(product = 'MCD12Q2', band=c('Greenup.Num_Modes_01', 'MidGreenup.Num_Modes_01'), lat = lat.in, lon=lon.in, start= '1995-01-01', site_name = site.id)
+dat.MODIS <- MODISTools::mt_subset(product = 'MCD12Q2', band=c('Greenup.Num_Modes_01', 'MidGreenup.Num_Modes_01'), lat = lat.in, lon=lon.in, start= '1999-01-01')
 head(dat.MODIS)
 
 dat.MODIS$value[dat.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
@@ -44,7 +65,7 @@ days.mrk <- data.frame(Label <- c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'J
                       Date <- c('2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01'))
 days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 
-#simple plot that should show the data for this area greening up between 2005 and 2015.
+#simple plot that should show the data for this area
 figures.dat <- '../figures'
 if(!dir.exists(figures.dat)) dir.create(figures.dat)
 png(width= 750, filename= file.path(figures.dat, paste0('Greenup_Plot_MODIS_', site.id, '.png')))
