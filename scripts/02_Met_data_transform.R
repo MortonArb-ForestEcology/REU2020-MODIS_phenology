@@ -9,13 +9,10 @@ if(!dir.exists(path.NPN)) dir.create(path.NPN)
 oak.leaf <- read.csv(file.path(path.NPN, paste0("NPN_Quercus_Raw_", species.name, ".csv")))
 summary(oak.leaf)
 
-#create a new column 'Year'. Going from 'xx-xx-2019' to '2019'
-#new column HERE
-
 # Creating a point list and time range that matches your MODIS dataset
 NPN.pts <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=min)
-#what is this doing?
+
 names(NPN.pts)[4] <- "yr.start"
 NPN.pts$yr.end <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=max)[,4]
@@ -53,7 +50,7 @@ names(list.met) <-  NPN.pts$site_id
 summary(list.met)
 summary(list.met[[1]])
 
-#rm(lat.list) # Removing lat.list to save memory
+rm(lat.list) # Removing lat.list to save memory
 
 #-----------------------------------------------------------------------#
 #take the daymet data, calculate GDD5 and make it a flattened object
@@ -100,11 +97,12 @@ summary(list.met[[1]])
 NPN.pts <- dplyr::bind_rows(list.met)
 head(NPN.pts)
 
-# Quick graph to make sure things look okay
-library(ggplot2)
-ggplot(data=NPN.pts) +
-  geom_line(aes(x=yday, y=GDD5.cum, group=year))
+# Quick graph to make sure things look okay !!!! Do not use unless necessary
+#library(ggplot2)
+#ggplot(data=NPN.pts) +
+ # geom_point(mapping = aes(x=yday, y=GDD5.cum, group=year))
 
-
-write.csv(NPN.pts, file.path(path.DAYMET, paste0("DAYMET_Data_Raw_", site.id, ".csv")), row.names=FALSE)
+met.processed <- '../data_raw/DAYMET'
+if(!dir.exists(met.processed)) dir.create(met.processed)
+write.csv(NPN.pts, file.path(met.processed, paste0("DAYMET_Data_Processed_", species.name, ".csv")), row.names=FALSE)
 

@@ -1,20 +1,20 @@
 # Cleaning the NPN Data -- what we need is 1 observation per tree per year.
 
 library(ggplot2)
-site.id <- 'MortonArb'
+species.name <- 'Q.alba'
 
 path.NPN <- "../data_raw/NPN/uncleaned"
 
 
-oak.leaf <- read.csv(file.path(path.NPN, paste0('NPN_Quercus_Raw_', site.id, '.csv')))
+oak.leaf <- read.csv(file.path(path.NPN, paste0('NPN_Quercus_Raw_', species.name, '.csv')))
 oak.leaf$species <- as.factor(oak.leaf$species)
 oak.leaf$species_id <- as.factor(oak.leaf$species_id)
 oak.leaf$individual_id <- as.factor(oak.leaf$individual_id)
 oak.leaf$phenophase_id <- as.factor(oak.leaf$phenophase_id)
 oak.leaf$phenophase_description <- as.factor(oak.leaf$phenophase_description)
-oak.leaf$site_id <- site.id
+#oak.leaf$site_id <- site.id
 summary(oak.leaf)
-
+unique(oak.leaf$phenophase_id)
 # ------------------------------------------
 # Deciding what data is "good" or "bad"
 # ------------------------------------------
@@ -37,7 +37,6 @@ summary(oak.leaf[oak.leaf$phenophase_id==371,])
 10/95
 
 # So now we feel like we have relatively good budburst data, but we still have multiple observaitons per tree; options: earliest, latest, mean
-oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$individual_id==132863,]
 # Aggregateing using a formula; in R, y=mx+b is y ~ m*x + b 
 dat.budburst <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.leaf$phenophase_id==371]), each=length(unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))),
                            year=unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))
@@ -70,20 +69,24 @@ for(IND in unique(dat.budburst$individual_id)){
     }
   }
 }
-summary(dat.budburst)
+
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
+
+#removes the Inf/-Inf values
+dat.budburst[dat.budburst$first.min== 'Inf' & !is.na(dat.budburst$first.min), 'first.min'] <- NA
+dat.budburst[dat.budburst$first.mean== '-Inf' & !is.na(dat.budburst$first.mean), 'first.mean'] <- NA
 
 hist(dat.budburst$first.mean)
 hist(dat.budburst$first.min)
 
+summary(dat.budburst)
+
+
 ########## --------------------- ################
 # Leaves '483'
 ########## --------------------- ################
-hist(oak.leaf[oak.leaf$phenophase_id==483, 'first_yes_doy'])
-hist(oak.leaf[oak.leaf$phenophase_id==483, 'last_yes_doy'])
-summary(oak.leaf[oak.leaf$phenophase_id==483,])
 
-# Getting rid of leaf phenophase observations after Sept 22 (first day of Autumn ~265) because we just want new/live leaves per the usanpn "Leaves" description for Tree/Shrub.
+#insufficient evidence to constrain the leaves observations by day of year. 
 oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>365 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
 oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>365 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
@@ -91,8 +94,6 @@ dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
 # So now we feel like we have relatively good "leaves" data, but we still have multiple observations per tree; options: earliest, latest, mean
 # We're making the data APPROPRIATE for the hypothesis rather than making it MEET the hypothesis
-
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$individual_id==132863,]
 
 # Aggregating using a formula; in R, y=mx+b is y ~ m*x + b 
 dat.leaves <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.leaf$phenophase_id==483]), each=length(unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==483]))),
@@ -130,15 +131,15 @@ for(IND in unique(dat.leaves$individual_id)){
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
-hist(dat.leaves$first.mean)
-hist(dat.leaves$first.min)
-
 #removes the Inf/-Inf values
 dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
 dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
 
+hist(dat.leaves$first.mean)
+hist(dat.leaves$first.min)
+
 path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
-write.csv(dat.budburst, file.path(path.clean, paste0('NPN_Quercus_bud_', site.id, '.csv')), row.names=F)
-write.csv(dat.leaves, file.path(path.clean, paste0('NPN_Quercus_leaf_', site.id, '.csv')), row.names=F)
+write.csv(dat.budburst, file.path(path.clean, paste0('NPN_Quercus_bud_', species.name, '.csv')), row.names=F)
+write.csv(dat.leaves, file.path(path.clean, paste0('NPN_Quercus_leaf_', species.name, '.csv')), row.names=F)
 
