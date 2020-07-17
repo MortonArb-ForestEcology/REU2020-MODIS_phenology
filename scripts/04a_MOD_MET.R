@@ -20,23 +20,24 @@ df.leaf <- read.csv(file.path(path.DAYMET, paste0("DAYMET_Data_Processed_", spec
 summary(df.leaf)
 leaf.MODIS$GDD5.cum <- NA
 
-for(i in 1:nrow(leaf.MODIS)){
+for(i in 1:nrow(leaf.MODIS)){}
   # dat.MODIS[i,]
   # We need to use greenup.year, greenup.yday
   yr.now <- leaf.MODIS[i, "greenup.year"]
   yday.now <- leaf.MODIS[i, "greenup.yday"]
-  lat.now <- leaf.MODIS[i, 'xllcorner']
-  lon.now <- leaf.MODIS[i, 'yllcorner']
+  site.now <- leaf.MODIS[i, 'site']
+  df.tmp <- is.na(leaf.MODIS$site)
   
-  #if is.na(leaf.MODIS[leaf.MODIS$]) next
+  if is.na(df.tmp) next
 
   # We need to get certain rows --> we need 2 pieces of info to match
-  leaf.MODIS[i,"GDD5.cum"] <- df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$latitude==lat.now & df.leaf$longitude==lon.now ,"GDD5.cum"]
+  leaf.MODIS[i,"GDD5.cum"] <- df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$site==site.now,"GDD5.cum"]
 }
 
 head(leaf.MODIS)
 unique(leaf.MODIS$BAND)
 tail(df.leaf)
+
 path.figures <- '../REU2020-MODIS_phenology/figures'
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive=T)
 png(filename= file.path(path.figures, paste0('MODIS_Met_Plot_', site.id, '.png')))
