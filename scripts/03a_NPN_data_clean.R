@@ -13,7 +13,7 @@ oak.leaf$individual_id <- as.factor(oak.leaf$individual_id)
 oak.leaf$phenophase_id <- as.factor(oak.leaf$phenophase_id)
 oak.leaf$phenophase_description <- as.factor(oak.leaf$phenophase_description)
 #oak.leaf$site_id <- site.id
-summary(oak.leaf)
+View(oak.leaf)
 unique(oak.leaf$phenophase_id)
 # ------------------------------------------
 # Deciding what data is "good" or "bad"
@@ -34,7 +34,7 @@ summary(oak.leaf)
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$first_yes_doy>182 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$last_yes_doy>182 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==371,])
-10/95
+
 
 # So now we feel like we have relatively good budburst data, but we still have multiple observaitons per tree; options: earliest, latest, mean
 # Aggregateing using a formula; in R, y=mx+b is y ~ m*x + b 
@@ -130,7 +130,7 @@ for(IND in unique(dat.leaves$individual_id)){
 #checking to see if it got rid of the multiple entries per year for a single tree.
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
-
+View(dat.leaves)
 #removes the Inf/-Inf values
 dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
 dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
