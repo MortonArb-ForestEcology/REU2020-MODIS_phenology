@@ -21,7 +21,7 @@ npn.quercus <- npn.spp[npn.spp$genus=="Quercus",]
 oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 483),species_ids=npn.quercus$species_id[npn.quercus$species=="alba"], years=2000:2019, request_source="The Morton Arboretum")
 oak.leaf[oak.leaf==-9999] <- NA
 dim(oak.leaf)
-head(oak.leaf)
+
 
 #Bud Burst and Leaves will be the two phenophases of most interest because we care about Spring phenology right now
 oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371']
