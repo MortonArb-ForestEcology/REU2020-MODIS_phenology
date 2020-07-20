@@ -69,14 +69,18 @@ for(IND in unique(dat.budburst$individual_id)){
     }
   }
 }
+summary(dat.budburst[is.na(dat.budburst$first.min),])
 
+
+summary(dat.budburst)
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 
 #removes the Inf/-Inf values
 dat.budburst[dat.budburst$first.min== 'Inf' & !is.na(dat.budburst$first.min), 'first.min'] <- NA
 dat.budburst[dat.budburst$first.mean== '-Inf' & !is.na(dat.budburst$first.mean), 'first.mean'] <- NA
 
-hist(dat.budburst$first.mean)
+dat.budburst <- dat.budburst[!is.na(dat.budburst$first.min),]
+# hist(dat.budburst$first.mean)
 hist(dat.budburst$first.min)
 
 summary(dat.budburst)
@@ -87,8 +91,8 @@ summary(dat.budburst)
 ########## --------------------- ################
 
 #insufficient evidence to constrain the leaves observations by day of year. 
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>365 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>365 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
+oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>182 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
+oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>182 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
 dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
@@ -134,9 +138,12 @@ dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
 #removes the Inf/-Inf values
 dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
 dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
+dat.leaves <- dat.leaves[!is.na(dat.leaves$first.min),]
 
 hist(dat.leaves$first.mean)
+
 hist(dat.leaves$first.min)
+hist(dat.budburst$first.min)
 
 path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
