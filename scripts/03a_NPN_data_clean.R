@@ -18,16 +18,18 @@ unique(oak.leaf$phenophase_id)
 # ------------------------------------------
 # Using a 10-day thresholds since prior/next no as an indicator of questionable data  or if there is no value for that (first obs of the year)
 # if the days since last no is greater than 10 OR (| mean OR) there is no "no" observation before a yes
+summary(oak.leaf$first_yes_doy)
 oak.leaf[oak.leaf$numdays_since_prior_no>10 | is.na(oak.leaf$numdays_since_prior_no), c("first_yes_doy", "first_yes_julian_date")] <- NA
+summary(oak.leaf$first_yes_doy)
 
+summary(oak.leaf$last_yes_doy)
 oak.leaf[oak.leaf$numdays_until_next_no>10 | is.na(oak.leaf$numdays_until_next_no), c("last_yes_doy", "last_yes_julian_date")] <- NA
-summary(oak.leaf)
+summary(oak.leaf$last_yes_doy)
 
 # BLB = 371; FL= 471; Leaves = 483
 ########## --------------------- ################
 # Bud burst
 ########## --------------------- ################
-
 # Getting rid of bud burst after July 1 (~182) because we just want SPRING budburst
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$first_yes_doy>182 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$last_yes_doy>182 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
@@ -46,13 +48,11 @@ for(IND in unique(dat.budburst$individual_id)){
   
   for(YR in unique(dat.budburst$year[dat.budburst$individual_id==IND])){
     # creating a handy index for what row we're working with
-    
-     for(ST in unique(dat.budburst$site_id[dat.budburst$individual_id==IND])){
        
-    row.now <- which(dat.budburst$individual_id==IND & dat.budburst$year==YR & dat.budburst$site_id==ST)
+    row.now <- which(dat.budburst$individual_id==IND & dat.budburst$year==YR)
     
     # Just narrowing the data frame down to just the part we want to work with
-    dat.tmp <- oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$individual_id==IND & oak.leaf$first_yes_year==YR & oak.leaf$site_id==ST,]
+    dat.tmp <- oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$individual_id==IND & oak.leaf$first_yes_year==YR,]
     
     if(nrow(dat.tmp)==0) next # skips through if there's no data
     
@@ -135,11 +135,10 @@ for(IND in unique(dat.leaves$individual_id)){
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
-#removes the Inf/-Inf values and NAs, see Coding Hangups in https://docs.google.com/document/d/1hHlDuY8WzCpZHmai323gRfmsfiNX9BhK5QYN7l93XsQ/edit
-dat.leaves <- dat.leaves[is.finite(rowSums(dat.leaves, na.rm =T)),]
+#removes the Inf/-Inf values and NAs
+dat.leaves[dat.leaves$first.min== 'Inf' & !is.na(dat.leaves$first.min), 'first.min'] <- NA
+dat.leaves[dat.leaves$first.mean== '-Inf' & !is.na(dat.leaves$first.mean), 'first.mean'] <- NA
 
-dat.leaves[dat.leaves$last.min== 'Inf'] <- NA
-dat.leaves[dat.leaves$last.max== '-Inf'] <- NA
 summary(dat.leaves)
 
 hist(dat.leaves$first.mean)
