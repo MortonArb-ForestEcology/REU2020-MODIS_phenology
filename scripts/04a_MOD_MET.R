@@ -9,10 +9,11 @@ species.name <- 'Q.alba'
 path.MODIS <- '../data_raw/MODIS'
 if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
 
-leaf.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_Greenup_leaf_", species.name, ".csv")))
+leaf.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_", species.name, ".csv")))
+leaf.MODIS$site <- as.factor(leaf.MODIS$site)
 summary(leaf.MODIS)
-budburst.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_Greenup_bud_", species.name, ".csv")))
-summary(budburst.MODIS)
+# budburst.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_Greenup_bud_", species.name, ".csv")))
+# summary(budburst.MODIS)
 
 path.DAYMET <- '../data_raw/DAYMET'
 if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
@@ -20,22 +21,22 @@ df.leaf <- read.csv(file.path(path.DAYMET, paste0("DAYMET_Data_Processed_", spec
 summary(df.leaf)
 leaf.MODIS$GDD5.cum <- NA
 
-hist(leaf.MODIS$greenup.yday)
-hist(budburst.MODIS$greenup.yday)
+# hist(leaf.MODIS$greenup.yday)
+# hist(budburst.MODIS$greenup.yday)
 
 #problem loop, possibly a problem in all the NAs in df.leaf$site
-leaf.MODIS$site <- as.character(leaf.MODIS$site)
-
-for(i in 1:nrow(budburst.MODIS)){
+# leaf.MODIS$site <- as.character(leaf.MODIS$site)
+pb <- txtProgressBar(min=0, max=nrow(leaf.MODIS), style=3)
+for(i in 1:nrow(leaf.MODIS)){
+  setTxtProgressBar(pb, i)
+  yr.now <- leaf.MODIS[i, "greenup.year"]
+  yday.now <- leaf.MODIS[i, "greenup.yday"]
+  site.now <- leaf.MODIS[i, 'site']
   
-  yr.now <- budburst.MODIS[i, "greenup.year"]
-  yday.now <- budburst.MODIS[i, "greenup.yday"]
-  site.now <- budburst.MODIS[i, 'site']
-  
-  if(is.na(budburst.MODIS$greenup.yday[i])) next
+  if(is.na(leaf.MODIS$greenup.yday[i])) next
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
-  budburst.MODIS[i,"GDD5.cum"] <-df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$site==site.now,"GDD5.cum"]
+  leaf.MODIS[i,"GDD5.cum"] <-df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$site==site.now,"GDD5.cum"]
 }
 summary(leaf.MODIS)
 
