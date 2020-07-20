@@ -8,14 +8,15 @@ path.NPN <- "../data_raw/NPN/uncleaned"
 if(!dir.exists(path.NPN)) dir.create(path.NPN)
 oak.leaf <- read.csv(file.path(path.NPN, paste0("NPN_Quercus_Raw_", species.name, ".csv")))
 summary(oak.leaf)
-
+dim(oak.leaf)
 # Creating a point list and time range that matches your MODIS dataset
 NPN.pts <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=min)
-
+dim(NPN.pts)
 names(NPN.pts)[4] <- "yr.start"
 NPN.pts$yr.end <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=max)[,4]
+summary(NPN.pts)
 
 NPN.pts$longitude[NPN.pts$longitude>0] <- NPN.pts$longitude[NPN.pts$longitude>0]*-1
 
@@ -99,10 +100,13 @@ summary(list.met[[1]])
 NPN.pts <- dplyr::bind_rows(list.met)
 head(NPN.pts)
 
+#hist()
+
 # Quick graph to make sure things look okay !!!! Do not use unless necessary
 #library(ggplot2)
 #ggplot(data=NPN.pts) +
  # geom_point(mapping = aes(x=yday, y=GDD5.cum, group=year))
+
 
 met.processed <- '../data_raw/DAYMET'
 if(!dir.exists(met.processed)) dir.create(met.processed)

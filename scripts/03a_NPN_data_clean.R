@@ -13,6 +13,8 @@ oak.leaf$individual_id <- as.factor(oak.leaf$individual_id)
 oak.leaf$phenophase_id <- as.factor(oak.leaf$phenophase_id)
 oak.leaf$phenophase_description <- as.factor(oak.leaf$phenophase_description)
 unique(oak.leaf$phenophase_id)
+summary(oak.leaf$numdays_since_prior_no)
+
 # ------------------------------------------
 # Deciding what data is "good" or "bad"
 # ------------------------------------------
@@ -41,7 +43,8 @@ summary(oak.leaf[oak.leaf$phenophase_id==371,])
 dat.budburst <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.leaf$phenophase_id==371]), each=length(unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))),
                            year=unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))
 summary(dat.budburst)                           
-
+dim(dat.budburst)
+dim(oak.leaf)
 for(IND in unique(dat.budburst$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
   dat.budburst[dat.budburst$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
@@ -67,7 +70,6 @@ for(IND in unique(dat.budburst$individual_id)){
       dat.budburst[row.now, "last.mean"] <- mean(dat.tmp$last_yes_doy, na.rm=T)
       dat.budburst[row.now, "last.min" ] <- min(dat.tmp$last_yes_doy, na.rm=T)
       dat.budburst[row.now, "last.max" ] <- max(dat.tmp$last_yes_doy, na.rm=T)
-      }
     }
   }
 }
@@ -80,6 +82,8 @@ dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 dat.budburst[dat.budburst$first.min== 'Inf' & !is.na(dat.budburst$first.min), 'first.min'] <- NA
 dat.budburst[dat.budburst$first.mean== '-Inf' & !is.na(dat.budburst$first.mean), 'first.mean'] <- NA
 
+dat.budburst <- dat.budburst[!is.na(dat.budburst$first.min),]
+
 hist(dat.budburst$first.mean)
 hist(dat.budburst$first.min)
 
@@ -91,8 +95,8 @@ summary(dat.budburst)
 ########## --------------------- ################
 
 #insufficient evidence to constrain the leaves observations by day of year. 
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>365 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
-oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>365 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
+oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$first_yes_doy>182 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
+oak.leaf[oak.leaf$phenophase_id==483 & oak.leaf$last_yes_doy>182 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==483,])
 dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
@@ -138,6 +142,7 @@ dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
 #removes the Inf/-Inf values and NAs
 dat.leaves[dat.leaves$first.min== 'Inf' & !is.na(dat.leaves$first.min), 'first.min'] <- NA
 dat.leaves[dat.leaves$first.mean== '-Inf' & !is.na(dat.leaves$first.mean), 'first.mean'] <- NA
+dat.leaves <- dat.leaves[!is.na(dat.leaves$first.min),]
 
 summary(dat.leaves)
 
