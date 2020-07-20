@@ -18,7 +18,13 @@ dat.leaves <- read.csv(file.path(path.clean, paste0("NPN_Quercus_leaf_", species
 #Leaves sites greenup
 leaf.pts <- aggregate(site.id~latitude+longitude, data=dat.leaves,
                      FUN=min)
-head(leaf.pts)
+# path.DAYMET <- '../data_raw/DAYMET'
+# npn.pts <- read.csv(file.path(path.DAYMET, paste0("NPN_Coords_Raw_", species.name, ".csv")))
+# names(npn.pts)
+
+# leaf.pts <- npn.pts[,c("site_id", "latitude", "longitude")]
+# names(leaf.pts) <- c("site_name", "lat", "lon")
+# head(leaf.pts)
 names(leaf.pts)[1] <- 'lat'
 names(leaf.pts)[2] <- 'lon'
 names(leaf.pts)[3] <- 'site_name'
@@ -29,8 +35,14 @@ dim(mtbands)
 
 mtbands #choose the variables of interest for the next step, !!!! use only the _01 bands !!!!
 
-leaf.MODIS <- MODISTools::mt_batch_subset(df= leaf.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
-head(leaf.MODIS)
+greenup.out <- list()
+for(i in 1:nrow(leaf.pts)){
+  greenup.out[[i]] <- MODISTools::mt_subset(product="MCD12Q2", band="Greenup.Num_Modes_01", start= '1999-01-01', end= '2019-12-31', lat = leaf.pts$lat[i], lon=leaf.pts$lon[i], site_name = leaf.pts$site_name[i])
+}
+# leaf.MODIS <- MODISTools::mt_batch_subset(df= leaf.pts[1:5,], product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31', ncores=4)
+# head(leaf.MODIS)
+leaf.MODIS <- dplyr::bind_rows(greenup.out)
+summary(leaf.MODIS)
 
 
 leaf.MODIS$value[leaf.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
@@ -60,8 +72,15 @@ names(budburst.pts)[1] <- 'lat'
 names(budburst.pts)[2] <- 'lon'
 names(budburst.pts)[3] <- 'site_name'
 
-budburst.MODIS <- MODISTools::mt_batch_subset(df= budburst.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
-head(budburst.MODIS)
+# budburst.MODIS <- MODISTools::mt_batch_subset(df= budburst.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
+# head(budburst.MODIS)
+greenup.out <- list()
+for(i in 1:nrow(leaf.pts)){
+  greenup.out[[i]] <- MODISTools::mt_subset(product="MCD12Q2", band="Greenup.Num_Modes_01", start= '1999-01-01', end= '2019-12-31', lat = budburst.pts$lat[i], lon=budburst.pts$lon[i], site_name = budburst.pts$site_name[i])
+}
+# head(leaf.MODIS)
+leaf.MODIS <- dplyr::bind_rows(greenup.out)
+summary(leaf.MODIS)
 
 
 budburst.MODIS$value[budburst.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
