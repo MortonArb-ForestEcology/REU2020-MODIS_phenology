@@ -89,7 +89,7 @@ calc.gdd5 <- function(NPN.pts){
   
   return(NPN.pts)
 }
-  
+
 
 # Apply our NPN.pts function to all layers of our list;
 list.met <- lapply(list.met, calc.gdd5)

@@ -12,8 +12,6 @@ oak.leaf$species_id <- as.factor(oak.leaf$species_id)
 oak.leaf$individual_id <- as.factor(oak.leaf$individual_id)
 oak.leaf$phenophase_id <- as.factor(oak.leaf$phenophase_id)
 oak.leaf$phenophase_description <- as.factor(oak.leaf$phenophase_description)
-#oak.leaf$site_id <- site.id
-View(oak.leaf)
 unique(oak.leaf$phenophase_id)
 # ------------------------------------------
 # Deciding what data is "good" or "bad"
@@ -44,14 +42,17 @@ summary(dat.budburst)
 
 for(IND in unique(dat.budburst$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
-  dat.budburst[dat.budburst$individual_id==IND, c("site.id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
+  dat.budburst[dat.budburst$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
   
   for(YR in unique(dat.budburst$year[dat.budburst$individual_id==IND])){
     # creating a handy index for what row we're working with
-    row.now <- which(dat.budburst$individual_id==IND & dat.budburst$year==YR)
+    
+     for(ST in unique(dat.budburst$site_id[dat.budburst$individual_id==IND])){
+       
+    row.now <- which(dat.budburst$individual_id==IND & dat.budburst$year==YR & dat.budburst$site_id==ST)
     
     # Just narrowing the data frame down to just the part we want to work with
-    dat.tmp <- oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$individual_id==IND & oak.leaf$first_yes_year==YR,]
+    dat.tmp <- oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$individual_id==IND & oak.leaf$first_yes_year==YR & oak.leaf$site_id==ST,]
     
     if(nrow(dat.tmp)==0) next # skips through if there's no data
     
@@ -66,9 +67,12 @@ for(IND in unique(dat.budburst$individual_id)){
       dat.budburst[row.now, "last.mean"] <- mean(dat.tmp$last_yes_doy, na.rm=T)
       dat.budburst[row.now, "last.min" ] <- min(dat.tmp$last_yes_doy, na.rm=T)
       dat.budburst[row.now, "last.max" ] <- max(dat.tmp$last_yes_doy, na.rm=T)
+      }
     }
   }
 }
+
+summary(dat.budburst)
 
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 
@@ -102,7 +106,7 @@ summary(dat.leaves)
 
 for(IND in unique(dat.leaves$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
-  dat.leaves[dat.leaves$individual_id==IND, c("site.id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
+  dat.leaves[dat.leaves$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
   
   for(YR in unique(dat.leaves$year[dat.leaves$individual_id==IND])){
     # creating a handy index for what row we're working with
@@ -130,10 +134,13 @@ for(IND in unique(dat.leaves$individual_id)){
 #checking to see if it got rid of the multiple entries per year for a single tree.
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
-View(dat.leaves)
-#removes the Inf/-Inf values
-dat.leaves[dat.leaves$last.min== 'Inf' & !is.na(dat.leaves$last.min), 'last.min'] <- NA
-dat.leaves[dat.leaves$last.max== '-Inf' & !is.na(dat.leaves$last.max), 'last.max'] <- NA
+
+#removes the Inf/-Inf values and NAs, see Coding Hangups in https://docs.google.com/document/d/1hHlDuY8WzCpZHmai323gRfmsfiNX9BhK5QYN7l93XsQ/edit
+dat.leaves <- dat.leaves[is.finite(rowSums(dat.leaves, na.rm =T)),]
+
+dat.leaves[dat.leaves$last.min== 'Inf'] <- NA
+dat.leaves[dat.leaves$last.max== '-Inf'] <- NA
+summary(dat.leaves)
 
 hist(dat.leaves$first.mean)
 hist(dat.leaves$first.min)
