@@ -20,19 +20,23 @@ df.leaf <- read.csv(file.path(path.DAYMET, paste0("DAYMET_Data_Processed_", spec
 summary(df.leaf)
 leaf.MODIS$GDD5.cum <- NA
 
-#problem loop, need gdd5 before it can calculate gdd5.cum?
-for(i in 1:nrow(leaf.MODIS)){
-  # dat.MODIS[i,]
-  # We need to use greenup.year, greenup.yday
-  yr.now <- leaf.MODIS[i, "greenup.year"]
-  yday.now <- leaf.MODIS[i, "greenup.yday"]
-  site.now <- leaf.MODIS[i, 'site']
-  # Only calculate GDD5 if we have Jan 1; this is Daymet, so it should be fine
-  if(is.na(leaf.MODIS$GDD5.cum[i])) next
-    # If we have Jan 1, calculate cumulative growing degree-days
-  leaf.MODIS[i,"GDD5.cum"] <- df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$site==site.now,"GDD5.cum"]
-}
+hist(leaf.MODIS$greenup.yday)
+hist(budburst.MODIS$greenup.yday)
 
+#problem loop, possibly a problem in all the NAs in df.leaf$site
+leaf.MODIS$site <- as.character(leaf.MODIS$site)
+
+for(i in 1:nrow(budburst.MODIS)){
+  
+  yr.now <- budburst.MODIS[i, "greenup.year"]
+  yday.now <- budburst.MODIS[i, "greenup.yday"]
+  site.now <- budburst.MODIS[i, 'site']
+  
+  if(is.na(budburst.MODIS$greenup.yday[i])) next
+  # We need to get certain rows --> we need 2 pieces of info to match
+  #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
+  budburst.MODIS[i,"GDD5.cum"] <-df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$site==site.now,"GDD5.cum"]
+}
 summary(leaf.MODIS)
 
 head(leaf.MODIS)

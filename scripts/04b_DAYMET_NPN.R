@@ -73,7 +73,8 @@ for(i in 1:nrow(dat.leaves)){
   
   Minleaf.year <- dat.leaves[i, "year"]
   Minleaf.yday <- dat.leaves[i, "first.min"]
-  Minleaf.site <- dat.leaves[i, 'site_id']
+  Minleaf.site <- dat.leaves[i, 'site.id']
+  
   if(is.na(dat.leaves$first.min[i])) next
   # We need to get certain rows --> we need 2 pieces of info to match
   #  we need BOTH year and yday to match that for the dat.MODIS row we're working with
@@ -102,7 +103,7 @@ dev.off()
 #visual for bud burst first.min thermal time
 png(filename= file.path(path.png, paste0('Budburst_firstmin_', site.id, '_NPN.png')))
 
-ggplot(data = dat.budburst, mapping = aes(x = species, y = MinGDD5.cum)) +
+ggplot(data = dat.budburst, mapping = aes(x = species.name, y = MinGDD5.cum)) +
   ggtitle('2017-2019 First Minimum Thermal Time at Bud Burst Onset of 12 Quercus at The Morton Arboretum') +
   geom_boxplot() +
   scale_y_continuous('Minimum Bud Burst Onset (MinGDD5.cum)') +
@@ -122,11 +123,11 @@ dev.off()
 #visual for Leaves first.min thermal time
 png(filename= file.path(path.png, paste0('Leaves_firstmin_', site.id, '_NPN.png')))
 
-ggplot(data = dat.leaves, mapping = aes(x = species, y = MinGDD5.cum)) +
-  ggtitle('2017-2019 First Minimum Thermal Time at Leaf Onset of 12 Quercus at The Morton Arboretum') +
-  geom_boxplot() +
+ggplot(data = dat.leaves, mapping = aes(x = year, y = MinGDD5.cum)) +
+  ggtitle('First Minimum Thermal Time at Leaf Onset of Quercus alba at The Morton Arboretum') +
+  geom_line(mapping = aes(color= species.name)) +
   scale_y_continuous('Minimum Leaf Onset (MinGDD5.cum)') +
-  scale_x_discrete('Quercus')
+  scale_x_discrete('Quercus alba')
 dev.off()
 
 #----------------------------
