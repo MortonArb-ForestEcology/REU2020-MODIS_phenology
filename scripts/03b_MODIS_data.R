@@ -11,17 +11,26 @@ species.name <- 'Q.alba'
 
 path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
-dat.budburst <- read.csv(file.path(path.clean, paste0("NPN_Quercus_bud_", species.name, ".csv")))
 dat.leaves <- read.csv(file.path(path.clean, paste0("NPN_Quercus_leaf_", species.name, ".csv")))
 
 #----------------------------------
-#Leaves sites greenup
-leaf.pts <- aggregate(site.id~latitude+longitude, data=dat.leaves,
-                     FUN=min)
-head(leaf.pts)
-names(leaf.pts)[1] <- 'lat'
-names(leaf.pts)[2] <- 'lon'
-names(leaf.pts)[3] <- 'site_name'
+#LNPN sites greenup
+
+path.DAYMET <- '../data_raw/DAYMET'
+if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
+NPN.pts <- read.csv(file.path(path.DAYMET, paste0("NPN_Coords_Raw_", species.name, ".csv")))
+
+summary(NPN.pts)
+
+NPN.pts <- aggregate(site.id~latitude+longitude, data=dat.leaves, FUN=min)
+
+head(NPN.pts)
+names(NPN.pts)[1] <- 'lat'
+names(NPN.pts)[2] <- 'lon'
+names(NPN.pts)[3] <- 'site_name'
+NPN.pts <- NPN.pts[,c(3,1,2)]
+
+summary(NPN.pts)
 
 #showing only the bands of interest within the product 'MCD12Q2
 mtbands <- MODISTools::mt_bands('MCD12Q2')
@@ -29,8 +38,8 @@ dim(mtbands)
 
 mtbands #choose the variables of interest for the next step, !!!! use only the _01 bands !!!!
 
-leaf.MODIS <- MODISTools::mt_batch_subset(df= leaf.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
-head(leaf.MODIS)
+leaf.MODIS <- MODISTools::mt_batch_subset(df= NPN.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
+summary(leaf.MODIS)
 
 
 leaf.MODIS$value[leaf.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
@@ -43,43 +52,15 @@ leaf.MODIS$BAND <- as.factor(sapply(leaf.MODIS$band, FUN <- function(x){stringr:
 #convert the days since 1970 value to a calendar date
 leaf.MODIS$value_date <- as.Date('1970-01-01') + leaf.MODIS$value
 
-head(leaf.MODIS)
+summary(leaf.MODIS)
 
 leaf.MODIS$greenup.year <- lubridate::year(leaf.MODIS$value_date)
 leaf.MODIS$greenup.yday <- lubridate::yday(leaf.MODIS$value_date)
 
+leaf.MODIS[leaf.MODIS$greenup.yday>182 & !is.na(leaf.MODIS$greenup.yday), "greenup.yday"] <- NA
+
 hist(leaf.MODIS$greenup.yday)
 
-#-------------------------------------
-#bud burst sites greenup
-
-budburst.pts <- aggregate(site.id~latitude+longitude, data=dat.budburst,
-                          FUN=min)
-head(budburst.pts)
-names(budburst.pts)[1] <- 'lat'
-names(budburst.pts)[2] <- 'lon'
-names(budburst.pts)[3] <- 'site_name'
-
-budburst.MODIS <- MODISTools::mt_batch_subset(df= budburst.pts, product= 'MCD12Q2', band= 'Greenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
-head(budburst.MODIS)
-
-
-budburst.MODIS$value[budburst.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
-
-#some formatting that will change the band names and alter the display of the dates
-budburst.MODIS$calendar_date <- as.Date(budburst.MODIS$calendar_date)
-budburst.MODIS$band <- as.factor(budburst.MODIS$band)
-budburst.MODIS$BAND <- as.factor(sapply(budburst.MODIS$band, FUN <- function(x){stringr::str_split(x, '[.]') [[1]][1]}))
-
-#convert the days since 1970 value to a calendar date
-budburst.MODIS$value_date <- as.Date('1970-01-01') + budburst.MODIS$value
-
-head(budburst.MODIS)
-
-budburst.MODIS$greenup.year <- lubridate::year(budburst.MODIS$value_date)
-budburst.MODIS$greenup.yday <- lubridate::yday(budburst.MODIS$value_date)
-
-hist(budburst.MODIS$greenup.yday)
 #--------------------------------------
 
 #translate yday to calendar dates
@@ -90,5 +71,4 @@ days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 # Storing the raw MODIS output 
 path.MODIS <- '../data_raw/MODIS'
 if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
-write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_leaf_", species.name, ".csv")), row.names=F)
-write.csv(budburst.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_bud_", species.name, ".csv")), row.names=F)
+write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_Quercus_", species.name, ".csv")), row.names=F)
