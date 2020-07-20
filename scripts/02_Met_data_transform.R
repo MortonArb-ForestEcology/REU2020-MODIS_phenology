@@ -17,6 +17,8 @@ names(NPN.pts)[4] <- "yr.start"
 NPN.pts$yr.end <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=max)[,4]
 
+NPN.pts$longitude[NPN.pts$longitude>0] <- NPN.pts$longitude[NPN.pts$longitude>0]*-1
+
 path.DAYMET <- '../data_raw/DAYMET'
 if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
 #Writing the csv file of lat and longs because daymetr batch function needs to read a file instead of a dataframe
@@ -41,12 +43,12 @@ summary(lat.list[[1]][["data"]])
 summary(lat.list)
 
 #Creating a simplified list of the information we want
-NPN.pts <- NPN.pts[c(1:232),]
+# NPN.pts <- NPN.pts[c(1:256),]
 list.met <- list()
 for(i in seq_along(lat.list)){
   list.met[[i]] <- data.frame(site=NPN.pts$site_id[i], latitude=NPN.pts$latitude[i], longitude=NPN.pts$longitude[i], lat.list[[i]]$data)
 }
-names(list.met) <-  NPN.pts$site_id
+names(list.met) <-  NPN.pts$site_id[1:length(list.met)]
 summary(list.met)
 summary(list.met[[1]])
 
