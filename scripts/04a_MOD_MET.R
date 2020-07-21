@@ -44,7 +44,7 @@ summary(leaf.MODIS)
 
 site_names <- rnpn::npn_stations()
 #Giving the sites their name
-leaf.MODIS$site_name <- site_names$station_name[match(leaf.MODIS$site_id, site_names$station_id)]
+leaf.MODIS$site_name <- site_names$station_name[match(leaf.MODIS$site, site_names$station_id)]
 
 #Makigns ure different locations with the same name are given unique names by adding site_id
 for(Name in unique(leaf.MODIS$site_name)){
