@@ -1,5 +1,10 @@
 #get DAYMET data
 
+#Getting npn site names
+#THIS WILL GIVE YOU AN ERROR BUT IT WORKS
+#IGNORE THE ERROR
+site_names <- rnpn::npn_stations()
+
 
 species.name <- 'Q.alba'
 df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_Processed_", species.name, ".csv")))
@@ -37,6 +42,19 @@ for(i in 1:nrow(dat.budburst)){
 #checking for new GDD5 columns
 summary(dat.budburst)
 
+#Giving the sites their name
+dat.budburst$site_name <- site_names$station_name[match(dat.budburst$site_id, site_names$station_id)]
+
+#Makigns ure different locations with the same name are given unique names by adding site_id
+for(Name in unique(dat.budburst$site_name)){
+  dat.tmp <- dat.budburst[dat.budburst$site_name == Name,]
+  if(length(unique(dat.tmp$site_id)) >1){
+    dat.tmp$site_name <- paste(dat.tmp$site_name, dat.tmp$site_id, sep="_")
+  }
+  dat.budburst[dat.budburst$site_name==Name, "site_name"] <- dat.tmp$site_name
+}
+
+
 #------------------------------
 #Leaves Minimum Onset GDD5
 
@@ -54,6 +72,19 @@ for(i in 1:nrow(dat.leaves)){
 
 #checking for new GDD5 columns
 summary(dat.leaves)
+
+#Giving the sites their name
+dat.leaves$site_name <- site_names$station_name[match(dat.leaves$site_id, site_names$station_id)]
+
+#Makigns ure different locations with the same name are given unique names by adding site_id
+for(Name in unique(dat.leaves$site_name)){
+  dat.tmp <- dat.leaves[dat.leaves$site_name == Name,]
+  if(length(unique(dat.tmp$site_id)) >1){
+    dat.tmp$site_name <- paste(dat.tmp$site_name, dat.tmp$site_id, sep="_")
+  }
+  dat.leaves[dat.leaves$site_name==Name, "site_name"] <- dat.tmp$site_name
+}
+
 
 #------------------------------
 
