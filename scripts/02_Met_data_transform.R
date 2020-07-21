@@ -100,13 +100,7 @@ summary(list.met[[1]])
 NPN.pts <- dplyr::bind_rows(list.met)
 head(NPN.pts)
 
-#hist()
-
-# Quick graph to make sure things look okay !!!! Do not use unless necessary
-#library(ggplot2)
-#ggplot(data=NPN.pts) +
- # geom_point(mapping = aes(x=yday, y=GDD5.cum, group=year))
-
+hist(NPN.pts$
 
 met.processed <- '../data_raw/DAYMET'
 if(!dir.exists(met.processed)) dir.create(met.processed)

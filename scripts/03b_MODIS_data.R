@@ -22,7 +22,7 @@ NPN.pts <- read.csv(file.path(path.DAYMET, paste0("NPN_Coords_Raw_", species.nam
 
 summary(NPN.pts)
 
-NPN.pts <- aggregate(site.id~latitude+longitude, data=dat.leaves, FUN=min)
+NPN.pts <- aggregate(site_id~latitude+longitude, data=dat.leaves, FUN=min)
 
 head(NPN.pts)
 names(NPN.pts)[1] <- 'lat'
@@ -57,10 +57,17 @@ summary(leaf.MODIS)
 leaf.MODIS$greenup.year <- lubridate::year(leaf.MODIS$value_date)
 leaf.MODIS$greenup.yday <- lubridate::yday(leaf.MODIS$value_date)
 
+summary(leaf.MODIS$greenup.yday)
 leaf.MODIS[leaf.MODIS$greenup.yday>182 & !is.na(leaf.MODIS$greenup.yday), "greenup.yday"] <- NA
+summary(leaf.MODIS$greenup.yday)
+
+path.png <- '../figures/'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
+png(filename= file.path(path.png, paste0('MODIS_Greenup_YDAY_', species.name, '.png')))
 
 hist(leaf.MODIS$greenup.yday)
 
+dev.off()
 #--------------------------------------
 
 #translate yday to calendar dates
