@@ -9,6 +9,7 @@ if(!dir.exists(path.NPN)) dir.create(path.NPN)
 oak.leaf <- read.csv(file.path(path.NPN, paste0("NPN_Quercus_Raw_", species.name, ".csv")))
 summary(oak.leaf)
 dim(oak.leaf)
+
 # Creating a point list and time range that matches your MODIS dataset
 NPN.pts <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.leaf,
 FUN=min)
@@ -99,8 +100,6 @@ summary(list.met[[1]])
 # Unlist the met to save it to a dataframe that will be easier to share
 NPN.pts <- dplyr::bind_rows(list.met)
 head(NPN.pts)
-
-hist(NPN.pts$
 
 met.processed <- '../data_raw/DAYMET'
 if(!dir.exists(met.processed)) dir.create(met.processed)
