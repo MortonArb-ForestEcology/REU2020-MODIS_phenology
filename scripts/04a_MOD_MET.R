@@ -46,13 +46,21 @@ tail(df.leaf)
 
 path.figures <- '../REU2020-MODIS_phenology/figures'
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive=T)
-png(filename= file.path(path.figures, paste0('MODIS_Met_Plot_', site.id, '.png')))
+png(filename= file.path(path.figures, paste0('MODIS_Met_Plot_', species.name, '.png')))
 ggplot(data = leaf.MODIS, mapping = aes(x = BAND, y = GDD5.cum)) +
-  ggtitle('Thermal Time at 15% Greenup at NPN Quecus alba from 2001-2019') +
+  ggtitle('Thermal Time at 15% & 50% Greenup at NPN Quecus alba from 2001-2019') +
+  geom_boxplot()
+dev.off()
+
+png(filename= file.path(path.figures, paste0('MODIS_Met_Plot_', species.name, '_log.png')))
+ggplot(data = leaf.MODIS, mapping = aes(x = BAND, y = log(GDD5.cum))) +
+  ggtitle('Thermal Time at 15% & 50% Greenup at NPN Quecus alba from 2001-2019') +
   geom_boxplot()
 dev.off()
 
 dat.processed <- file.path("../data_processed/MODIS")
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
-write.csv(leaf.MODIS, file.path(dat.processed, paste0("MODIS_leaf_GDD5_", site.id, ".csv")), row.names=F)
+write.csv(leaf.MODIS, file.path(dat.processed, paste0("MODIS_leaf_GDD5_", species.name, ".csv")), row.names=F)
 
+# leaf.modis <- read.csv(file.path(dat.processed, paste0("MODIS_leaf_GDD5_", species.name, ".csv")))
+                       
