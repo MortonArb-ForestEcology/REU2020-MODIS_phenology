@@ -80,15 +80,19 @@ dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 
 #removes the Inf/-Inf values
 dat.budburst[dat.budburst$first.min== 'Inf' & !is.na(dat.budburst$first.min), 'first.min'] <- NA
-dat.budburst[dat.budburst$first.mean== '-Inf' & !is.na(dat.budburst$first.mean), 'first.mean'] <- NA
+dat.budburst[dat.budburst$first.min== '-Inf' & !is.na(dat.budburst$first.min), 'first.min'] <- NA
 
 dat.budburst <- dat.budburst[!is.na(dat.budburst$first.min),]
 
-hist(dat.budburst$first.mean)
+path.png <- '../figures/'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
+png(filename= file.path(path.png, paste0('Clean_firstmin_bud_', species.name, '_NPN.png')))
+
 hist(dat.budburst$first.min)
 
-summary(dat.budburst)
+dev.off()
 
+summary(dat.budburst)
 
 ########## --------------------- ################
 # Leaves '483'
@@ -139,15 +143,21 @@ for(IND in unique(dat.leaves$individual_id)){
 summary(dat.leaves)
 dim(dat.leaves); dim(oak.leaf[oak.leaf$phenophase_id==483,])
 
-#removes the Inf/-Inf values and NAs
+#removes the Inf/-Inf values
 dat.leaves[dat.leaves$first.min== 'Inf' & !is.na(dat.leaves$first.min), 'first.min'] <- NA
-dat.leaves[dat.leaves$first.mean== '-Inf' & !is.na(dat.leaves$first.mean), 'first.mean'] <- NA
+dat.leaves[dat.leaves$first.min== '-Inf' & !is.na(dat.leaves$first.min), 'first.min'] <- NA
+
 dat.leaves <- dat.leaves[!is.na(dat.leaves$first.min),]
 
-summary(dat.leaves)
+path.png <- '../figures/'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
+png(filename= file.path(path.png, paste0('Clean_firstmin_leaf_', species.name, '_NPN.png')))
 
-hist(dat.leaves$first.mean)
 hist(dat.leaves$first.min)
+
+dev.off()
+
+summary(dat.leaves)
 
 path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)

@@ -39,16 +39,15 @@ for(i in 1:nrow(leaf.MODIS)){
 summary(leaf.MODIS)
 unique(leaf.MODIS$BAND)
 
+path.png <- '../figures/'
+if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
+png(filename= file.path(path.png, paste0('MODIS_Greenup_GDD5_', species.name, '.png')))
 
-path.figures <- '../REU2020-MODIS_phenology/figures'
-if(!dir.exists(path.figures)) dir.create(path.figures, recursive=T)
-png(filename= file.path(path.figures, paste0('MODIS_Met_Plot_', species.name, '.png')))
-ggplot(data = leaf.MODIS, mapping = aes(x= GDD5.cum, y = BAND)) +
-  ggtitle('Thermal Time at 15% Greenup at NPN Quecus alba from 2001-2019') +
-  geom_line()
+hist(leaf.MODIS$GDD5.cum)
+
 dev.off()
 
 dat.processed <- file.path("../data_processed/MODIS")
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
-write.csv(leaf.MODIS, file.path(dat.processed, paste0("MODIS_Quercus_alba_GDD5_", species.name, ".csv")), row.names=F)
+write.csv(leaf.MODIS, file.path(dat.processed, paste0("MODIS_GDD5_", species.name, ".csv")), row.names=F)
 
