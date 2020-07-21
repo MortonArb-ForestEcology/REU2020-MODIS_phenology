@@ -99,11 +99,39 @@ hist(dat.budburst$MinGDD5.cum)
 
 dev.off()
 
+map.us <- map_data("state")
+png() #file path in here in here
+ggplot() +
+  coord_fixed(1.3) +
+  ggtitle("test") +#Pick title here
+  geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill=NA, color="black") +
+  geom_point(data=dat.budburst, aes(x=longitude, y=latitude), alpha=0.75) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        axis.ticks = element_blank())
+dev.off()
+
 #visual for Leaves first.min thermal time
 png(filename= file.path(path.png, paste0('Leaves_firstmin_', species.name, '_NPN.png')))
 
 hist(dat.leaves$MinGDD5.cum)
 
+dev.off()
+
+map.us <- map_data("state")
+png() #file path in here in here
+ggplot() +
+  coord_fixed(1.3) +
+  ggtitle("test") +#Pick title here
+  geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill=NA, color="black") +
+  geom_point(data=dat.leaves, aes(x=longitude, y=latitude), alpha=0.75) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        axis.ticks = element_blank())
 dev.off()
 
 #----------------------------
