@@ -23,23 +23,22 @@ NPN_regression <- "
   model{
     
     for(k in 1:n){
-      mu[k] <- THRESH[loc[k]] 
-      y[k] ~ dnorm(mu[k], Prec)
-    }
-    
-    for(t in 1:nLoc){
-    THRESH[t] <- Ex[pln[t]] 
-    Ex[t] ~ dnorm(0, aPrec)
+      mu[k] <- THRESH[loc[k]]  #Combination of species Threshold and individual effect
+      y[k] ~ dnorm(mu[k], sPrec)
     }
 
+    for(t in 1:nLoc){
+    THRESH[t] <-  c[t] + ind[pln[t]]
+    c[t] ~ dnorm(0, aPrec[t])
+    aPrec[t] ~ dgamma(0.1, 0.1)
+    }
     
     for(i in 1:nPln){
         ind[i] <-  b[i]
         b[i] ~ dnorm(0, bPrec)
     }
-    aPrec ~ dgamma(0.1, 0.1)
-    bPrec ~ dgamma(1, 0.1)
-    Prec ~ dgamma(0.1, 0.1)
+    bPrec ~ dgamma(0.1, 0.1)
+    sPrec ~ dgamma(0.1, 0.1)
   }
   "
 
