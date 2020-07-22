@@ -90,47 +90,8 @@ bud.alba.burn <- window(bud.alba.out, start= burnin)
 bud.stats.alba <- as.data.frame(as.matrix(bud.alba.burn))
 summary(bud.stats.alba)
 
-
-# What pieces of information do we need to distinguish?
-stats.greenup$name <- "greenup"
-stats.midgreenup$name <- "midgreenup"
-bud.stats.alba$name <- "Q. alba"
-
-
-stats.greenup$type <- "MODIS"
-stats.midgreenup$type <- "MODIS"
-bud.stats.alba$type <- "NPN"
-
-
-# Combine our different data frames into "long" format 
-bud.first.mean <- rbind(bud.stats.alba, bud.stats.mont, bud.stats.gamb, bud.stats.rubr, bud.stats.ilic, bud.stats.imbr
-                        ,bud.stats.macr, bud.stats.palu, bud.stats.shum, bud.stats.velu)
-bud.first.mean$name <- as.factor(bud.first.mean$name)
-bud.first.mean$type <- as.factor(bud.first.mean$type)
-
-
-summary(bud.first.mean)
-
-library(ggplot2)
-figures.dat <- '../figures'
-if(!dir.exists(figures.dat)) dir.create(figures.dat)
-png(width= 750, filename= file.path(figures.dat, 'THRESH_bud_firstmean_MortonArb.png'))
-
-ggplot(data= bud.first.mean) +
-  ggtitle('Thermal Time Thresholds at First Mean Bud Burst Onset of Quercus at The Morton Arboretum') +
-  geom_density(mapping = aes(x= THRESH, color = name, fill=name), alpha=0.5) +
-  scale_color_manual(values=c("darkblue", "lightblue", "mediumspringgreen", "olivedrab2", 'goldenrod1','darkolivegreen4', 'goldenrod3', 'aquamarine3'
-                              , 'olivedrab4', 'chartreuse3', 'forestgreen', 'lightgreen')) +
-  scale_fill_manual(values=c("darkblue", "lightblue", "mediumspringgreen", "olivedrab2", 'goldenrod1','darkolivegreen4', 'goldenrod3', 'aquamarine3'
-                             , 'olivedrab4', 'chartreuse3', 'forestgreen', 'lightgreen'))  +
-  scale_x_continuous('Thermal Time Threshold Mean (5C Growing Degree Days)') +
-  scale_y_continuous('DENSITY (%)')
-dev.off()
-
 # save the outputs
 path.mod.firstmean <- "../data_processed/mod.firstmean.MortonArb"
 if(!dir.exists(path.mod.firstmean)) dir.create(path.mod.firstmean)
-write.csv(stats.greenup, file.path(path.mod.firstmean, "THRESH_MODIS_Greenup.csv"), row.names=F)
-write.csv(stats.midgreenup, file.path(path.mod.firstmean, "THRESH_MODIS_MidGreenup.csv"), row.names=F)
 write.csv(bud.stats.alba, file.path(path.mod.firstmean, "THRESH_bud_firstmean_alba.csv"), row.names=F) 
 
