@@ -35,25 +35,44 @@ leaf.MODIS <- MODISTools::mt_batch_subset(df= NPN.pts, product= 'MCD12Q2', band=
 summary(leaf.MODIS)
 
 
+midgreen.MODIS <- MODISTools::mt_batch_subset(df= NPN.pts, product= 'MCD12Q2', band= 'MidGreenup.Num_Modes_01', start= '1999-01-01', end= '2019-12-31')
+summary(midgreen.MODIS)
+
 leaf.MODIS$value[leaf.MODIS$value == 32767] <- NA #value representative of NA in MODIS, this filters that out
+midgreen.MODIS$value[midgreen.MODIS$value == 32767] <- NA 
 
 #some formatting that will change the band names and alter the display of the dates
 leaf.MODIS$calendar_date <- as.Date(leaf.MODIS$calendar_date)
 leaf.MODIS$band <- as.factor(leaf.MODIS$band)
 leaf.MODIS$BAND <- as.factor(sapply(leaf.MODIS$band, FUN <- function(x){stringr::str_split(x, '[.]') [[1]][1]}))
 
+#some formatting that will change the band names and alter the display of the dates
+midgreen.MODIS$calendar_date <- as.Date(midgreen.MODIS$calendar_date)
+midgreen.MODIS$band <- as.factor(midgreen.MODIS$band)
+midgreen.MODIS$BAND <- as.factor(sapply(midgreen.MODIS$band, FUN <- function(x){stringr::str_split(x, '[.]') [[1]][1]}))
+
 #convert the days since 1970 value to a calendar date
 leaf.MODIS$value_date <- as.Date('1970-01-01') + leaf.MODIS$value
-
 summary(leaf.MODIS)
+
+#convert the days since 1970 value to a calendar date
+midgreen.MODIS$value_date <- as.Date('1970-01-01') + midgreen.MODIS$value
+summary(midgreen.MODIS)
 
 leaf.MODIS$greenup.year <- lubridate::year(leaf.MODIS$value_date)
 leaf.MODIS$greenup.yday <- lubridate::yday(leaf.MODIS$value_date)
+
+midgreen.MODIS$greenup.year <- lubridate::year(midgreen.MODIS$value_date)
+midgreen.MODIS$greenup.yday <- lubridate::yday(midgreen.MODIS$value_date)
 
 #putting a filter on the DOY vaue of MODIS so that we are still looking at the spring season
 summary(leaf.MODIS$greenup.yday)
 leaf.MODIS[leaf.MODIS$greenup.yday>182 & !is.na(leaf.MODIS$greenup.yday), "greenup.yday"] <- NA
 summary(leaf.MODIS$greenup.yday)
+
+summary(midgreen.MODIS$greenup.yday)
+leaf.MODIS[midgreen.MODIS$greenup.yday>182 & !is.na(midgreen.MODIS$greenup.yday), "greenup.yday"] <- NA
+summary(midgreen.MODIS$greenup.yday)
 
 #visual showing the DOY that the 15% Greenup happened at each of the sites included from NPN.pts for the years 2000-2019
 path.png <- '../figures/'
@@ -61,6 +80,13 @@ if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
 png(filename= file.path(path.png, paste0('MODIS_Greenup_YDAY_', species.name, '.png')))
 
 hist(leaf.MODIS$greenup.yday)
+
+dev.off()
+
+#visual showing the DOY that the 50% MidGreenup happened at each of the sites included from NPN.pts for the years 2000-2019
+png(filename= file.path(path.png, paste0('MODIS_MidGreenup_YDAY_', species.name, '.png')))
+
+hist(midgreen.MODIS$greenup.yday)
 
 dev.off()
 #--------------------------------------
@@ -74,3 +100,4 @@ days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 path.MODIS <- '../data_raw/MODIS'
 if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
 write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_Quercus_", species.name, ".csv")), row.names=F)
+write.csv(midgreen.MODIS, file.path(path.MODIS, paste0("MODIS_MidGreenup_Quercus_", species.name, ".csv")), row.names=F)

@@ -120,6 +120,38 @@ hist(dat.leaves$MinGDD5.cum)
 
 dev.off()
 
+#----------------------------------
+#summary statistics
+
+#GDD5 95 CI NPN Budburst
+round(quantile(dat.budburst$MinGDD5.cum, c(0.025, 0.975), na.rm = T), digits = 1)
+
+#GDD5 95 CI NPN Leaves
+round(quantile(dat.leaves$MinGDD5.cum, c(0.025, 0.975), na.rm = T), digits = 1)
+
+#YDAY 95 CI NPN Budburst
+round(quantile(dat.budburst$first.min , c(0.025, 0.975), na.rm = T), digits = 0)
+
+#YDAY 95 CI NPN Leaves
+round(quantile(dat.leaves$first.min , c(0.025, 0.975), na.rm = T), digits = 0)
+
+#GDD5 Threshold 95 CI NPN Budburst
+round(quantile(dat.budburst$ , c(0.025, 0.975), na.rm = T), digits = )
+
+#GDD5 Threshold95 CI NPN Leaves
+round(quantile(dat.leaves$ , c(0.025, 0.975), na.rm = T), digits = )
+
+#number of observations for NPN Budburst
+summary(dat.budburst)
+dim(dat.budburst[!is.na(dat.budburst$site_id),])
+length(unique(dat.budburst$site_id))
+
+#number of observations for NPN Leaves
+summary(dat.leaves)
+dim(dat.leaves[!is.na(dat.leaves$site_id),])
+length(unique(dat.leaves$site_id))
+#----------------------------------
+
 #getting a map of all the NPN sites which collected observation for 'Leaves' from 2000 to 2019
 map.us <- map_data("state")
 png(filename= file.path(path.png, paste0('NPN_sitemap_leaves', species.name, '.png')))
