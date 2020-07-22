@@ -22,14 +22,13 @@ oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 483),spe
 oak.leaf[oak.leaf==-9999] <- NA
 dim(oak.leaf)
 
-
-#Bud Burst and Leaves will be the two phenophases of most interest because we care about Spring phenology right now
+#Bud Burst and Leaves will be the two phenophases of most interest because we care about Spring phenology
 oak.budburst <- oak.leaf[oak.leaf$phenophase_id == '371']
 summary(oak.budburst)
 oak.leaves <- oak.leaf[oak.leaf$phenophase_id == '483']
 summary(oak.leaves)
 
-#260 individual trees for WHite Oak "Breaking Leaf Buds" 
+#260 individual trees for White Oak "Breaking Leaf Buds" 
 length(unique(oak.budburst$individual_id))
 
 #261 individual trees for White Oak "Leaves"
@@ -39,7 +38,7 @@ length(unique(oak.leaves$individual_id))
 hist(oak.budburst$first_yes_doy)
 hist(oak.leaves$first_yes_doy)
 
-
+#savin the raw NPN data which has no filters set on it. This is just what all Q. alba data NPN has for 371 'Breaking Leaf Buds' and 483 'Leaves' 
 path.NPN <- "../data_raw/NPN/uncleaned"
 if(!dir.exists(path.NPN)) dir.create(path.NPN)
 write.csv(oak.leaf, file.path(path.NPN, paste0('NPN_Quercus_Raw_', species.name, '.csv')), row.names=F)
