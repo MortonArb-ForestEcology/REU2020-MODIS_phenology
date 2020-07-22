@@ -51,3 +51,11 @@ gelman.diag(green.out)
 
 burnin = 9000 
 green.burn <- window(green.out, start= burnin)
+
+green.stats <- as.data.frame(as.matrix(green.stats))
+summary(green.stats)
+
+# save the outputs
+path.mod.firstmean <- "../data_processed/mod.firstmean.MortonArb"
+if(!dir.exists(path.mod.firstmean)) dir.create(path.mod.firstmean)
+write.csv(green.stats, file.path(path.mod.firstmean, "MODIS_THRESH_bud_firstmean_alba.csv"), row.names=F) 
