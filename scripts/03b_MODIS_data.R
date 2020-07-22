@@ -4,17 +4,10 @@
 
 #install.packages("MODISTools")
 library(MODISTools)
-#install.packages("ggplot2")
-library(ggplot2)
 
 species.name <- 'Q.alba'
-
-path.clean <- "../data_raw/NPN/cleaned"
-if(!dir.exists(path.clean)) dir.create(path.clean)
-dat.leaves <- read.csv(file.path(path.clean, paste0("NPN_Quercus_leaf_", species.name, ".csv")))
-
 #----------------------------------
-#LNPN sites greenup
+#NPN sites
 
 path.DAYMET <- '../data_raw/DAYMET'
 if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
@@ -22,7 +15,7 @@ NPN.pts <- read.csv(file.path(path.DAYMET, paste0("NPN_Coords_Raw_", species.nam
 
 summary(NPN.pts)
 
-NPN.pts <- aggregate(site_id~latitude+longitude, data=dat.leaves, FUN=min)
+NPN.pts <- aggregate(site_id~latitude+longitude, data=NPN.pts, FUN=min)
 
 head(NPN.pts)
 names(NPN.pts)[1] <- 'lat'
@@ -57,10 +50,12 @@ summary(leaf.MODIS)
 leaf.MODIS$greenup.year <- lubridate::year(leaf.MODIS$value_date)
 leaf.MODIS$greenup.yday <- lubridate::yday(leaf.MODIS$value_date)
 
+#putting a filter on the DOY vaue of MODIS so that we are still looking at the spring season
 summary(leaf.MODIS$greenup.yday)
 leaf.MODIS[leaf.MODIS$greenup.yday>182 & !is.na(leaf.MODIS$greenup.yday), "greenup.yday"] <- NA
 summary(leaf.MODIS$greenup.yday)
 
+#visual showing the DOY that the 15% Greenup happened at each of the sites included from NPN.pts for the years 2000-2019
 path.png <- '../figures/'
 if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
 png(filename= file.path(path.png, paste0('MODIS_Greenup_YDAY_', species.name, '.png')))
@@ -75,7 +70,7 @@ days.mrk <- data.frame(Label <- c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'J
                       Date <- c('2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01'))
 days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 
-# Storing the raw MODIS output 
+#saving the filtered and downloaded MODIs data for all sites of NPN data for Q. alba 'Breaking Leaf Buds' and 'Leaves'
 path.MODIS <- '../data_raw/MODIS'
 if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
 write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_Quercus_", species.name, ".csv")), row.names=F)
