@@ -37,6 +37,24 @@ for(i in 1:nrow(leaf.MODIS)){
   leaf.MODIS[i,"GDD5.cum"] <-df.leaf[df.leaf$year==yr.now & df.leaf$yday==yday.now & df.leaf$site==site.now,"GDD5.cum"]
 }
 summary(leaf.MODIS)
+
+#Getting npn site names
+#THIS WILL GIVE YOU AN ERROR BUT IT WORKS
+#IGNORE THE ERROR
+
+site_names <- rnpn::npn_stations()
+#Giving the sites their name
+leaf.MODIS$site_name <- site_names$station_name[match(leaf.MODIS$site, site_names$station_id)]
+
+#Makigns ure different locations with the same name are given unique names by adding site_id
+for(Name in unique(leaf.MODIS$site_name)){
+  dat.tmp <- leaf.MODIS[leaf.MODIS$site_name == Name,]
+  if(length(unique(dat.tmp$site)) >1){
+    dat.tmp$site_name <- paste(dat.tmp$site_name, dat.tmp$site, sep="_")
+  }
+  leaf.MODIS[leaf.MODIS$site_name==Name, "site_name"] <- dat.tmp$site_name
+}
+
 unique(leaf.MODIS$BAND)
 
 path.png <- '../figures/'

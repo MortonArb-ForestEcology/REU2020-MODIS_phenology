@@ -1,5 +1,10 @@
 #get DAYMET data
 
+#Getting npn site names
+#THIS WILL GIVE YOU AN ERROR BUT IT WORKS
+#IGNORE THE ERROR
+site_names <- rnpn::npn_stations()
+
 
 species.name <- 'Q.alba'
 df.met <- read.csv(file.path('../data_raw/DAYMET', paste0("DAYMET_Data_Processed_", species.name, ".csv")))
@@ -37,6 +42,19 @@ for(i in 1:nrow(dat.budburst)){
 #checking for new GDD5 columns
 summary(dat.budburst)
 
+#Giving the sites their name
+dat.budburst$site_name <- site_names$station_name[match(dat.budburst$site_id, site_names$station_id)]
+
+#Makigns ure different locations with the same name are given unique names by adding site_id
+for(Name in unique(dat.budburst$site_name)){
+  dat.tmp <- dat.budburst[dat.budburst$site_name == Name,]
+  if(length(unique(dat.tmp$site_id)) >1){
+    dat.tmp$site_name <- paste(dat.tmp$site_name, dat.tmp$site_id, sep="_")
+  }
+  dat.budburst[dat.budburst$site_name==Name, "site_name"] <- dat.tmp$site_name
+}
+
+
 #------------------------------
 #Leaves Minimum Onset GDD5
 
@@ -55,6 +73,19 @@ for(i in 1:nrow(dat.leaves)){
 #checking for new GDD5 columns
 summary(dat.leaves)
 
+#Giving the sites their name
+dat.leaves$site_name <- site_names$station_name[match(dat.leaves$site_id, site_names$station_id)]
+
+#Makigns ure different locations with the same name are given unique names by adding site_id
+for(Name in unique(dat.leaves$site_name)){
+  dat.tmp <- dat.leaves[dat.leaves$site_name == Name,]
+  if(length(unique(dat.tmp$site_id)) >1){
+    dat.tmp$site_name <- paste(dat.tmp$site_name, dat.tmp$site_id, sep="_")
+  }
+  dat.leaves[dat.leaves$site_name==Name, "site_name"] <- dat.tmp$site_name
+}
+
+
 #------------------------------
 
 library(ggplot2)
@@ -68,11 +99,39 @@ hist(dat.budburst$MinGDD5.cum)
 
 dev.off()
 
+map.us <- map_data("state")
+png() #file path in here in here
+ggplot() +
+  coord_fixed(1.3) +
+  ggtitle("test") +#Pick title here
+  geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill=NA, color="black") +
+  geom_point(data=dat.budburst, aes(x=longitude, y=latitude), alpha=0.75) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        axis.ticks = element_blank())
+dev.off()
+
 #visual for Leaves first.min thermal time
 png(filename= file.path(path.png, paste0('Leaves_firstmin_', species.name, '_NPN.png')))
 
 hist(dat.leaves$MinGDD5.cum)
 
+dev.off()
+
+map.us <- map_data("state")
+png() #file path in here in here
+ggplot() +
+  coord_fixed(1.3) +
+  ggtitle("test") +#Pick title here
+  geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill=NA, color="black") +
+  geom_point(data=dat.leaves, aes(x=longitude, y=latitude), alpha=0.75) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        axis.ticks = element_blank())
 dev.off()
 
 #----------------------------
