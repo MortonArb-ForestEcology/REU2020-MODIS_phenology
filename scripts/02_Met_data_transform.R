@@ -4,6 +4,7 @@
 # Note: We will probably want this to go by species, rather than site, but for now this works
 species.name = 'Q.alba'
 
+#bringing in the Raw NPN data to pull the site and coordinate data out
 path.NPN <- "../data_raw/NPN/uncleaned"
 if(!dir.exists(path.NPN)) dir.create(path.NPN)
 oak.leaf <- read.csv(file.path(path.NPN, paste0("NPN_Quercus_Raw_", species.name, ".csv")))
@@ -19,8 +20,10 @@ NPN.pts$yr.end <- aggregate(first_yes_year~site_id+latitude+longitude, data=oak.
 FUN=max)[,4]
 summary(NPN.pts)
 
+#fixing coordinates that omitted the "-" in front of the longitude
 NPN.pts$longitude[NPN.pts$longitude>0] <- NPN.pts$longitude[NPN.pts$longitude>0]*-1
 
+#bringing in the raw DAYMET data only for the sites provided by the NPN data
 path.DAYMET <- '../data_raw/DAYMET'
 if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
 #Writing the csv file of lat and longs because daymetr batch function needs to read a file instead of a dataframe

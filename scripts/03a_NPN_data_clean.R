@@ -1,11 +1,10 @@
 # Cleaning the NPN Data -- what we need is 1 observation per tree per year.
 
-library(ggplot2)
 species.name <- 'Q.alba'
 
 path.NPN <- "../data_raw/NPN/uncleaned"
 
-
+#bringing in the NPN data to be filtered and cleaned
 oak.leaf <- read.csv(file.path(path.NPN, paste0('NPN_Quercus_Raw_', species.name, '.csv')))
 oak.leaf$species <- as.factor(oak.leaf$species)
 oak.leaf$species_id <- as.factor(oak.leaf$species_id)
@@ -32,19 +31,19 @@ summary(oak.leaf$last_yes_doy)
 ########## --------------------- ################
 # Bud burst
 ########## --------------------- ################
-# Getting rid of bud burst after July 1 (~182) because we just want SPRING budburst
+# Getting rid of bud burst after July 1 (~182) because we just want SPRING phenology
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$first_yes_doy>182 & !is.na(oak.leaf$first_yes_doy), c("first_yes_doy", "first_yes_julian_date")] <- NA
 oak.leaf[oak.leaf$phenophase_id==371 & oak.leaf$last_yes_doy>182 & !is.na(oak.leaf$last_yes_doy), c("last_yes_doy", "last_yes_julian_date")] <- NA
 summary(oak.leaf[oak.leaf$phenophase_id==371,])
 
-
 # So now we feel like we have relatively good budburst data, but we still have multiple observaitons per tree; options: earliest, latest, mean
-# Aggregateing using a formula; in R, y=mx+b is y ~ m*x + b 
+# Aggregating using a formula; in R, y=mx+b is y ~ m*x + b 
 dat.budburst <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.leaf$phenophase_id==371]), each=length(unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))),
                            year=unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==371]))
 summary(dat.budburst)                           
 dim(dat.budburst)
 dim(oak.leaf)
+#creating summary columns from the first and last parts of 'Breaking Leaf Buds'
 for(IND in unique(dat.budburst$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
   dat.budburst[dat.budburst$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
@@ -76,6 +75,7 @@ for(IND in unique(dat.budburst$individual_id)){
 
 summary(dat.budburst)
 
+#Checking to see how the data changed from the loop
 dim(dat.budburst); dim(oak.leaf[oak.leaf$phenophase_id==371,])
 
 #removes the Inf/-Inf values
@@ -84,6 +84,7 @@ dat.budburst[dat.budburst$first.min== '-Inf' & !is.na(dat.budburst$first.min), '
 
 dat.budburst <- dat.budburst[!is.na(dat.budburst$first.min),]
 
+#visual for the cleaned NPN data, focusing on the minimum value of the first observed yes DOY in 'Breaking Leaf Buds'
 path.png <- '../figures/'
 if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
 png(filename= file.path(path.png, paste0('Clean_firstmin_bud_', species.name, '_NPN.png')))
@@ -112,6 +113,7 @@ dat.leaves <- data.frame(individual_id=rep(unique(oak.leaf$individual_id[oak.lea
                            year=unique(oak.leaf$first_yes_year[oak.leaf$phenophase_id==483]))
 summary(dat.leaves)                           
 
+#creating summary columns from the first and last parts of 'Breaking Leaf Buds'
 for(IND in unique(dat.leaves$individual_id)){
   # adding some individual metadata -- this only needs to be done for each tree; we don't care about which year it is
   dat.leaves[dat.leaves$individual_id==IND, c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")] <- unique(oak.leaf[oak.leaf$individual_id==IND,c("site_id", "latitude", "longitude", "species_id", "genus", "species", "common_name")])
@@ -149,6 +151,7 @@ dat.leaves[dat.leaves$first.min== '-Inf' & !is.na(dat.leaves$first.min), 'first.
 
 dat.leaves <- dat.leaves[!is.na(dat.leaves$first.min),]
 
+#visual for the cleaned NPN data, focusing on the minimum value of the first observed yes DOY in 'Leaves'
 path.png <- '../figures/'
 if(!dir.exists(path.png)) dir.create(path.png, recursive=T)
 png(filename= file.path(path.png, paste0('Clean_firstmin_leaf_', species.name, '_NPN.png')))
@@ -159,6 +162,7 @@ dev.off()
 
 summary(dat.leaves)
 
+#saving the cleaned NPN data that has been split by phenophase
 path.clean <- "../data_raw/NPN/cleaned"
 if(!dir.exists(path.clean)) dir.create(path.clean)
 write.csv(dat.budburst, file.path(path.clean, paste0('NPN_Quercus_bud_', species.name, '.csv')), row.names=F)
