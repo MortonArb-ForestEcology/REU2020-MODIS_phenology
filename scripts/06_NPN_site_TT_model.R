@@ -18,20 +18,26 @@ NPN_regression <- "
   model{
     
     for(k in 1:n){
-      mu[k] <- THRESH[loc[k]]  #Combination of species Threshold and individual effect
+      mu[k] <- THRESH[sp[k]]  
       y[k] ~ dnorm(mu[k], sPrec)
+    }
+    
+    for(j in 1:nSp){
+      THRESH[j] <- Site[loc[j]] + a[j]
+      a[j] ~ dnorm(0, aPrec)
     }
 
     for(t in 1:nLoc){
-    THRESH[t] <-  c[t] + ind[pln[t]]
-    c[t] ~ dnorm(0, aPrec[t])
-    aPrec[t] ~ dgamma(0.1, 0.1)
+    Site[t] <-  c[t] + ind[pln[t]]
+    c[t] ~ dnorm(0, cPrec)
     }
     
     for(i in 1:nPln){
         ind[i] <-  b[i]
         b[i] ~ dnorm(0, bPrec)
     }
+    cPrec ~ dgamma(0.1, 0.1)
+    aPrec ~ dgamma(0.1, 0.1)
     bPrec ~ dgamma(0.1, 0.1)
     sPrec ~ dgamma(0.1, 0.1)
   }
@@ -50,16 +56,16 @@ for(i in 1:nchain){
 #Converting to list format needed for JAGs
 
 #bud burst lists for dat.budburst$MeanGDD5.cum
-bud.alba.list <- list(y = alba.budburst$first.min, n = length(alba.budburst$first.min),
+bud.alba.list <- list(y = alba.budburst$MinGDD5.cum, n = length(alba.budburst$MinGDD5.cum),
                       loc = as.numeric(factor(alba.budburst$site_id)), nLoc = length(unique(alba.budburst$site_id)),
-                      pln = as.numeric(factor(alba.budburst$individual_id)), nPln = length(unique(alba.budburst$individual_id)))
+                      pln = as.numeric(factor(alba.budburst$individual_id)), nPln = length(unique(alba.budburst$individual_id)),
+                      sp = as.numeric(factor(alba.budburst$species)), nSp = length(unique(alba.budburst$species)))
 
 
 
 
 bud.alba.mod <- jags.model (file = textConnection(NPN_regression),
                             data = bud.alba.list,
-                            inits = inits,
                             n.chains = 3)
 
 #Converting the output into a workable format
@@ -67,23 +73,17 @@ bud.alba.mod <- jags.model (file = textConnection(NPN_regression),
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("THRESH", "sPrec"),
-                              n.iter = 10000)
+                              variable.names = c("THRESH"),
+                              n.iter = 100000)
 
 
 #plot(bud.alba.out)
 summary(bud.alba.out)
 
-
-
-
 gelman.diag(bud.alba.out)
 
-
-#--------------------
-
 #Removing burnin before convergence occurred -- this is the model "warmup"
-burnin = 9000                                ## determine convergence from GBR output
+burnin = 90000                                ## determine convergence from GBR output
 bud.alba.burn <- window(bud.alba.out, start= burnin)
 
 

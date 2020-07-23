@@ -8,21 +8,29 @@ path.MODIS <- "../data_processed/MODIS"
 species.name <- "Q.alba"
 
 dat.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_", species.name, ".csv")))
+dat.MODIS$species <- species.name
 
 MODIS_regression <- "
   model{
     
     for(k in 1:n){
-      mu[k] <- THRESH[loc[k]]  #Combination of species Threshold and individual effect
+      mu[k] <- THRESH[sp[k]]  
       y[k] ~ dnorm(mu[k], sPrec)
+    }
+    
+    for(j in 1:nSp){
+      THRESH[j] <- Site[loc[j]] + a[j]
+      a[j] ~ dnorm(0, aPrec)
     }
 
     for(t in 1:nLoc){
-    THRESH[t] <-  c[t]
-    c[t] ~ dnorm(0, aPrec[t])
-    aPrec[t] ~ dgamma(0.1, 0.1)
+    Site[t] <-  c[t]
+    c[t] ~ dnorm(0, cPrec[t])
+    cPrec[t] ~ dgamma(0.1, 0.1)
     }
+    
     sPrec ~ dgamma(0.1, 0.1)
+    aPrec ~ dgamma(0.1, 0.1)
   }
   "
 
@@ -33,7 +41,8 @@ for(i in 1:nchain){
 }
 
 green.list <- list(y = dat.MODIS$GDD5.cum, n = length(dat.MODIS$GDD5.cum),
-                      loc = as.numeric(factor(dat.MODIS$site)), nLoc = length(unique(dat.MODIS$site)))
+                      loc = as.numeric(factor(dat.MODIS$site)), nLoc = length(unique(dat.MODIS$site)),
+                   sp=as.numeric(factor(dat.MODIS$species)) , nSp =length(unique(dat.MODIS$species)))
 
 green.mod <- jags.model (file = textConnection(MODIS_regression),
                             data = green.list,
