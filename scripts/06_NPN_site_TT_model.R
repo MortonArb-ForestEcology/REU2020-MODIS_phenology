@@ -29,16 +29,16 @@ NPN_regression <- "
 
     for(t in 1:nLoc){
     Site[t] <-  c[t] + ind[pln[t]]
-    c[t] ~ dnorm(0, cPrec)
+    c[t] ~ dnorm(0, cPrec[t])
+    cPrec[t] ~ dgamma(0.1, 0.01)
     }
     
     for(i in 1:nPln){
         ind[i] <-  b[i]
         b[i] ~ dnorm(0, bPrec)
     }
-    cPrec ~ dgamma(0.1, 0.1)
     aPrec ~ dgamma(0.1, 0.1)
-    bPrec ~ dgamma(0.1, 0.1)
+    bPrec ~ dgamma(1, 0.1)
     sPrec ~ dgamma(0.1, 0.1)
   }
   "
@@ -73,14 +73,15 @@ bud.alba.mod <- jags.model (file = textConnection(NPN_regression),
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("THRESH"),
+                              variable.names = c("Site", "cPrec", "bPrec", "THRESH", "sPrec"),
                               n.iter = 100000)
 
 
-#plot(bud.alba.out)
+gelman.diag(bud.alba.out)
+
+
 summary(bud.alba.out)
 
-gelman.diag(bud.alba.out)
 
 #Removing burnin before convergence occurred -- this is the model "warmup"
 burnin = 90000                                ## determine convergence from GBR output

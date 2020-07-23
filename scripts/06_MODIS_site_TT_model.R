@@ -51,7 +51,7 @@ green.mod <- jags.model (file = textConnection(MODIS_regression),
 
 
 green.out <- coda.samples (model = green.mod,
-                           variable.names = c("THRESH", "sPrec"),
+                           variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
                            n.iter = 10000)
 
 summary(green.out)
