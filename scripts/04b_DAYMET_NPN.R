@@ -135,11 +135,7 @@ round(quantile(dat.budburst$first.min , c(0.025, 0.975), na.rm = T), digits = 0)
 #YDAY 95 CI NPN Leaves
 round(quantile(dat.leaves$first.min , c(0.025, 0.975), na.rm = T), digits = 0)
 
-#GDD5 Threshold 95 CI NPN Budburst
-round(quantile(dat.budburst$ , c(0.025, 0.975), na.rm = T), digits = )
-
-#GDD5 Threshold95 CI NPN Leaves
-round(quantile(dat.leaves$ , c(0.025, 0.975), na.rm = T), digits = )
+#----------------------------------
 
 #number of observations for NPN Budburst
 summary(dat.budburst)
