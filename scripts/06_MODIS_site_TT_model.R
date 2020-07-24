@@ -9,7 +9,7 @@ species.name <- "Q.alba"
 
 green.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_15_", species.name, ".csv")))
 green.MODIS$species <- species.name
-midgreen.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_15_", species.name, ".csv")))
+midgreen.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_50_", species.name, ".csv")))
 midgreen.MODIS$species <- species.name
 
 
@@ -63,15 +63,12 @@ midgreen.mod <- jags.model (file = textConnection(MODIS_regression),
 
 green.out <- coda.samples (model = green.mod,
                            variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
-                           n.iter = 10000)
+                           n.iter = 100000)
 
 midgreen.out <- coda.samples (model = midgreen.mod,
                            variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
                            n.iter = 100000)
 
-
-summary(green.out)
-summary(midgreen.out)
 
 gelman.diag(green.out)
 gelman.diag(midgreen.out)
@@ -80,18 +77,20 @@ burnin = 90000
 green.burn <- window(green.out, start= burnin)
 midgreen.burn <- window(midgreen.out, start= burnin)
 
-green.stats <- as.data.frame(as.matrix(green.stats))
+green.stats <- as.data.frame(as.matrix(green.burn))
 summary(green.stats)
 
-midgreen.stats <- as.data.frame(as.matrix(midgreen.stats))
+midgreen.stats <- as.data.frame(as.matrix(midgreen.burn))
 summary(midgreen.stats)
 #--------------------------
 #summary statistics https://docs.google.com/spreadsheets/d/1c3OIhbKru-WJF3vmgUEUpltis22eYuaebYFEEPxKEtI/edit#gid=0
 
 #GDD5 Threshold 95 CI MODIS 15% Greenup
+summary(green.stats$THRESH)
 round(quantile(green.stats$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
 
 #GDD5 Threshold95 CI MODIS 50% MidGreenup
+summary(midgreen.stats$THRESH)
 round(quantile(midgreen.stats$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
 
 # save the outputs
