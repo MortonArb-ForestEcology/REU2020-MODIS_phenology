@@ -7,8 +7,11 @@ library(coda)
 path.MODIS <- "../data_processed/MODIS"
 species.name <- "Q.alba"
 
-dat.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_", species.name, ".csv")))
-dat.MODIS$species <- species.name
+green.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_15_", species.name, ".csv")))
+green.MODIS$species <- species.name
+midgreen.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_15_", species.name, ".csv")))
+midgreen.MODIS$species <- species.name
+
 
 MODIS_regression <- "
   model{
@@ -40,31 +43,59 @@ for(i in 1:nchain){
   inits[[i]] <- list(sPrec = runif(1,1/200,1/20))
 }
 
-green.list <- list(y = dat.MODIS$GDD5.cum, n = length(dat.MODIS$GDD5.cum),
-                      loc = as.numeric(factor(dat.MODIS$site)), nLoc = length(unique(dat.MODIS$site)),
-                   sp=as.numeric(factor(dat.MODIS$species)) , nSp =length(unique(dat.MODIS$species)))
+green.list <- list(y = green.MODIS$GDD5.cum, n = length(green.MODIS$GDD5.cum),
+                      loc = as.numeric(factor(green.MODIS$site)), nLoc = length(unique(green.MODIS$site)),
+                   sp=as.numeric(factor(green.MODIS$species)) , nSp =length(unique(green.MODIS$species)))
+
+midgreen.list <- list(y = midgreen.MODIS$GDD5.cum, n = length(midgreen.MODIS$GDD5.cum),
+                   loc = as.numeric(factor(midgreen.MODIS$site)), nLoc = length(unique(midgreen.MODIS$site)),
+                   sp=as.numeric(factor(midgreen.MODIS$species)) , nSp =length(unique(midgreen.MODIS$species)))
 
 green.mod <- jags.model (file = textConnection(MODIS_regression),
                             data = green.list,
                             inits = inits,
                             n.chains = 3)
 
+midgreen.mod <- jags.model (file = textConnection(MODIS_regression),
+                         data = midgreen.list,
+                         inits = inits,
+                         n.chains = 3)
 
 green.out <- coda.samples (model = green.mod,
                            variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
                            n.iter = 10000)
 
+midgreen.out <- coda.samples (model = midgreen.mod,
+                           variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
+                           n.iter = 100000)
+
+
 summary(green.out)
+summary(midgreen.out)
 
 gelman.diag(green.out)
+gelman.diag(midgreen.out)
 
-burnin = 9000 
+burnin = 90000 
 green.burn <- window(green.out, start= burnin)
+midgreen.burn <- window(midgreen.out, start= burnin)
 
 green.stats <- as.data.frame(as.matrix(green.stats))
 summary(green.stats)
 
+midgreen.stats <- as.data.frame(as.matrix(midgreen.stats))
+summary(midgreen.stats)
+#--------------------------
+#summary statistics https://docs.google.com/spreadsheets/d/1c3OIhbKru-WJF3vmgUEUpltis22eYuaebYFEEPxKEtI/edit#gid=0
+
+#GDD5 Threshold 95 CI MODIS 15% Greenup
+round(quantile(green.stats$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
+
+#GDD5 Threshold95 CI MODIS 50% MidGreenup
+round(quantile(midgreen.stats$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
+
 # save the outputs
-path.mod.firstmean <- "../data_processed/mod.firstmean.MortonArb"
-if(!dir.exists(path.mod.firstmean)) dir.create(path.mod.firstmean)
-write.csv(green.stats, file.path(path.mod.firstmean, "MODIS_THRESH_bud_firstmean_alba.csv"), row.names=F) 
+path.mod.firstmin <- "../data_processed/mod.firstmin.Q.alba"
+if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
+write.csv(green.stats, file.path(path.mod.firstmin, "MODIS_THRESH_15_alba.csv"), row.names=F) 
+write.csv(midgreen.stats, file.path(path.mod.firstmin, "MODIS_THRESH_50_alba.csv"), row.names=F) 

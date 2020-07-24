@@ -70,7 +70,7 @@ site_names <- rnpn::npn_stations()
 leaf.MODIS$site_name <- site_names$station_name[match(leaf.MODIS$site, site_names$station_id)]
 midgreen.MODIS$site_name <- site_names$station_name[match(midgreen.MODIS$site, site_names$station_id)]
 
-#Makigns ure different locations with the same name are given unique names by adding site_id
+#Making sure different locations with the same name are given unique names by adding site_id
 for(Name in unique(leaf.MODIS$site_name)){
   dat.tmp <- leaf.MODIS[leaf.MODIS$site_name == Name,]
   if(length(unique(dat.tmp$site)) >1){
@@ -79,7 +79,7 @@ for(Name in unique(leaf.MODIS$site_name)){
   leaf.MODIS[leaf.MODIS$site_name==Name, "site_name"] <- dat.tmp$site_name
 }
 
-#Makigns ure different locations with the same name are given unique names by adding site_id
+#Making sure different locations with the same name are given unique names by adding site_id
 for(Name in unique(midgreen.MODIS$site_name)){
   dat.tmp <- midgreen.MODIS[midgreen.MODIS$site_name == Name,]
   if(length(unique(dat.tmp$site)) >1){
@@ -120,11 +120,7 @@ round(quantile(leaf.MODIS$greenup.yday, c(0.025, 0.975), na.rm = T), digits = 0)
 #YDAY 95 CI MODIS 50% MidGreenup
 round(quantile(midgreen.MODIS$greenup.yday, c(0.025, 0.975), na.rm = T), digits = 0)
 
-#GDD5 Threshold 95 CI MODIS 15% Greenup
-round(quantile(leaf.MODIS$GDD5.cum, c(0.025, 0.975), na.rm = T), digits = )
-
-#GDD5 Threshold95 CI MODIS 50% MidGreenup
-round(quantile(migreen.MODIS$GDD5.cum, c(0.025, 0.975), na.rm = T), digits = )
+#---------------------------
 
 #number of observations for MODIS 15% Greenup
 summary(leaf.MODIS)
@@ -141,5 +137,6 @@ length(unique(midgreen.MODIS$site[!is.na(midgreen.MODIS$value)]))
 #Saving the outputted MODIS data which now has a GDD5.cum and actual site names
 dat.processed <- file.path("../data_processed/MODIS")
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
-write.csv(leaf.MODIS, file.path(dat.processed, paste0("MODIS_GDD5_", species.name, ".csv")), row.names=F)
+write.csv(leaf.MODIS, file.path(dat.processed, paste0("MODIS_GDD5_15_", species.name, ".csv")), row.names=F)
+write.csv(midgreen.MODIS, file.path(dat.processed, paste0("MODIS_GDD5_50_", species.name, ".csv")), row.names=F)
 
