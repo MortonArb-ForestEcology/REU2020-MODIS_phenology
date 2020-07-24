@@ -15,14 +15,6 @@ summary(alba.budburst$MinGDD5.cum)
 alba.budburst <- alba.budburst[alba.budburst$MinGDD5.cum>0,]
 alba.budburst[alba.budburst$site_id == 35869 ,]
 
-Obs <- as.data.frame(table(alba.budburst$site_id))
-colnames(Obs) <- c("Site", "Freq")
-size <- Obs[Obs$Freq > 0, ]
-
-alba.budburst <- alba.budburst[alba.budburst$site_id %in% size$Site,]
-
-alba.budburst[unique(alba.budburst$individual_id), ]
-
 ind <- aggregate(site_id~individual_id, data=alba.budburst,
           FUN=min)
 
@@ -70,6 +62,7 @@ for(i in 1:nchain){
 
 #bud burst lists for dat.budburst$MeanGDD5.cum
 bud.alba.list <- list(y = alba.budburst$MinGDD5.cum, n = length(alba.budburst$MinGDD5.cum),
+                      #The line below contains the main change. Using the ind data frame to match individuals to their sites
                       loc = as.numeric(factor(ind$site_id)), nLoc = length(unique(alba.budburst$site_id)),
                       pln = as.numeric(factor(alba.budburst$individual_id)), nPln = length(unique(alba.budburst$individual_id)),
                       sp = as.numeric(factor(alba.budburst$species)), nSp = length(unique(alba.budburst$species)))
@@ -83,7 +76,7 @@ bud.alba.mod <- jags.model (file = textConnection(NPN_regression),
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("THRESH", "Site", "ind", "sPrec", "bPrec", "cPrec", "aPrec"),
+                              variable.names = c("THRESH", "Site"),
                               n.iter = 100000)
 
 
@@ -91,11 +84,6 @@ gelman.diag(bud.alba.out)
 
 
 summary(bud.alba.out)
-
-plot(bud.alba.out)
-
-
-1/sqrt(.00000689)
 
 
 #Removing burnin before convergence occurred -- this is the model "warmup"
