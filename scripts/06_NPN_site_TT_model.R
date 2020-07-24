@@ -3,7 +3,7 @@
 library(rjags)
 library(coda)
 
-#THIS IS WHER YOU DO THINGS
+#THIS IS WHERE YOU DO THINGS
 path.NPN <- "../data_processed/NPN"
 species.name <- "Q.alba"
 
@@ -12,6 +12,8 @@ alba.budburst <- read.csv(file.path(path.NPN, paste0('Quercus_bud_GDD5_', specie
 alba.leaves <- read.csv(file.path(path.NPN, paste0('Quercus_leaf_GDD5_', species.name, '_NPN.csv')))
 head(alba.budburst)
 summary(alba.budburst)
+head(alba.leaves)
+summary(alba.leaves)
 
 
 NPN_regression <- "
@@ -55,17 +57,26 @@ for(i in 1:nchain){
 #---------------------------------------------------------#
 #Converting to list format needed for JAGs
 
-#bud burst lists for dat.budburst$MeanGDD5.cum
+#bud burst lists for dat.budburst$MinGDD5.cum
 bud.alba.list <- list(y = alba.budburst$MinGDD5.cum, n = length(alba.budburst$MinGDD5.cum),
                       loc = as.numeric(factor(alba.budburst$site_id)), nLoc = length(unique(alba.budburst$site_id)),
                       pln = as.numeric(factor(alba.budburst$individual_id)), nPln = length(unique(alba.budburst$individual_id)),
                       sp = as.numeric(factor(alba.budburst$species)), nSp = length(unique(alba.budburst$species)))
 
+#leaves lists for dat.leaves$MinGDD5.cum
+leaf.alba.list <- list(y = alba.leaves$MinGDD5.cum, n = length(alba.leaves$MinGDD5.cum),
+                       loc = as.numeric(factor(alba.leaves$site_id)), nLoc = length(unique(alba.leaves$site_id)),
+                       pln = as.numeric(factor(alba.leaves$individual_id)), nPln = length(unique(alba.leaves$individual_id)),
+                       sp = as.numeric(factor(alba.leaves$species)), nSp = length(unique(alba.leaves$species)))
 
 
 
 bud.alba.mod <- jags.model (file = textConnection(NPN_regression),
                             data = bud.alba.list,
+                            n.chains = 3)
+
+leaf.alba.mod <- jags.model (file = textConnection(NPN_regression),
+                            data = leaf.alba.list,
                             n.chains = 3)
 
 #Converting the output into a workable format
@@ -76,23 +87,32 @@ bud.alba.out <- coda.samples (model = bud.alba.mod,
                               variable.names = c("Site", "cPrec", "bPrec", "THRESH", "sPrec"),
                               n.iter = 100000)
 
+leaf.alba.out <- coda.samples (model = leaf.alba.mod,
+                              variable.names = c("Site", "cPrec", "bPrec", "THRESH", "sPrec"),
+                              n.iter = 100000)
 
 gelman.diag(bud.alba.out)
-
+gelman.diag(leaf.alba.out)
+#site convergence is not right yet
 
 summary(bud.alba.out)
-
+summary(leaf.alba.out)
 
 #Removing burnin before convergence occurred -- this is the model "warmup"
 burnin = 90000                                ## determine convergence from GBR output
 bud.alba.burn <- window(bud.alba.out, start= burnin)
+leaf.alba.burn <- window(leaf.alba.out, start= burnin)
 
 
 bud.stats.alba <- as.data.frame(as.matrix(bud.alba.burn))
 summary(bud.stats.alba)
 
+leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
+summary(leaf.stats.alba)
+
 # save the outputs
-path.mod.firstmean <- "../data_processed/mod.firstmean.MortonArb"
-if(!dir.exists(path.mod.firstmean)) dir.create(path.mod.firstmean)
-write.csv(bud.stats.alba, file.path(path.mod.firstmean, "THRESH_bud_firstmean_alba.csv"), row.names=F) 
+path.mod.firstmin <- "../data_processed/mod.firstmin.MortonArb"
+if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
+write.csv(bud.stats.alba, file.path(path.mod.firstmin, "THRESH_bud_firstmin_alba.csv"), row.names=F) 
+write.csv(leaf.stats.alba, file.path(path.mod.firstmin, "THRESH_leaf_firstmin_alba.csv"), row.names=F) 
 
