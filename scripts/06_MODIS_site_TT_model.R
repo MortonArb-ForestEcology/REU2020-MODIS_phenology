@@ -82,6 +82,24 @@ summary(green.stats)
 
 midgreen.stats <- as.data.frame(as.matrix(midgreen.burn))
 summary(midgreen.stats)
+
+#--------------------------
+#visualization
+#MODIS.stats <- rbind(green.stats) #need to combine the green.stats and midgreen.stats objects to visualize them together
+  
+library(ggplot2)
+path.figures <- "../figures"
+if(!dir.exists(path.figures)) dir.create(path.figures)
+#png(width= 750, filename= file.path(path.figures, paste0('Thresh_MODIS_', species.name, '.png')))
+ggplot(data= green.stats) +
+  ggtitle('Thermal Time Thresholds at First Minimum leaf Onset of Quercus at The Morton Arboretum') +
+  geom_density(mapping = aes(x= THRESH), alpha=0.5) +
+  scale_color_manual(values= "darkblue") +
+  scale_fill_manual(values= "darkblue")  +
+  scale_x_continuous('Thermal Time Threshold Minimum (5C Growing Degree Days)') +
+  scale_y_continuous('DENSITY (%)')
+dev.off()
+
 #--------------------------
 #summary statistics https://docs.google.com/spreadsheets/d/1c3OIhbKru-WJF3vmgUEUpltis22eYuaebYFEEPxKEtI/edit#gid=0
 
