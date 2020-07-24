@@ -10,8 +10,10 @@ species.name <- "Q.alba"
 #-----------------------------
 alba.budburst <- read.csv(file.path(path.NPN, paste0('Quercus_bud_GDD5_', species.name, '_NPN.csv')))
 alba.leaves <- read.csv(file.path(path.NPN, paste0('Quercus_leaf_GDD5_', species.name, '_NPN.csv')))
+
 head(alba.budburst)
 summary(alba.budburst)
+
 head(alba.leaves)
 summary(alba.leaves)
 
@@ -105,14 +107,26 @@ leaf.alba.burn <- window(leaf.alba.out, start= burnin)
 
 
 bud.stats.alba <- as.data.frame(as.matrix(bud.alba.burn))
-summary(bud.stats.alba)
+summary(bud.stats.alba$THRESH) #look for THRESH Mean
 
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
-summary(leaf.stats.alba)
+summary(leaf.stats.alba$THRESH) #look for THRESH Mean
+
+#-----------------------
+#summary statistics https://docs.google.com/spreadsheets/d/1c3OIhbKru-WJF3vmgUEUpltis22eYuaebYFEEPxKEtI/edit#gid=0
+
+#GDD5 Threshold 95 CI NPN Budburst
+
+round(quantile(bud.stats.alba$THRESH , c(0.025, 0.975), na.rm = T), digits = 1)
+
+#GDD5 Threshold95 CI NPN Leaves
+round(quantile(leaf.stats.alba$THRESH , c(0.025, 0.975), na.rm = T), digits = 1)
+
+#----------------------
 
 # save the outputs
-path.mod.firstmin <- "../data_processed/mod.firstmin.MortonArb"
+path.mod.firstmin <- "../data_processed/mod.firstmin.Q.alba"
 if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
-write.csv(bud.stats.alba, file.path(path.mod.firstmin, "THRESH_bud_firstmin_alba.csv"), row.names=F) 
-write.csv(leaf.stats.alba, file.path(path.mod.firstmin, "THRESH_leaf_firstmin_alba.csv"), row.names=F) 
+write.csv(bud.stats.alba, file.path(path.mod.firstmin, "THRESH_bud_NPN_alba.csv"), row.names=F) 
+write.csv(leaf.stats.alba, file.path(path.mod.firstmin, "THRESH_leaf_NPN_alba.csv"), row.names=F) 
 
