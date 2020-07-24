@@ -15,27 +15,27 @@ midgreen.MODIS$species <- species.name
 
 MODIS_regression <- "
   model{
-    
+  
     for(k in 1:n){
-      mu[k] <- THRESH[sp[k]]  
-      y[k] ~ dnorm(mu[k], sPrec)
+        mu[k] <- Site[loc[k]]  
+        y[k] ~ dnorm(mu[k], sPrec)
     }
-    
+      
     for(j in 1:nSp){
-      THRESH[j] <- Site[loc[j]] + a[j]
+      THRESH[j] <-  a[j]
       a[j] ~ dnorm(0, aPrec)
     }
 
     for(t in 1:nLoc){
-    Site[t] <-  c[t]
-    c[t] ~ dnorm(0, cPrec[t])
-    cPrec[t] ~ dgamma(0.1, 0.1)
+      Site[t] <-  THRESH[sp[t]] + b[t]
+      b[t] ~ dnorm(0, bPrec[t])
+      bPrec[t] ~ dgamma(0.1, 0.1)
     }
-    
+
     sPrec ~ dgamma(0.1, 0.1)
     aPrec ~ dgamma(0.1, 0.1)
   }
-  "
+"
 
 nchain = 3
 inits <- list()
