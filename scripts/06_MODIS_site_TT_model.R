@@ -9,6 +9,7 @@ species.name <- "Q.alba"
 
 dat.MODIS <- read.csv(file.path(path.MODIS, paste0("MODIS_GDD5_", species.name, ".csv")))
 dat.MODIS$species <- species.name
+#st up for read is of both greenup and midgreenup
 
 MODIS_regression <- "
   model{
