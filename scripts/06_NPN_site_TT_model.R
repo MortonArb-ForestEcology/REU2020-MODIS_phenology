@@ -2,6 +2,7 @@
 
 library(rjags)
 library(coda)
+library(ggplot2)
 
 #THIS IS WHERE YOU DO THINGS
 path.NPN <- "../data_processed/NPN"
@@ -91,11 +92,11 @@ leaf.alba.mod <- jags.model (file = textConnection(NPN_regression),
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("THRESH", "Site"),
+                              variable.names = c("THRESH", "aPrec"),
                               n.iter = 100000)
 
 leaf.alba.out <- coda.samples (model = leaf.alba.mod,
-                              variable.names = c("THRESH", "Site"),
+                              variable.names = c("THRESH", "aPrec"),
                               n.iter = 100000)
 
 
@@ -128,6 +129,11 @@ leaf.stats.alba$name <- as.factor(leaf.stats.alba$name)
 leaf.stats.alba$type <- as.factor(leaf.stats.alba$type)
 
 summary(NPN.stats)
+
+bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
+
+THRESH.ci <- apply(as.matrix(bud.stats.alba$THRESH),2,quantile,c(0.055,0.5,0.945))
+sd.ci <- apply(as.matrix(bud.stats.alba$sd),2,quantile,c(0.055,0.5,0.945))
 
 library(ggplot2)
 path.figures <- "../figures"
