@@ -19,22 +19,18 @@ alba.budburst[alba.budburst$site_id == 35869 ,]
 
 #how to exactly describe this?
 bud.ind <- aggregate(site_id~individual_id, data=alba.budburst,
-          FUN=min)
+                     FUN=min)
 
 leaves.ind <- aggregate(site_id~individual_id, data=alba.leaves,
-                     FUN=min)
+                        FUN=min)
 
 NPN_regression <- "
   model{
-  
-    for(k in 1:n){
-        mu[k] <- ind[pln[k]]  
-        y[k] ~ dnorm(mu[k], sPrec)
-    }
       
     for(j in 1:nSp){
       THRESH[j] <-  a[j]
-      a[j] ~ dnorm(0, aPrec)
+      a[j] ~ dnorm(120, aPrec)
+      aPrec[j] ~ dgamma(0.1, 0.1)
     }
 
     for(t in 1:nLoc){
@@ -44,13 +40,17 @@ NPN_regression <- "
     }
     
     for(i in 1:nPln){
-        ind[i] <-  Site[loc[i]] + c[i]
-        c[i] ~ dnorm(0, cPrec)
+        ind[i] <-  Site[loc[i]] * c[i]
+        c[i] ~ dnorm(1, cPrec)
     }
     
+    for(k in 1:n){
+        mu[k] <- ind[pln[k]]  
+        y[k] ~ dnorm(mu[k], sPrec)
+    }
     sPrec ~ dgamma(0.1, 0.1)
-    aPrec ~ dgamma(0.1, 0.1)
     cPrec ~ dgamma(0.1, 0.1)
+
   }
 "
 
@@ -75,10 +75,10 @@ bud.alba.list <- list(y = alba.budburst$MinGDD5.cum, n = length(alba.budburst$Mi
 
 #bud burst lists for dat.leaves$MinGDD5.cum
 leaf.alba.list <- list(y = alba.leaves$MinGDD5.cum, n = length(alba.leaves$MinGDD5.cum),
-                      #The line below contains the main change. Using the ind data frame to match individuals to their sites
-                      loc = as.numeric(factor(leaves.ind$site_id)), nLoc = length(unique(alba.leaves$site_id)),
-                      pln = as.numeric(factor(alba.leaves$individual_id)), nPln = length(unique(alba.leaves$individual_id)),
-                      sp = as.numeric(factor(alba.leaves$species)), nSp = length(unique(alba.leaves$species)))
+                       #The line below contains the main change. Using the ind data frame to match individuals to their sites
+                       loc = as.numeric(factor(leaves.ind$site_id)), nLoc = length(unique(alba.leaves$site_id)),
+                       pln = as.numeric(factor(alba.leaves$individual_id)), nPln = length(unique(alba.leaves$individual_id)),
+                       sp = as.numeric(factor(alba.leaves$species)), nSp = length(unique(alba.leaves$species)))
 
 
 
@@ -87,17 +87,17 @@ bud.alba.mod <- jags.model (file = textConnection(NPN_regression),
                             n.chains = 3)
 
 leaf.alba.mod <- jags.model (file = textConnection(NPN_regression),
-                            data = leaf.alba.list,
-                            n.chains = 3)
+                             data = leaf.alba.list,
+                             n.chains = 3)
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("THRESH", "aPrec"),
+                              variable.names = c("THRESH"),
                               n.iter = 100000)
 
 leaf.alba.out <- coda.samples (model = leaf.alba.mod,
-                              variable.names = c("THRESH", "aPrec"),
-                              n.iter = 100000)
+                               variable.names = c("THRESH"),
+                               n.iter = 100000)
 
 
 gelman.diag(bud.alba.out)
@@ -115,16 +115,17 @@ summary(bud.stats.alba)
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
 summary(leaf.stats.alba)
 
-bud.stats.alba <- bud.stats.alba
 
 #Converting back into sd
-bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
+#bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
+#leaf.stats.alba$sd <- 1/sqrt(leaf.stats.alba[,"aPrec"])
 
-bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
 
-colnames(bud.density) <- c("THRESH")
+#bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
+#leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
 
-ci <- apply(as.matrix(bud.density),2,quantile,c(0.055,0.5,0.945))
+#bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.125,0.5,0.875))
+#leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.125,0.5,0.875))
 
 #--------------------------
 #visualization
@@ -146,7 +147,7 @@ library(ggplot2)
 path.figures <- "../figures"
 if(!dir.exists(path.figures)) dir.create(path.figures)
 png(width= 750, filename= file.path(path.figures, paste0('Thresh_NPN_GDD5', species.name, '.png')))
-ggplot(data= leaf.stats.alba) +
+ggplot(data= bud.stats.alba) +
   ggtitle('Thermal Time Thresholds of two NPN metrics at sites of data for Quercus alba from 2008-2019') +
   geom_density(mapping = aes(x= THRESH, fill = name, color = name), alpha=0.5) +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
