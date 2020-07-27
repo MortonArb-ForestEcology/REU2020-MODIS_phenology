@@ -115,6 +115,13 @@ summary(bud.stats.alba)
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
 summary(leaf.stats.alba)
 
+#Converting back into sd
+bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
+
+bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
+
+ci <- apply(as.matrix(bud.density),2,quantile,c(0.055,0.5,0.945))
+
 #--------------------------
 #visualization
 bud.stats.alba$name <- 'Breaking Leaf Buds'
@@ -130,10 +137,6 @@ leaf.stats.alba$type <- as.factor(leaf.stats.alba$type)
 
 summary(NPN.stats)
 
-bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
-
-THRESH.ci <- apply(as.matrix(bud.stats.alba$THRESH),2,quantile,c(0.055,0.5,0.945))
-sd.ci <- apply(as.matrix(bud.stats.alba$sd),2,quantile,c(0.055,0.5,0.945))
 
 library(ggplot2)
 path.figures <- "../figures"
