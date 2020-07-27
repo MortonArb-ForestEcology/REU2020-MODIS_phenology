@@ -3,7 +3,7 @@
 library(rjags)
 library(coda)
 
-#THIS IS WHER YOU DO THINGS
+#THIS IS WHERE YOU DO THINGS
 path.MODIS <- "../data_processed/MODIS"
 species.name <- "Q.alba"
 
@@ -85,18 +85,24 @@ summary(midgreen.stats)
 
 #--------------------------
 #visualization
-#MODIS.stats <- rbind(green.stats) #need to combine the green.stats and midgreen.stats objects to visualize them together
-  
+green.stats$name <- '15% Greenup'
+midgreen.stats$name <- '50% MidGreenup'
+green.stats$type <- 'MODIS'
+midgreen.stats$type <- 'MODIS'
+
+MODIS.stats <- rbind(green.stats, midgreen.stats)
+MODIS.stats$name <- as.factor(MODIS.stats$name)
+MODIS.stats$type <- as.factor(MODIS.stats$type)
+summary(MODIS.stats)
+
 library(ggplot2)
 path.figures <- "../figures"
 if(!dir.exists(path.figures)) dir.create(path.figures)
-#png(width= 750, filename= file.path(path.figures, paste0('Thresh_MODIS_', species.name, '.png')))
-ggplot(data= green.stats) +
-  ggtitle('Thermal Time Thresholds at First Minimum leaf Onset of Quercus at The Morton Arboretum') +
-  geom_density(mapping = aes(x= THRESH), alpha=0.5) +
-  scale_color_manual(values= "darkblue") +
-  scale_fill_manual(values= "darkblue")  +
-  scale_x_continuous('Thermal Time Threshold Minimum (5C Growing Degree Days)') +
+png(width= 750, filename= file.path(path.figures, paste0('Thresh_MODIS_GDD5', species.name, '.png')))
+ggplot(data= MODIS.stats) +
+  ggtitle('Thermal Time Thresholds of two MODIS metrics at sites of NPN data for Quercus alba from 2001-2018') +
+  geom_density(mapping = aes(x= THRESH, fill = name, color = name), alpha=0.5) +
+  scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (%)')
 dev.off()
 
