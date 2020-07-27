@@ -92,7 +92,7 @@ leaf.alba.mod <- jags.model (file = textConnection(NPN_regression),
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("ind", "sPrec", "cPrec"),
+                              variable.names = c("THRESH"),
                               n.iter = 100000)
 
 leaf.alba.out <- coda.samples (model = leaf.alba.mod,
