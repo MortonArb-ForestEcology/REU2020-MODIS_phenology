@@ -17,8 +17,11 @@ alba.budburst[alba.budburst$site_id == 35869 ,]
 
 
 #how to exactly describe this?
-ind <- aggregate(site_id~individual_id, data=alba.leaves,
+bud.ind <- aggregate(site_id~individual_id, data=alba.budburst,
           FUN=min)
+
+leaves.ind <- aggregate(site_id~individual_id, data=alba.leaves,
+                     FUN=min)
 
 NPN_regression <- "
   model{
@@ -65,14 +68,14 @@ for(i in 1:nchain){
 #bud burst lists for dat.budburst$MinGDD5.cum
 bud.alba.list <- list(y = alba.budburst$MinGDD5.cum, n = length(alba.budburst$MinGDD5.cum),
                       #The line below contains the main change. Using the ind data frame to match individuals to their sites
-                      loc = as.numeric(factor(ind$site_id)), nLoc = length(unique(alba.budburst$site_id)),
+                      loc = as.numeric(factor(bud.ind$site_id)), nLoc = length(unique(alba.budburst$site_id)),
                       pln = as.numeric(factor(alba.budburst$individual_id)), nPln = length(unique(alba.budburst$individual_id)),
                       sp = as.numeric(factor(alba.budburst$species)), nSp = length(unique(alba.budburst$species)))
 
 #bud burst lists for dat.leaves$MinGDD5.cum
 leaf.alba.list <- list(y = alba.leaves$MinGDD5.cum, n = length(alba.leaves$MinGDD5.cum),
                       #The line below contains the main change. Using the ind data frame to match individuals to their sites
-                      loc = as.numeric(factor(ind$site_id)), nLoc = length(unique(alba.leaves$site_id)),
+                      loc = as.numeric(factor(leaves.ind$site_id)), nLoc = length(unique(alba.leaves$site_id)),
                       pln = as.numeric(factor(alba.leaves$individual_id)), nPln = length(unique(alba.leaves$individual_id)),
                       sp = as.numeric(factor(alba.leaves$species)), nSp = length(unique(alba.leaves$species)))
 
