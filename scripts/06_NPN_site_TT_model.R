@@ -67,14 +67,14 @@ for(i in 1:nchain){
 #Converting to list format needed for JAGs
 
 #bud burst lists for dat.budburst$MinGDD5.cum
-bud.alba.list <- list(y = alba.budburst$MinGDD5.cum, n = length(alba.budburst$MinGDD5.cum),
+bud.alba.list <- list(y = log(alba.budburst$MinGDD5.cum), n = length(alba.budburst$MinGDD5.cum),
                       #The line below contains the main change. Using the ind data frame to match individuals to their sites
                       loc = as.numeric(factor(bud.ind$site_id)), nLoc = length(unique(alba.budburst$site_id)),
                       pln = as.numeric(factor(alba.budburst$individual_id)), nPln = length(unique(alba.budburst$individual_id)),
                       sp = as.numeric(factor(alba.budburst$species)), nSp = length(unique(alba.budburst$species)))
 
 #bud burst lists for dat.leaves$MinGDD5.cum
-leaf.alba.list <- list(y = alba.leaves$MinGDD5.cum, n = length(alba.leaves$MinGDD5.cum),
+leaf.alba.list <- list(y = log(alba.leaves$MinGDD5.cum), n = length(alba.leaves$MinGDD5.cum),
                       #The line below contains the main change. Using the ind data frame to match individuals to their sites
                       loc = as.numeric(factor(leaves.ind$site_id)), nLoc = length(unique(alba.leaves$site_id)),
                       pln = as.numeric(factor(alba.leaves$individual_id)), nPln = length(unique(alba.leaves$individual_id)),
@@ -114,6 +114,8 @@ summary(bud.stats.alba)
 
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
 summary(leaf.stats.alba)
+
+bud.stats.alba <- exp(bud.stats.alba)
 
 #Converting back into sd
 bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
