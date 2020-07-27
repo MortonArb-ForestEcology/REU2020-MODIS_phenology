@@ -10,3 +10,4 @@ scripts/.Rhistory
 scripts/.Rhistory
 *.png
 scripts/04b_Full_TT_model.R
+scripts/06_NPN_site_TT_model.R
