@@ -14,6 +14,8 @@ alba.leaves <- read.csv(file.path(path.NPN, paste0('Quercus_leaf_GDD5_', species
 head(alba.budburst)
 summary(alba.budburst$MinGDD5.cum)
 alba.budburst <- alba.budburst[alba.budburst$MinGDD5.cum>0,]
+alba.leaves <- alba.leaves[alba.leaves$MinGDD5.cum>0,]
+
 alba.budburst[alba.budburst$site_id == 35869 ,]
 
 
@@ -115,31 +117,36 @@ summary(bud.stats.alba)
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
 summary(leaf.stats.alba)
 
-bud.stats.alba <- bud.stats.alba
 
 #Converting back into sd
 bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
+leaf.stats.alba$sd <- 1/sqrt(leaf.stats.alba[,"aPrec"])
 
 bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
+leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
 
-ci <- apply(as.matrix(bud.density),2,quantile,c(0.055,0.5,0.945))
+colnames(bud.density) <- c('THRESH')
+colnames(leaf.density) <- c('THRESH')
+
+summary(bud.density)
+
+bud.density$name <- 'Breaking Leaf Buds'
+leaf.density$name <- 'Leaves'
+bud.density$type <- 'NPN'
+leaf.density$type <- 'NPN'
+
+bud.density$name <- as.factor(bud.density$name)
+bud.density$type <- as.factor(bud.density$type)
+
+leaf.density$name <- as.factor(leaf.density$name)
+leaf.density$type <- as.factor(leaf.density$type)
+
+#this is wonky! do not use unless you are Andrew for right now
+NPN.stats <- rbind(bud.density, leaf.density)
+summary(NPN.stats)
 
 #--------------------------
 #visualization
-bud.stats.alba$name <- 'Breaking Leaf Buds'
-leaf.stats.alba$name <- 'Leaves'
-bud.stats.alba$type <- 'NPN'
-leaf.stats.alba$type <- 'NPN'
-
-#this is wonky! do not use unless you are Andrew for right now
-NPN.stats <- rbind(bud.stats.alba, leaf.stats.alba)
-
-leaf.stats.alba$name <- as.factor(leaf.stats.alba$name)
-leaf.stats.alba$type <- as.factor(leaf.stats.alba$type)
-
-summary(NPN.stats)
-
-
 library(ggplot2)
 path.figures <- "../figures"
 if(!dir.exists(path.figures)) dir.create(path.figures)
@@ -154,6 +161,11 @@ dev.off()
 #--------------------------
 #summary statistics https://docs.google.com/spreadsheets/d/1c3OIhbKru-WJF3vmgUEUpltis22eYuaebYFEEPxKEtI/edit#gid=0
 
+#After the log version
+bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.055,0.5,0.945))
+leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.055,0.5,0.945))
+View(bud.ci)
+View(leaf.ci)
 #GDD5 Threshold 95 CI for NPN Breaking Leaf Buds Greenup
 round(summary(bud.stats.alba$THRESH), digits = 1)
 round(quantile(bud.stats.alba$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
