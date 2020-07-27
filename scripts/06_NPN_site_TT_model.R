@@ -36,7 +36,7 @@ NPN_regression <- "
     for(t in 1:nLoc){
       Site[t] <-  THRESH[sp[t]] + b[t]
       b[t] ~ dnorm(0, bPrec[t])
-      bPrec[t] ~ dgamma(0.1, 0.1)
+      bPrec[t] ~ dgamma(1, 0.1)
     }
     
     for(i in 1:nPln){
@@ -57,7 +57,7 @@ NPN_regression <- "
 nchain = 3
 inits <- list()
 for(i in 1:nchain){
-  inits[[i]] <- list(sPrec = runif(1,1/200,1/20))
+  inits[[i]] <- list(bPrec = runif(1,1/2000,1/200))
 }
 
 
@@ -92,7 +92,7 @@ leaf.alba.mod <- jags.model (file = textConnection(NPN_regression),
 
 
 bud.alba.out <- coda.samples (model = bud.alba.mod,
-                              variable.names = c("THRESH"),
+                              variable.names = c("ind", "sPrec", "cPrec"),
                               n.iter = 100000)
 
 leaf.alba.out <- coda.samples (model = leaf.alba.mod,
@@ -147,9 +147,9 @@ library(ggplot2)
 path.figures <- "../figures"
 if(!dir.exists(path.figures)) dir.create(path.figures)
 png(width= 750, filename= file.path(path.figures, paste0('Thresh_NPN_GDD5', species.name, '.png')))
-ggplot(data= bud.stats.alba) +
+ggplot(data= NPN.stats) +
   ggtitle('Thermal Time Thresholds of two NPN metrics at sites of data for Quercus alba from 2008-2019') +
-  geom_density(mapping = aes(x= THRESH, fill = name, color = name), alpha=0.5) +
+  geom_histogram(mapping = aes(x= THRESH, fill = name, color = name),stat="density", alpha=0.5) +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (%)')
 dev.off()
