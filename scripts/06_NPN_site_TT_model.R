@@ -130,20 +130,19 @@ summary(leaf.stats.alba)
 #bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.125,0.5,0.875))
 #leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.125,0.5,0.875))
 
-bud.density$name <- 'Breaking Leaf Buds'
-leaf.density$name <- 'Leaves'
-bud.density$type <- 'NPN'
-leaf.density$type <- 'NPN'
+bud.stats.alba$metric <- 'Breaking Leaf Buds'
+leaf.stats.alba$metric <- 'Leaves'
+bud.stats.alba$type <- 'NPN'
+leaf.stats.alba$type <- 'NPN'
 
-bud.density$name <- as.factor(bud.density$name)
-bud.density$type <- as.factor(bud.density$type)
+bud.stats.alba$metric <- as.factor(bud.stats.alba$metric)
+bud.stats.alba$type <- as.factor(bud.stats.alba$type)
 
-leaf.density$name <- as.factor(leaf.density$name)
-leaf.density$type <- as.factor(leaf.density$type)
+leaf.stats.alba$metric <- as.factor(leaf.stats.alba$metric)
+leaf.stats.alba$type <- as.factor(leaf.stats.alba$type)
 
-#this is wonky! do not use unless you are Andrew for right now
-NPN.stats <- rbind(bud.density, leaf.density)
-summary(NPN.stats)
+NPN.stats <- rbind(bud.stats.alba, leaf.stats.alba)
+head(NPN.stats)
 
 #--------------------------
 #visualization
@@ -153,30 +152,30 @@ if(!dir.exists(path.figures)) dir.create(path.figures)
 png(width= 750, filename= file.path(path.figures, paste0('Thresh_NPN_GDD5', species.name, '.png')))
 ggplot(data= NPN.stats) +
   ggtitle('Thermal Time Thresholds of two NPN metrics at sites of data for Quercus alba from 2008-2019') +
-  geom_histogram(mapping = aes(x= THRESH, fill = name, color = name),stat="density", alpha=0.5) +
+  geom_density(mapping = aes(x= THRESH, fill = metric, color = metric), alpha=0.5) +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
-  scale_y_continuous('DENSITY (%)')
+  scale_y_continuous('DENSITY (Probability)')
 dev.off()
 
 #--------------------------
 #summary statistics https://docs.google.com/spreadsheets/d/1c3OIhbKru-WJF3vmgUEUpltis22eYuaebYFEEPxKEtI/edit#gid=0
 
-#After the log version
-bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.055,0.5,0.945))
-leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.055,0.5,0.945))
-View(bud.ci)
-View(leaf.ci)
+
 #GDD5 Threshold 95 CI for NPN Breaking Leaf Buds Greenup
-round(summary(bud.stats.alba$THRESH), digits = 1)
-round(quantile(bud.stats.alba$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
+bud.ci <- round(apply(as.matrix(bud.stats.alba$THRESH),2,quantile,c(0.05,0.5,0.95)), digits =1)
+bud.ci
 
 #GDD5 Threshold95 CI for NPN Leaves
-round(summary(leaf.stats.alba$THRESH), digits = 1)
-round(quantile(leaf.stats.alba$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
+leaf.ci <- round(apply(as.matrix(leaf.stats.alba$THRESH),2,quantile,c(0.05,0.5,0.95)), digits = 1)
+leaf.ci
+#-------------------------
 
 # save the outputs
 path.mod.firstmin <- "../data_processed/mod.firstmin.Q.alba"
 if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
 write.csv(bud.stats.alba, file.path(path.mod.firstmin, "THRESH_bud_firstmin_alba.csv"), row.names=F) 
-write.csv(leaf.stats.alba, file.path(path.mod.firstmin, "THRESH_bud_firstmin_alba.csv"), row.names=F) 
+write.csv(leaf.stats.alba, file.path(path.mod.firstmin, "THRESH_leaf_firstmin_alba.csv"), row.names=F)
+write.csv(NPN.stats, file.path(path.mod.firstmin, "THRESH_NPN_firstmin_alba.csv"), row.names=F)
+
+
 

@@ -62,11 +62,11 @@ midgreen.mod <- jags.model (file = textConnection(MODIS_regression),
                          n.chains = 3)
 
 green.out <- coda.samples (model = green.mod,
-                           variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
+                           variable.names = c("THRESH"),
                            n.iter = 100000)
 
 midgreen.out <- coda.samples (model = midgreen.mod,
-                           variable.names = c("THRESH", "sPrec", "Site", "aPrec", "cPrec"),
+                           variable.names = c("THRESH"),
                            n.iter = 100000)
 
 
@@ -85,15 +85,15 @@ summary(midgreen.stats)
 
 #--------------------------
 #visualization
-green.stats$name <- '15% Greenup'
-midgreen.stats$name <- '50% MidGreenup'
+green.stats$metric <- '15% Greenup'
+midgreen.stats$metric <- '50% MidGreenup'
 green.stats$type <- 'MODIS'
 midgreen.stats$type <- 'MODIS'
 
 MODIS.stats <- rbind(green.stats, midgreen.stats)
-MODIS.stats$name <- as.factor(MODIS.stats$name)
+MODIS.stats$metric <- as.factor(MODIS.stats$metric)
 MODIS.stats$type <- as.factor(MODIS.stats$type)
-summary(MODIS.stats)
+head(MODIS.stats)
 
 library(ggplot2)
 path.figures <- "../figures"
@@ -101,9 +101,9 @@ if(!dir.exists(path.figures)) dir.create(path.figures)
 png(width= 750, filename= file.path(path.figures, paste0('Thresh_MODIS_GDD5', species.name, '.png')))
 ggplot(data= MODIS.stats) +
   ggtitle('Thermal Time Thresholds of two MODIS metrics at sites of NPN data for Quercus alba from 2001-2018') +
-  geom_density(mapping = aes(x= THRESH, fill = name, color = name), alpha=0.5) +
+  geom_density(mapping = aes(x= THRESH, fill = metric, color = metric), alpha=0.5) +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
-  scale_y_continuous('DENSITY (%)')
+  scale_y_continuous('DENSITY (Probability)')
 dev.off()
 
 #--------------------------
@@ -111,14 +111,15 @@ dev.off()
 
 #GDD5 Threshold 95 CI MODIS 15% Greenup
 summary(green.stats$THRESH)
-round(quantile(green.stats$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
+round(quantile(green.stats$THRESH, c(0.05, 0.5, 0.95), na.rm = T), digits = 1)
 
 #GDD5 Threshold95 CI MODIS 50% MidGreenup
 summary(midgreen.stats$THRESH)
-round(quantile(midgreen.stats$THRESH, c(0.025, 0.975), na.rm = T), digits = 1)
+round(quantile(midgreen.stats$THRESH, c(0.05, 0.5, 0.95), na.rm = T), digits = 1)
 
 # save the outputs
 path.mod.firstmin <- "../data_processed/mod.firstmin.Q.alba"
 if(!dir.exists(path.mod.firstmin)) dir.create(path.mod.firstmin)
 write.csv(green.stats, file.path(path.mod.firstmin, "MODIS_THRESH_15_alba.csv"), row.names=F) 
 write.csv(midgreen.stats, file.path(path.mod.firstmin, "MODIS_THRESH_50_alba.csv"), row.names=F) 
+write.csv(MODIS.stats, file.path(path.mod.firstmin, "THRESH_MODIS_alba.csv"), row.names=F) 
