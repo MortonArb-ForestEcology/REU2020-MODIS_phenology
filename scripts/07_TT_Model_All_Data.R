@@ -26,6 +26,8 @@ png(width= 750, filename= file.path(path.figures, paste0('THRESHOLDS_GDD5_', spe
 ggplot(data= Q.alba.stats) +
   ggtitle('Thermal Time Thresholds for NPN and MODIS metrics at sites of data for Quercus alba') +
   geom_density(mapping = aes(x= THRESH, fill = metric, color = metric), alpha=0.5) +
+  scale_color_manual(values=c("coral2", "coral3", "darkolivegreen", "darkgreen")) +
+  scale_fill_manual(values=c("coral2", "coral3", "darkolivegreen", "darkgreen"))  +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (Probability)')
 dev.off()
