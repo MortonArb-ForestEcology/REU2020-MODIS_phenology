@@ -22,7 +22,7 @@ unique(Q.alba.stats$metric)
 library(ggplot2)
 path.figures <- "../figures"
 if(!dir.exists(path.figures)) dir.create(path.figures)
-png(width= 750, filename= file.path(path.figures, paste0('THRESHOLDS_GDD5', species.name, '.png')))
+png(width= 750, filename= file.path(path.figures, paste0('THRESHOLDS_GDD5_', species.name, '.png')))
 ggplot(data= Q.alba.stats) +
   ggtitle('Thermal Time Thresholds for NPN and MODIS metrics at sites of data for Quercus alba') +
   geom_density(mapping = aes(x= THRESH, fill = metric, color = metric), alpha=0.5) +
@@ -34,3 +34,4 @@ dev.off()
 path.mod <- "../data_processed/Q.alba.model"
 if(!dir.exists(path.mod)) dir.create(path.mod)
 write.csv(Q.alba.stats, file.path(path.mod, paste0('THRESHOLDS_GDD5_', species.name, '.csv')), row.names=F) 
+
