@@ -17,8 +17,8 @@ dat.leaves <- read.csv(file.path(path.clean, paste0('NPN_Quercus_leaf_', species
 dat.budburst <- read.csv(file.path(path.clean, paste0('NPN_Quercus_bud_', species.name, '.csv')))
 
 #----------------------------
-head(dat.budburst)
-head(dat.leaves)
+View(dat.budburst)
+View(dat.leaves)
 
 #the yday values from NPN and DAYMET are rounded to different decimals. One has to conform to the other.
 dat.budburst$first.min <- round(dat.budburst$first.min, digits = 0)
@@ -105,7 +105,7 @@ ggplot() +
   coord_fixed(1.3) +
   ggtitle("Map of NPN sites where 'Breaking Leaf Buds' for Q. alba was observed from 2000-2019") +
   geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill=NA, color="black") +
-  geom_point(data=dat.budburst, aes(x=longitude, y=latitude), alpha=0.75) +
+  geom_point(data=dat.budburst, aes(x=longitude, y=latitude, color = 'red'), alpha=0.75) +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
         axis.text=element_blank(),
@@ -155,7 +155,7 @@ ggplot() +
   coord_fixed(1.3) +
   ggtitle("Map of NPN sites where 'Leaves' for Q. alba was observed from 2000-2019") +
   geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill=NA, color="black") +
-  geom_point(data=dat.leaves, aes(x=longitude, y=latitude), alpha=0.75) +
+  geom_point(data=dat.leaves, aes(x=longitude, y=latitude, color = 'red'), alpha=0.75) +
   theme(panel.background = element_blank(),
         panel.grid = element_blank(),
         axis.text=element_blank(),
