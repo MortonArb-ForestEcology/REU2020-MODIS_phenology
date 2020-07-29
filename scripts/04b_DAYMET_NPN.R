@@ -207,19 +207,14 @@ All.MODIS <- merge(short.green, short.midgreen, by=c("site", "YEAR"))
 All.dat <- merge(All.NPN, All.MODIS, by=c("site", "YEAR"))
 head(All.dat)
 
-#1 date of "Spring"
-ggplot(data = All.dat) +
-  geom_point(mapping = aes(x = bud.GDD5.cum, y = MODIS15.GDD5.cum))
-
-
 #This will help with figure 1A
 All.long <- reshape::melt(All.dat, id=c("site", "YEAR"))
 
-ggplot(data = All.long) +
-  geom_point(mapping = aes(x = YEAR, y = value, color = variable))
-
-
-
+ggplot(data = All.dat) +
+  geom_point(mapping = aes(x = YEAR, y = bud.YDAY, color = 'orange')) +
+  geom_point(mapping = aes(x = YEAR, y = MODIS15.YDAY, color = 'green')) +
+  scale_y_continuous('Cumulative TT (GDD5)') +
+  ggtitle('YDAY occurance of MODIS 15% Greenup and NPN Breaking Leaf Buds for Quercus Alba in 2009-2018')
 
 #saving the processed NPN data which now has a GDD5.cum as well as actual site names.
 dat.processed <- '../data_processed/NPN'
