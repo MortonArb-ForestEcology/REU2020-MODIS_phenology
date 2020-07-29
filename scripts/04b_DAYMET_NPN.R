@@ -17,8 +17,6 @@ dat.leaves <- read.csv(file.path(path.clean, paste0('NPN_Quercus_leaf_', species
 dat.budburst <- read.csv(file.path(path.clean, paste0('NPN_Quercus_bud_', species.name, '.csv')))
 
 #----------------------------
-View(dat.budburst)
-View(dat.leaves)
 
 #the yday values from NPN and DAYMET are rounded to different decimals. One has to conform to the other.
 dat.budburst$first.min <- round(dat.budburst$first.min, digits = 0)
@@ -115,9 +113,7 @@ dev.off()
 
 #visual for Leaves first.min thermal time accumulation
 png(filename= file.path(path.png, paste0('Leaves_firstmin_', species.name, '_NPN.png')))
-
 hist(dat.leaves$MinGDD5.cum)
-
 dev.off()
 
 #----------------------------------
@@ -146,6 +142,7 @@ length(unique(dat.budburst$site_id))
 summary(dat.leaves)
 dim(dat.leaves[!is.na(dat.leaves$site_id),])
 length(unique(dat.leaves$site_id))
+
 #----------------------------------
 
 #getting a map of all the NPN sites which collected observation for 'Leaves' from 2000 to 2019
@@ -164,6 +161,51 @@ ggplot() +
 dev.off()
 
 #----------------------------
+#conceptual figures
+
+summary(dat.budburst)#see what data there is to work with 
+summary(dat.leaves)
+
+#read in the MODIS data from the 04a_MOD_MET script
+path.modis <- file.path("../data_processed/MODIS")
+if(!dir.exists(path.modis)) dir.create(path.modis)
+dat.green <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_15_", species.name, ".csv")))
+dat.midgreen <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_50_", species.name, ".csv")))
+
+#getting paired data
+short.bud <- data.frame(metric=as.factor('Breaking Leaf Buds'), type='NPN',YEAR=dat.budburst$year,
+                 YDAY=dat.budburst$first.min,
+                 GDD5.cum=dat.budburst$MinGDD5.cum,
+                 stringsAsFactors=FALSE)
+head(short.bud)
+
+short.leaf <- data.frame(metric=as.factor('Leaves'), type='NPN',YEAR=dat.leaves$year,
+                        YDAY=dat.leaves$first.min,
+                        GDD5.cum=dat.leaves$MinGDD5.cum,
+                        stringsAsFactors=FALSE)
+head(short.leaf)
+
+short.green <- data.frame(metric=as.factor('15% Greenup'), type='MODIS',YEAR=dat.green$greenup.year,
+                         YDAY=dat.green$greenup.yday,
+                         GDD5.cum=dat.green$GDD5.cum,
+                         stringsAsFactors=FALSE)
+tail(short.green)
+
+short.midgreen <- data.frame(metric=as.factor('50% Greenup'), type='MODIS',YEAR=dat.midgreen$greenup.year,
+                          YDAY=dat.midgreen$greenup.yday,
+                          GDD5.cum=dat.midgreen$GDD5.cum,
+                          stringsAsFactors=FALSE)
+tail(short.midgreen)
+
+#binding the new dataframes
+All.dat <- rbind(short.bud, short.leaf, short.green, short.midgreen)
+head(All.dat)
+
+
+#1 date of "Spring"
+ggplot(data = All.dat) +
+  geom_point(mapping = aes(x = All.dat$YEAR[YEAR== 'Breaking Leaf Buds',], y = All.dat$YDAY[YDAY== 'Breaking Leaf Buds',]))
+  
 
 #saving the processed NPN data which now has a GDD5.cum as well as actual site names.
 dat.processed <- '../data_processed/NPN'
