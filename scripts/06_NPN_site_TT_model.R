@@ -31,8 +31,8 @@ NPN_regression <- "
       
     for(j in 1:nSp){
       THRESH[j] <-  a[j]
-      a[j] ~ dnorm(120, aPrec)
-      aPrec[j] ~ dgamma(0.1, 0.1)
+      a[j] ~ dnorm(Tprior, aPrec)
+      aPrec[j] ~ dgamma(0.5, 0.1)
     }
 
     for(t in 1:nLoc){
@@ -52,6 +52,7 @@ NPN_regression <- "
     }
     sPrec ~ dgamma(0.1, 0.1)
     cPrec ~ dgamma(0.1, 0.1)
+    Tprior ~ dunif(0, 500)
 
   }
 "
@@ -120,15 +121,15 @@ summary(leaf.stats.alba)
 
 #Converting back into sd
 
-#bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
-#leaf.stats.alba$sd <- 1/sqrt(leaf.stats.alba[,"aPrec"])
+bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
+leaf.stats.alba$sd <- 1/sqrt(leaf.stats.alba[,"aPrec"])
 
 
-#bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
-#leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
+bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
+leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
 
-#bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.125,0.5,0.875))
-#leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.125,0.5,0.875))
+bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.125,0.5,0.875))
+leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.125,0.5,0.875))
 
 bud.stats.alba$metric <- 'Breaking Leaf Buds'
 leaf.stats.alba$metric <- 'Leaves'
