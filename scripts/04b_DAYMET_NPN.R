@@ -211,10 +211,10 @@ head(All.dat)
 All.long <- reshape::melt(All.dat, id=c("site", "YEAR"))
 
 ggplot(data = All.dat) +
-  geom_point(mapping = aes(x = YEAR, y = bud.YDAY, color = 'orange')) +
-  geom_point(mapping = aes(x = YEAR, y = MODIS15.YDAY, color = 'green')) +
+  geom_point(mapping = aes(x = YEAR, y = bud.YDAY), color = 'orange') +
+  geom_point(mapping = aes(x = YEAR, y = MODIS15.YDAY), color = 'green') +
   scale_y_continuous('Cumulative TT (GDD5)') +
-  ggtitle('YDAY occurance of MODIS 15% Greenup and NPN Breaking Leaf Buds for Quercus Alba in 2009-2018')
+  ggtitle('YDAY Occurance of MODIS 15% Greenup and NPN Breaking Leaf Buds for Quercus Alba in 2009-2018')
 
 #saving the processed NPN data which now has a GDD5.cum as well as actual site names.
 dat.processed <- '../data_processed/NPN'
