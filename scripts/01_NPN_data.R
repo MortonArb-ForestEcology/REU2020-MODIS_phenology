@@ -9,7 +9,7 @@
 #devtools::install_github("usa-npn/rnpn")
 
 library(rnpn)
-species.name <- 'Q.alba'
+species.name <- 'Q.rubra'
 
 # -----------------------------------
 # To get pre-summarized data, use npn_donwload_individual_phenometrics
@@ -18,7 +18,7 @@ species.name <- 'Q.alba'
 npn.spp <- npn_species()
 npn.quercus <- npn.spp[npn.spp$genus=="Quercus",]
 
-oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 483),species_ids=npn.quercus$species_id[npn.quercus$species=="alba"], years=2000:2019, request_source="The Morton Arboretum")
+oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 483),species_ids=npn.quercus$species_id[npn.quercus$species=="rubra"], years=2000:2019, request_source="The Morton Arboretum")
 oak.leaf[oak.leaf==-9999] <- NA
 dim(oak.leaf)
 
@@ -38,7 +38,7 @@ length(unique(oak.leaves$individual_id))
 hist(oak.budburst$first_yes_doy)
 hist(oak.leaves$first_yes_doy)
 
-#savin the raw NPN data which has no filters set on it. This is just what all Q. alba data NPN has for 371 'Breaking Leaf Buds' and 483 'Leaves' 
+#saving the raw NPN data which has no filters set on it. This is just what all Q. alba data NPN has for 371 'Breaking Leaf Buds' and 483 'Leaves' 
 path.NPN <- "../data_raw/NPN/uncleaned"
 if(!dir.exists(path.NPN)) dir.create(path.NPN)
 write.csv(oak.leaf, file.path(path.NPN, paste0('NPN_Quercus_Raw_', species.name, '.csv')), row.names=F)
