@@ -172,40 +172,54 @@ if(!dir.exists(path.modis)) dir.create(path.modis)
 dat.green <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_15_", species.name, ".csv")))
 dat.midgreen <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_50_", species.name, ".csv")))
 
+
+
 #getting paired data
-short.bud <- data.frame(metric=as.factor('Breaking Leaf Buds'), type='NPN',YEAR=dat.budburst$year,
-                 YDAY=dat.budburst$first.min,
-                 GDD5.cum=dat.budburst$MinGDD5.cum,
+short.bud <- data.frame(YEAR=dat.budburst$year, site = dat.budburst$site_id,
+                 bud.YDAY=dat.budburst$first.min,
+                 bud.GDD5.cum=dat.budburst$MinGDD5.cum,
                  stringsAsFactors=FALSE)
 head(short.bud)
 
-short.leaf <- data.frame(metric=as.factor('Leaves'), type='NPN',YEAR=dat.leaves$year,
-                        YDAY=dat.leaves$first.min,
-                        GDD5.cum=dat.leaves$MinGDD5.cum,
+short.leaf <- data.frame(YEAR=dat.leaves$year, site = dat.leaves$site_id,
+                        leaf.YDAY=dat.leaves$first.min,
+                        leaf.GDD5.cum=dat.leaves$MinGDD5.cum,
                         stringsAsFactors=FALSE)
 head(short.leaf)
 
-short.green <- data.frame(metric=as.factor('15% Greenup'), type='MODIS',YEAR=dat.green$greenup.year,
-                         YDAY=dat.green$greenup.yday,
-                         GDD5.cum=dat.green$GDD5.cum,
+short.green <- data.frame(YEAR=dat.green$greenup.year, site = dat.green$site, 
+                         MODIS15.YDAY=dat.green$greenup.yday,
+                         MODIS15.GDD5.cum=dat.green$GDD5.cum,
                          stringsAsFactors=FALSE)
 tail(short.green)
 
-short.midgreen <- data.frame(metric=as.factor('50% Greenup'), type='MODIS',YEAR=dat.midgreen$greenup.year,
-                          YDAY=dat.midgreen$greenup.yday,
-                          GDD5.cum=dat.midgreen$GDD5.cum,
+short.midgreen <- data.frame(YEAR=dat.midgreen$greenup.year, site = dat.midgreen$site,
+                          MODIS50.YDAY=dat.midgreen$greenup.yday,
+                          MODIS50.GDD5.cum=dat.midgreen$GDD5.cum,
                           stringsAsFactors=FALSE)
 tail(short.midgreen)
 
-#binding the new dataframes
-All.dat <- rbind(short.bud, short.leaf, short.green, short.midgreen)
-head(All.dat)
 
+#THIS WILL ALL HELP WITH FIGURE 1B
+#binding the new dataframes
+All.NPN <- merge(short.bud, short.leaf, by=c("site", "YEAR"))
+All.MODIS <- merge(short.green, short.midgreen, by=c("site", "YEAR"))
+All.dat <- merge(All.NPN, All.MODIS, by=c("site", "YEAR"))
+head(All.dat)
 
 #1 date of "Spring"
 ggplot(data = All.dat) +
-  geom_point(mapping = aes(x = All.dat$YEAR[YEAR== 'Breaking Leaf Buds',], y = All.dat$YDAY[YDAY== 'Breaking Leaf Buds',]))
-  
+  geom_point(mapping = aes(x = bud.GDD5.cum, y = MODIS15.GDD5.cum))
+
+
+#This will help with figure 1A
+All.long <- reshape::melt(All.dat, id=c("site", "YEAR"))
+
+ggplot(data = test) +
+  geom_point(mapping = aes(x = YEAR, y = value, color = variable))
+
+
+
 
 #saving the processed NPN data which now has a GDD5.cum as well as actual site names.
 dat.processed <- '../data_processed/NPN'
