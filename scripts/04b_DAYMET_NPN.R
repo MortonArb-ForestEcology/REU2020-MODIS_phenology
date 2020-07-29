@@ -215,7 +215,7 @@ ggplot(data = All.dat) +
 #This will help with figure 1A
 All.long <- reshape::melt(All.dat, id=c("site", "YEAR"))
 
-ggplot(data = test) +
+ggplot(data = All.long) +
   geom_point(mapping = aes(x = YEAR, y = value, color = variable))
 
 
