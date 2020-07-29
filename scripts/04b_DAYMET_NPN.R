@@ -160,10 +160,13 @@ ggplot() +
         axis.ticks = element_blank())
 dev.off()
 
-#----------------------------
-#conceptual figures
+#----------------------conceptual figures------------------------
 
-summary(dat.budburst)#see what data there is to work with 
+path.figures <- "../figures"
+if(!dir.exists(path.figures)) dir.create(path.figures)
+
+#see what data there is to work with 
+summary(dat.budburst)
 summary(dat.leaves)
 
 #read in the MODIS data from the 04a_MOD_MET script
@@ -171,7 +174,6 @@ path.modis <- file.path("../data_processed/MODIS")
 if(!dir.exists(path.modis)) dir.create(path.modis)
 dat.green <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_15_", species.name, ".csv")))
 dat.midgreen <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_50_", species.name, ".csv")))
-
 
 
 #getting paired data
@@ -199,23 +201,174 @@ short.midgreen <- data.frame(YEAR=dat.midgreen$greenup.year, site = dat.midgreen
                           stringsAsFactors=FALSE)
 tail(short.midgreen)
 
-
-#THIS WILL ALL HELP WITH FIGURE 1B
 #binding the new dataframes
 All.NPN <- merge(short.bud, short.leaf, by=c("site", "YEAR"))
 All.MODIS <- merge(short.green, short.midgreen, by=c("site", "YEAR"))
 All.dat <- merge(All.NPN, All.MODIS, by=c("site", "YEAR"))
-head(All.dat)
+summary(All.dat)
+ 
+#----------------------concept. fig. 1A -------------------------
 
-#This will help with figure 1A
-All.long <- reshape::melt(All.dat, id=c("site", "YEAR"))
-
+#get color blind friendly colors
+#figure using NPN Breaking Leaf Buds and MODIS Greenup metrics YDAY
+png(width= 750, filename= file.path(path.figures, paste0('Concept1A_BLB_YDAY_', species.name, '.png')))
 ggplot(data = All.dat) +
-  geom_point(mapping = aes(x = YEAR, y = bud.YDAY), color = 'orange') +
-  geom_point(mapping = aes(x = YEAR, y = MODIS15.YDAY), color = 'green') +
-  scale_y_continuous('Cumulative TT (GDD5)') +
-  ggtitle('YDAY Occurance of MODIS 15% Greenup and NPN Breaking Leaf Buds for Quercus Alba in 2009-2018')
+  geom_point(mapping = aes(x = YEAR, y = bud.YDAY, color = 'NPN')) +
+  geom_point(mapping = aes(x = YEAR, y = MODIS15.YDAY, color = 'MODIS Greenup')) +
+  geom_smooth(mapping = aes(x = YEAR, y = bud.YDAY, color = 'NPN', fill = 'NPN' )) +
+  geom_smooth(mapping = aes(x = YEAR, y = MODIS15.YDAY, color = 'MODIS Greenup', fill = 'MODIS Greenup')) +
+  scale_y_continuous('Cumulative TT (YDAY)') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  ggtitle('Input YDAY Threshold for NPN Breaking Leaf Buds and MODIS 15% Greenup of Quercus alba from 2009-2019') +
+  theme(text = element_text(size=10))
+dev.off()
 
+#figure using NPN Leaves and MODIS MidGreenup metrics YDAY
+png(width= 750, filename= file.path(path.figures, paste0('Concept1A_Leaves_YDAY_', species.name, '.png')))
+ggplot(data = All.dat) +
+  geom_point(mapping = aes(x = YEAR, y = leaf.YDAY, color = 'NPN Leaves')) +
+  geom_point(mapping = aes(x = YEAR, y = MODIS50.YDAY, color = 'MODIS MidGreenup')) +
+  geom_smooth(mapping = aes(x = YEAR, y = leaf.YDAY, color = 'NPN Leaves', fill = 'NPN Leaves' )) +
+  geom_smooth(mapping = aes(x = YEAR, y = MODIS50.YDAY, color = 'MODIS MidGreenup', fill = 'MODIS MidGreenup')) +
+  scale_y_continuous('Cumulative TT (YDAY)') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  ggtitle('Input YDAY Threshold for NPN Leaves and MODIS 50% MidGreenup of Quercus alba from 2009-2018') +
+  theme(text = element_text(size=10))
+dev.off()
+
+#figure using NPN Breaking Leaf Buds and MODIS Greenup metrics GDD5
+png(width= 750, filename= file.path(path.figures, paste0('Concept1A_BLB_GDD5_', species.name, '.png')))
+ggplot(data = All.dat) +
+  geom_point(mapping = aes(x = YEAR, y = bud.GDD5.cum, color = 'NPN Breaking Leaf Buds')) +
+  geom_point(mapping = aes(x = YEAR, y = MODIS15.GDD5.cum, color = 'MODIS Greenup')) +
+  geom_smooth(mapping = aes(x = YEAR, y = bud.GDD5.cum, color = 'NPN Breaking Leaf Buds', fill = 'NPN Breaking Leaf Buds' )) +
+  geom_smooth(mapping = aes(x = YEAR, y = MODIS15.GDD5.cum, color = 'MODIS Greenup', fill = 'MODIS Greenup')) +
+  scale_y_continuous('Cumulative TT (GDD5)') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  ggtitle('Input GDD5 Threshold for NPN Breaking Leaf Buds and MODIS 15% Greenup of Quercus alba from 2009-2018') +
+  theme(text = element_text(size=10))
+dev.off()
+
+#figure using NPN Leaves and MODIS MidGreenup metrics GDD5
+png(width= 750, filename= file.path(path.figures, paste0('Concept1A_Leaves_GDD5_', species.name, '.png')))
+ggplot(data = All.dat) +
+  geom_point(mapping = aes(x = YEAR, y = leaf.GDD5.cum, color = 'NPN Leaves')) +
+  geom_point(mapping = aes(x = YEAR, y = MODIS50.GDD5.cum, color = 'MODIS MidGreenup')) +
+  geom_smooth(mapping = aes(x = YEAR, y = leaf.GDD5.cum, color = 'NPN Leaves', fill = 'NPN Leaves' )) +
+  geom_smooth(mapping = aes(x = YEAR, y = MODIS50.GDD5.cum, color = 'MODIS MidGreenup', fill = 'MODIS MidGreenup')) +
+  scale_y_continuous('Cumulative TT (GDD5)') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  ggtitle('Input GDD5 Threshold for NPN Leaves and MODIS 50% MidGreenup of Quercus alba from 2009-2018') +
+  theme(text = element_text(size=10))
+dev.off()
+
+#----------------------concept. fig. 1B ------------------------
+
+#figure using NPN Breaking Leaf Buds and MODIS Greenup metrics YDAY
+png(width= 750, filename= file.path(path.figures, paste0('Concept1B_BLB_YDAY_', species.name, '.png')))
+ggplot(All.dat) +
+  coord_equal() +
+  geom_point(mapping = aes(x = bud.YDAY, y = MODIS15.YDAY)) +
+  geom_smooth(mapping = aes(x = bud.YDAY, y = MODIS15.YDAY), method= 'lm')
+dev.off()
+
+Mod.npn1 <- lm(MODIS15.YDAY ~ bud.YDAY, data=All.dat)
+summary(Mod.npn1) #statistical summary of the correlation
+
+#figure using NPN Leaves and MODIS MidGreenup metrics YDAY
+png(width= 750, filename= file.path(path.figures, paste0('Concept1B_Leaves_YDAY_', species.name, '.png')))
+ggplot(All.dat) +
+  coord_equal() +
+  geom_point(mapping = aes(x = leaf.YDAY, y = MODIS50.YDAY)) +
+  geom_smooth(mapping = aes(x = leaf.YDAY, y = MODIS50.YDAY), method= 'lm')
+dev.off()
+
+Mod.npn2 <- lm(MODIS50.YDAY ~ leaf.YDAY, data=All.dat)
+summary(Mod.npn2) #statistical summary of the correlation
+
+#figure using NPN Breaking Leaf Buds and MODIS Greenup metrics GDD5
+png(width= 750, filename= file.path(path.figures, paste0('Concept1B_BLB_GDD5_', species.name, '.png')))
+ggplot(All.dat) +
+  coord_equal() +
+  geom_point(mapping = aes(x = bud.GDD5.cum, y = MODIS15.GDD5.cum)) +
+  geom_smooth(mapping = aes(x = bud.GDD5.cum, y = MODIS15.GDD5.cum), method= 'lm')
+dev.off()
+
+Mod.npn3 <- lm(MODIS15.GDD5.cum ~ bud.GDD5.cum, data=All.dat)
+summary(Mod.npn3) #statistical summary of the correlation
+
+#figure using NPN Leaves and MODIS MidGreenup metrics GDD5
+png(width= 750, filename= file.path(path.figures, paste0('Concept1B_Leaves_GDD5_', species.name, '.png')))
+ggplot(All.dat) +
+  coord_equal() +
+  geom_point(mapping = aes(x = leaf.GDD5.cum, y = MODIS50.GDD5.cum)) +
+  geom_smooth(mapping = aes(x = leaf.GDD5.cum, y = MODIS50.GDD5.cum), method= 'lm')
+dev.off()
+
+Mod.npn4 <- lm(MODIS50.GDD5.cum ~ leaf.GDD5.cum, data=All.dat)
+summary(Mod.npn4) #statistical summary of the correlation
+
+#--------------------concept. fig. 2---------------------------
+
+#figure using NPN Breaking Leaf Buds and MODIS Greenup metrics
+png(width= 750, filename= file.path(path.figures, paste0('Concept2_BLB_', species.name, '.png')))
+ggplot(data= All.dat) +
+  ggtitle('Input GDD5 Threshold for NPN Breaking Leaf Buds and MODIS Greenup of Quercus alba') +
+  geom_density(mapping = aes(x = bud.GDD5.cum, color = 'NPN Breaking Leaf Buds', fill = 'NPN Breaking Leaf Buds'), alpha = 0.5) +
+  geom_density(mapping = aes(x = MODIS15.GDD5.cum, color = 'MODIS Greenup', fill = 'MODIS Greenup'), alpha = 0.5) +
+  scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
+  scale_y_continuous('DENSITY (Probability)') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  theme(text = element_text(size=10))
+dev.off()
+
+#figure using NPN Leaves and MODIS MidGreenup metrics
+png(width= 750, filename= file.path(path.figures, paste0('Concept2_Leaves_', species.name, '.png')))
+ggplot(data= All.dat) +
+  ggtitle('Input GDD5 Threshold for NPN Leaves and MODIS MidGreenup of Quercus alba') +
+  geom_density(mapping = aes(x = leaf.GDD5.cum, color = 'NPN Leaves', fill = 'NPN Leaves'), alpha = 0.5) +
+  geom_density(mapping = aes(x = MODIS50.GDD5.cum, color = 'MODIS MidGreenup', fill = 'MODIS MidGreenup'), alpha = 0.5) +
+  scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
+  scale_y_continuous('DENSITY (Probability)') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  theme(text = element_text(size=10))
+dev.off()
+
+#--------------------concept. fig. 3--------------------------
+
+#figure using NPN Breaking Leaf Buds and MODIS Greenup metrics
+png(width= 750, filename= file.path(path.figures, paste0('Concept3_BLB_', species.name, '.png')))
+ggplot(data= All.dat) +
+  ggtitle('Input GDD5 Threshold and YDAY for NPN Breaking Leaf Buds and MODIS Greenup of Quercus alba') +
+  geom_smooth(mapping = aes(x = bud.GDD5.cum, y = bud.YDAY, color = 'NPN Breaking Leaf Buds', fill = 'NPN Breaking Leaf Buds')) +
+  geom_smooth(mapping = aes(x = MODIS15.GDD5.cum, y = MODIS15.YDAY, color = 'MODIS Greenup', fill = 'MODIS Greenup')) +
+  scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
+  scale_y_continuous('YDAY') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  theme(text = element_text(size=10))
+dev.off()
+
+#figure using NPN Leaves and MODIS MidGreenup metrics
+png(width= 750, filename= file.path(path.figures, paste0('Concept3_Leaves_', species.name, '.png')))
+ggplot(data= All.dat) +
+  ggtitle('Input GDD5 Threshold and YDAY for NPN Leaves and MODIS MidGreenup of Quercus alba') +
+  geom_smooth(mapping = aes(x = leaf.GDD5.cum, y = leaf.YDAY, color = 'NPN Leaves', fill = 'NPN Leaves')) +
+  geom_smooth(mapping = aes(x = MODIS50.GDD5.cum, y = MODIS50.YDAY, color = 'MODIS MidGreenup', fill = 'MODIS MidGreenup')) +
+  scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
+  scale_y_continuous('YDAY') +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
+  theme(text = element_text(size=10))
+dev.off()
+
+#-------------------------------------
 #saving the processed NPN data which now has a GDD5.cum as well as actual site names.
 dat.processed <- '../data_processed/NPN'
 if(!dir.exists(dat.processed)) dir.create(dat.processed)
