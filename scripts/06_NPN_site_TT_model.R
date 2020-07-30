@@ -118,9 +118,6 @@ summary(bud.stats.alba)
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
 summary(leaf.stats.alba)
 
-bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])), na.rm = T)
-leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])), na.rm = T)
-
 bud.stats.alba$metric <- 'Breaking Leaf Buds'
 leaf.stats.alba$metric <- 'Leaves'
 bud.stats.alba$type <- 'NPN'

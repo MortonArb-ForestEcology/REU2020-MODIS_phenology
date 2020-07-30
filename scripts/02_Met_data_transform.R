@@ -2,7 +2,7 @@
 #Setting the points to download the daymet data from
 
 # Note: We will probably want this to go by species, rather than site, but for now this works
-species.name = 'Q.rubra'
+species.name = 'Q.alba'
 
 #bringing in the Raw NPN data to pull the site and coordinate data out
 path.NPN <- "../data_raw/NPN/uncleaned"

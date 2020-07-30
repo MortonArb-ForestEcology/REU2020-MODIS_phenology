@@ -9,7 +9,7 @@
 #devtools::install_github("usa-npn/rnpn")
 
 library(rnpn)
-species.name <- 'Q.rubra'
+species.name <- 'Q.alba'
 
 # -----------------------------------
 # To get pre-summarized data, use npn_donwload_individual_phenometrics
@@ -18,7 +18,7 @@ species.name <- 'Q.rubra'
 npn.spp <- npn_species()
 npn.quercus <- npn.spp[npn.spp$genus=="Quercus",]
 
-oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 483),species_ids=npn.quercus$species_id[npn.quercus$species=="rubra"], years=2000:2019, request_source="The Morton Arboretum")
+oak.leaf <- npn_download_individual_phenometrics(phenophase_ids =c(371, 483),species_ids=npn.quercus$species_id[npn.quercus$species=="alba"], years=2000:2019, request_source="The Morton Arboretum")
 oak.leaf[oak.leaf==-9999] <- NA
 dim(oak.leaf)
 
