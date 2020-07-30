@@ -118,18 +118,8 @@ summary(bud.stats.alba)
 leaf.stats.alba <- as.data.frame(as.matrix(leaf.alba.burn))
 summary(leaf.stats.alba)
 
-
-#Converting back into sd
-
-bud.stats.alba$sd <- 1/sqrt(bud.stats.alba[,"aPrec"])
-leaf.stats.alba$sd <- 1/sqrt(leaf.stats.alba[,"aPrec"])
-
-
-bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
-leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])))
-
-bud.ci <- apply(as.matrix(bud.density),2,quantile,c(0.125,0.5,0.875))
-leaf.ci <- apply(as.matrix(leaf.density),2,quantile,c(0.125,0.5,0.875))
+bud.density <- as.data.frame(apply(as.matrix(bud.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])), na.rm = T)
+leaf.density <- as.data.frame(apply(as.matrix(leaf.stats.alba), 1 , function(x) rnorm(1, mean=x[1], sd=x[3])), na.rm = T)
 
 bud.stats.alba$metric <- 'Breaking Leaf Buds'
 leaf.stats.alba$metric <- 'Leaves'
@@ -154,6 +144,8 @@ png(width= 750, filename= file.path(path.figures, paste0('Thresh_NPN_GDD5', spec
 ggplot(data= NPN.stats) +
   ggtitle('Thermal Time Thresholds of two NPN metrics at sites of data for Quercus alba from 2008-2019') +
   geom_density(mapping = aes(x= THRESH, fill = metric, color = metric), alpha=0.5) +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (Probability)')
 dev.off()
@@ -163,11 +155,11 @@ dev.off()
 
 
 #GDD5 Threshold 95 CI for NPN Breaking Leaf Buds Greenup
-bud.ci <- round(apply(as.matrix(bud.stats.alba$THRESH),2,quantile,c(0.05,0.5,0.95)), digits =1)
+bud.ci <- round(apply(as.matrix(bud.stats.alba$THRESH),2,quantile,c(0.025,0.5,0.975)), digits =1)
 bud.ci
 
 #GDD5 Threshold95 CI for NPN Leaves
-leaf.ci <- round(apply(as.matrix(leaf.stats.alba$THRESH),2,quantile,c(0.05,0.5,0.95)), digits = 1)
+leaf.ci <- round(apply(as.matrix(leaf.stats.alba$THRESH),2,quantile,c(0.025,0.5,0.975)), digits = 1)
 leaf.ci
 #-------------------------
 

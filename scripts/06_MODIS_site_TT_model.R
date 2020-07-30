@@ -104,6 +104,8 @@ png(width= 750, filename= file.path(path.figures, paste0('Thresh_MODIS_GDD5', sp
 ggplot(data= MODIS.stats) +
   ggtitle('Thermal Time Thresholds of two MODIS metrics at sites of NPN data for Quercus alba from 2001-2018') +
   geom_density(mapping = aes(x= THRESH, fill = metric, color = metric), alpha=0.5) +
+  scale_fill_manual(name='Metric', values=c("orange", "forestgreen")) +
+  scale_color_manual(name='Metric', values=c("orange", "forestgreen")) +
   scale_x_continuous('TT Threshold (5C Growing Degree Days)') +
   scale_y_continuous('DENSITY (Probability)')
 dev.off()
@@ -113,11 +115,11 @@ dev.off()
 
 #GDD5 Threshold 95 CI MODIS 15% Greenup
 summary(green.stats$THRESH)
-round(quantile(green.stats$THRESH, c(0.05, 0.5, 0.95), na.rm = T), digits = 1)
+round(quantile(green.stats$THRESH, c(0.025, 0.5, 0.975), na.rm = T), digits = 1)
 
 #GDD5 Threshold95 CI MODIS 50% MidGreenup
 summary(midgreen.stats$THRESH)
-round(quantile(midgreen.stats$THRESH, c(0.05, 0.5, 0.95), na.rm = T), digits = 1)
+round(quantile(midgreen.stats$THRESH, c(0.025, 0.5, 0.975), na.rm = T), digits = 1)
 
 # save the outputs
 path.mod.firstmin <- "../data_processed/mod.firstmin.Q.alba"
