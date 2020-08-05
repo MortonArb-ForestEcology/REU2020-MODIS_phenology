@@ -141,13 +141,12 @@ budburst.freq$longitude <- dat.budburst$longitude[match(budburst.freq$Site, dat.
 budburst.freq$latitude <- dat.budburst$latitude[match(budburst.freq$Site, dat.budburst$site_name)]
 
 map.NPN <- rbind(budburst.freq, leaves.freq)
-View(map.NPN)
 
 map.us <- map_data("state")
 png(filename= file.path(path.png, paste0('sitemap_allNPN', species.name, '.png')))
 ggplot() +
   coord_fixed(1.3) +
-  ggtitle("Map of the NPN phenometrcis sites where Quercus alba was observed from 2008-2019") +
+  ggtitle("NPN sites for Breaking Leaf Buds and Leaves of Quercus alba from 2008-2019") +
   geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill='gray36', color="white") +
   geom_point(data=budburst.freq, aes(x=longitude, y=latitude, color = 'red', size = Freq), alpha=0.8) +
   theme(panel.background = element_blank(),
@@ -224,14 +223,15 @@ day.labels <- data.frame(Date=seq.Date(as.Date("2020-01-01"), as.Date("2020-12-3
 day.labels$yday <- lubridate::yday(day.labels$Date)
 day.labels$Text <- paste(lubridate::month(day.labels$Date, label=T), lubridate::day(day.labels$Date))
 summary(day.labels)
+summary(dat.long)
 
 png("figures/LeafPhenophases.png", height =4, width=6, units="in", res=180)
 ggplot(data=dat.long) +
   ggtitle("The Morton Arboretum, Oak Collection") + 
   facet_grid(~Type) +
-  geom_histogram(aes(x=YDAY, y=..count.., fill = Type), binwidth=7)+ 
-  scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=day.labels$yday[seq(2,12, by=3)], label=day.labels$Text[seq(2,12, by=3)]) +
-  scale_y_continuous(name="# Observations", expand=c(0,0)) +
+  geom_histogram(mapping = aes(x= GDD5.cum, fill = Type))+ 
+  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", breaks = c(100, 200, 300, 400, 500)) +
+  scale_y_continuous(name="Count") +
   guides(fill=F) +
   theme_bw() +
   theme(axis.text.x=element_text(angle=-45, hjust=0)) 
