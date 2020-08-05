@@ -229,8 +229,8 @@ png("figures/LeafPhenophases.png", height =4, width=6, units="in", res=180)
 ggplot(data=dat.long) +
   ggtitle("The Morton Arboretum, Oak Collection") + 
   facet_grid(~Type) +
-  geom_histogram(mapping = aes(x= GDD5.cum, fill = Type))+ 
-  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", breaks = c(100, 200, 300, 400, 500)) +
+  geom_histogram(mapping = aes(x= GDD5.cum, fill = Type)) + 
+  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", limits = c(0, 2000)) +
   scale_y_continuous(name="Count") +
   guides(fill=F) +
   theme_bw() +
