@@ -225,7 +225,7 @@ day.labels$Text <- paste(lubridate::month(day.labels$Date, label=T), lubridate::
 summary(day.labels)
 summary(dat.long)
 
-png("figures/LeafPhenophases.png", height =4, width=6, units="in", res=180)
+png(width= 750, filename= file.path(path.figures, paste0('Presentfig2_HIST_GDD5_', species.name, '.png')))
 ggplot(data=dat.long) +
   ggtitle("The Morton Arboretum, Oak Collection") + 
   facet_grid(~Type) +
