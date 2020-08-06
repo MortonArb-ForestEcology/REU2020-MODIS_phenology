@@ -13,6 +13,7 @@ path.DAYMET <- '../data_raw/DAYMET'
 if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
 NPN.pts <- read.csv(file.path(path.DAYMET, paste0("NPN_Coords_Raw_", species.name, ".csv")))
 
+
 summary(NPN.pts)
 
 NPN.pts <- aggregate(site_id~latitude+longitude, data=NPN.pts, FUN=min)
@@ -24,6 +25,31 @@ names(NPN.pts)[3] <- 'site_name'
 NPN.pts <- NPN.pts[,c(3,1,2)]
 
 summary(NPN.pts)
+
+#bringing in the Raw NPN data to pull the site and coordinate data out
+path.NPN <- "../data_raw/NPN/uncleaned"
+
+species.name = 'Q.alba'
+
+oak.bud <- read.csv(file.path(path.clean, paste0('NPN_Quercus_bud_', species.name, '.csv')))
+oak.leaf <- read.csv(file.path(path.clean, paste0('NPN_Quercus_leaf_', species.name, '.csv')))
+
+oak.both <- rbind(oak.leaf, oak.bud)
+
+dim(oak.both)
+
+# Creating a point list and time range that matches your MODIS dataset
+NPN.pts <- aggregate(site_id~latitude+longitude, data=oak.both, FUN=min)
+
+head(NPN.pts)
+names(NPN.pts)[1] <- 'lat'
+names(NPN.pts)[2] <- 'lon'
+names(NPN.pts)[3] <- 'site_name'
+NPN.pts <- NPN.pts[,c(3,1,2)]
+
+summary(NPN.pts)
+#fixing coordinates that omitted the "-" in front of the longitude
+NPN.pts$longitude[NPN.pts$longitude>0] <- NPN.pts$longitude[NPN.pts$longitude>0]*-1
 
 #showing only the bands of interest within the product 'MCD12Q2
 mtbands <- MODISTools::mt_bands('MCD12Q2')
