@@ -7,25 +7,6 @@ library(MODISTools)
 
 species.name <- 'Q.alba'
 #----------------------------------
-#NPN sites
-
-path.DAYMET <- '../data_raw/DAYMET'
-if(!dir.exists(path.DAYMET)) dir.create(path.DAYMET)
-NPN.pts <- read.csv(file.path(path.DAYMET, paste0("NPN_Coords_Raw_", species.name, ".csv")))
-
-
-summary(NPN.pts)
-
-NPN.pts <- aggregate(site_id~latitude+longitude, data=NPN.pts, FUN=min)
-
-head(NPN.pts)
-names(NPN.pts)[1] <- 'lat'
-names(NPN.pts)[2] <- 'lon'
-names(NPN.pts)[3] <- 'site_name'
-NPN.pts <- NPN.pts[,c(3,1,2)]
-
-summary(NPN.pts)
-
 #bringing in the Raw NPN data to pull the site and coordinate data out
 path.NPN <- "../data_raw/NPN/uncleaned"
 
