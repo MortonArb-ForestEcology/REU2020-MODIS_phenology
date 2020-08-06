@@ -4,14 +4,12 @@
 
 #install.packages("MODISTools")
 library(MODISTools)
-
-species.name <- 'Q.alba'
 #----------------------------------
 #bringing in the Raw NPN data to pull the site and coordinate data out
 path.NPN <- "../data_raw/NPN/uncleaned"
 
 species.name = 'Q.alba'
-
+path.clean <- "../data_raw/NPN/cleaned"
 oak.bud <- read.csv(file.path(path.clean, paste0('NPN_Quercus_bud_', species.name, '.csv')))
 oak.leaf <- read.csv(file.path(path.clean, paste0('NPN_Quercus_leaf_', species.name, '.csv')))
 
