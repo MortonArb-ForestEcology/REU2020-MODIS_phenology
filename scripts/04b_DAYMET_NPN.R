@@ -146,10 +146,11 @@ map.us <- map_data("state")
 png(filename= file.path(path.png, paste0('sitemap_allNPN', species.name, '.png')))
 ggplot() +
   coord_fixed(1.3) +
-  ggtitle("NPN sites for Breaking Leaf Buds and Leaves of Quercus alba from 2008-2019") +
+  ggtitle("      USANPN sites for bud burst and leaf out of Quercus alba from 2008-2019") +
   geom_polygon(data=map.us, aes(x=long, y=lat, group=group), fill='gray36', color="white") +
-  geom_point(data=budburst.freq, aes(x=longitude, y=latitude, color = 'red', size = Freq), alpha=0.8) +
+  geom_point(data=budburst.freq, aes(x=longitude, y=latitude, color = 'Site', size = Freq), alpha=0.75) +
   theme(panel.background = element_blank(),
+        legend.title = element_blank(), # omit plot title saying 'color'
         panel.grid = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank(),
@@ -213,8 +214,8 @@ colnames(short.bud) <- c("site", "YEAR", "YDAY", "GDD5.cum")
 
 short.green$Type <- "15% greenup"
 short.midgreen$Type <- "50% greenup"
-short.leaf$Type <- "leaves"
-short.bud$Type <- "Budburst"
+short.leaf$Type <- "Leaf out"
+short.bud$Type <- "Bud burst"
 
 dat.long <- rbind(short.bud, short.leaf, short.green, short.midgreen)
 
@@ -227,10 +228,10 @@ summary(dat.long)
 
 png(width= 750, filename= file.path(path.figures, paste0('Presentfig2_HIST_GDD5_', species.name, '.png')))
 ggplot(data=dat.long) +
-  ggtitle("The Morton Arboretum, Oak Collection") + 
+  ggtitle("Spring Phenology Thermal Time Threshold for Quercus alba") + 
   facet_grid(~Type) +
   geom_histogram(mapping = aes(x= GDD5.cum, fill = Type)) + 
-  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", limits = c(0, 2000)) +
+  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", limits = c(0, 1800)) +
   scale_y_continuous(name="Count") +
   guides(fill=F) +
   theme_bw() +
