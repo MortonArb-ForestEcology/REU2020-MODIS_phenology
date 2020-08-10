@@ -231,7 +231,7 @@ ggplot(data=dat.long) +
   ggtitle("Spring Phenology Thermal Time Threshold for Quercus alba") + 
   facet_grid(~Type) +
   geom_histogram(mapping = aes(x= GDD5.cum, fill = Type)) + 
-  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", limits = c(0, 1800)) +
+  scale_x_continuous(name="Accumulated Thermal Time (5C GDD)", limits = c(0, 2000)) +
   scale_y_continuous(name="Count") +
   guides(fill=F) +
   theme_bw() +
