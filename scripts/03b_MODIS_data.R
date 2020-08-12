@@ -102,7 +102,7 @@ days.mrk <- data.frame(Label <- c('Jan 1', 'Feb 1', 'Mar 1', 'Apr1', 'May 1', 'J
 days.mrk$mrk.yday <- lubridate::yday(days.mrk$Date)
 
 #saving the filtered and downloaded MODIs data for all sites of NPN data for Q. alba 'Breaking Leaf Buds' and 'Leaves'
-path.MODIS <- '../data_processed/MODIS'
+path.MODIS <- '../data_raw/MODIS'
 if(!dir.exists(path.MODIS)) dir.create(path.MODIS)
-write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_GDD5_15_", species.name, ".csv")), row.names=F)
-write.csv(midgreen.MODIS, file.path(path.MODIS, paste0("MODIS_GDD5_50_", species.name, ".csv")), row.names=F)
+write.csv(leaf.MODIS, file.path(path.MODIS, paste0("MODIS_Greenup_Quercus_", species.name, ".csv")), row.names=F)
+write.csv(midgreen.MODIS, file.path(path.MODIS, paste0("MODIS_MidGreenup_Quercus_", species.name, ".csv")), row.names=F)

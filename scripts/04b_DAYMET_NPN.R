@@ -172,7 +172,7 @@ path.modis <- file.path("../data_processed/MODIS")
 if(!dir.exists(path.modis)) dir.create(path.modis)
 dat.green <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_15_", species.name, ".csv")))
 dat.midgreen <- read.csv(file.path(path.modis, paste0("MODIS_GDD5_50_", species.name, ".csv")))
-
+summary(dat.green)
 
 #getting paired data
 short.bud <- data.frame(YEAR=dat.budburst$year, site = dat.budburst$site_id,
@@ -187,10 +187,10 @@ short.leaf <- data.frame(YEAR=dat.leaves$year, site = dat.leaves$site_id,
                         stringsAsFactors=FALSE)
 head(short.leaf)
 
-short.green <- data.frame(YEAR=dat.green$greenup.year, site = dat.green$site, 
-                         MODIS15.YDAY=dat.green$greenup.yday,
-                         MODIS15.GDD5.cum=dat.green$GDD5.cum,
-                         stringsAsFactors=FALSE)
+short.green <- data.frame(YEAR=dat.green$greenup.year, site = dat.green$site,
+                             MODIS15.YDAY=dat.green$greenup.yday,
+                             MODIS15.GDD5.cum=dat.green$GDD5.cum,
+                             stringsAsFactors=FALSE)
 tail(short.green)
 
 short.midgreen <- data.frame(YEAR=dat.midgreen$greenup.year, site = dat.midgreen$site,
